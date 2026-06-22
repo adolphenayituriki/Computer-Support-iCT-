@@ -178,6 +178,9 @@ export default function Hero() {
       <canvas ref={canvasRef} className="hero-canvas" />
       <div className="hero-overlay" />
       <div className="hero-content">
+        <div className="hero-logo-showcase">
+          <img src="/final-logo.jpg" alt="CS hub (iCT)" className="hero-logo-img" />
+        </div>
         <span className="hero-badge">&#9733; CS hub (iCT)</span>
         <h1>CS hub <span>(iCT)</span></h1>
         <p className="hero-tagline">

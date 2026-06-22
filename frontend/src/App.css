@@ -268,6 +268,21 @@ header.scrolled .hamburger {
   max-width: 750px;
 }
 
+.hero-logo-showcase {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.hero-logo-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 206, 8, 0.4);
+  box-shadow: 0 0 30px rgba(255, 206, 8, 0.15);
+}
+
 .hero-badge {
   display: inline-block;
   background: rgba(255, 206, 8, 0.2);

@@ -12,7 +12,9 @@ import TeamApp from './models/TeamApp.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = 'cshub_ict_secret_key_2026';
-const MONGO_URI = 'mongodb://localhost:27017/computer_support';
+// MongoDB — uses environment variable MONGO_URI or falls back to local
+// Atlas: set MONGO_URI to your connection string and whitelist your IP in Atlas console
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/computer_support';
 
 app.use(cors());
 app.use(express.json());
