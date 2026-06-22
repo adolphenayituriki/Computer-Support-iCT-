@@ -20,6 +20,9 @@ const MONGO_URI = process.env.MONGO_URI;
 app.use(cors());
 app.use(express.json());
 
+// ── Serve built frontend ──
+app.use(express.static('public'));
+
 // ── MongoDB connection ──
 (async () => {
   try {
@@ -448,6 +451,11 @@ app.put('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res) =>
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
+});
+
+// ── SPA catch-all — serve frontend for any non-API route ──
+app.get('*', (_req, res) => {
+  res.sendFile('index.html', { root: 'public' });
 });
 
 app.delete('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res) => {
