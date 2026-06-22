@@ -11,6 +11,8 @@ import Ticket from './models/Ticket.js';
 import Contact from './models/Contact.js';
 import Suggestion from './models/Suggestion.js';
 import TeamApp from './models/TeamApp.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +24,9 @@ app.use(express.json());
 
 // ── Serve built frontend ──
 app.use(express.static('public'));
+
+// ── API Documentation (Swagger) ──
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none } .swagger-ui .info .title { color: #FFCE08 } .swagger-ui .info { margin: 20px 0 }', customSiteTitle: 'CS hub (iCT) API Docs' }));
 
 // ── MongoDB connection ──
 (async () => {
