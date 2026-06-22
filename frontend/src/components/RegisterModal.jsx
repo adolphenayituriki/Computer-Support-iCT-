@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function RegisterModal({ onClose, onSwitchToLogin }) {
   const { register } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [showPwd, setShowPwd] = useState({ password: false, confirm: false });
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
@@ -54,20 +56,30 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
-        <input
-          type="password"
-          placeholder="Password (min 6 chars)"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={form.confirm}
-          onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-          required
-        />
+        <div className="pwd-wrapper">
+          <input
+            type={showPwd.password ? 'text' : 'password'}
+            placeholder="Password (min 6 chars)"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+          <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, password: !showPwd.password })}>
+            {showPwd.password ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+        <div className="pwd-wrapper">
+          <input
+            type={showPwd.confirm ? 'text' : 'password'}
+            placeholder="Confirm Password"
+            value={form.confirm}
+            onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+            required
+          />
+          <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}>
+            {showPwd.confirm ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
         {error && <p className="auth-error">{error}</p>}
         <button type="submit" className="btn">Create Account</button>
       </form>

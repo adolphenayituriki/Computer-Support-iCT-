@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '../ToastContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
   const { showToast } = useToast();
@@ -7,6 +8,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [newPwd, setNewPwd] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
   const requestToken = async (e) => {
@@ -90,13 +92,18 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
             onChange={(e) => setToken(e.target.value)}
             required
           />
-          <input
-            type="password"
-            placeholder="New password (min 6 chars)"
-            value={newPwd}
-            onChange={(e) => setNewPwd(e.target.value)}
-            required
-          />
+          <div className="pwd-wrapper">
+            <input
+              type={showPwd ? 'text' : 'password'}
+              placeholder="New password (min 6 chars)"
+              value={newPwd}
+              onChange={(e) => setNewPwd(e.target.value)}
+              required
+            />
+            <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
+              {showPwd ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           {message.text && <p className={`auth-error ${message.type === 'success' ? 'auth-success' : ''}`}>{message.text}</p>}
           <button type="submit" className="btn">Reset Password</button>
         </form>

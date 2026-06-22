@@ -971,6 +971,45 @@ header.scrolled .hamburger {
   font-size: 0.9rem;
 }
 
+/* ── Password visibility toggle ── */
+.pwd-wrapper {
+  position: relative;
+}
+
+.pwd-wrapper input {
+  padding-right: 2.8rem !important;
+}
+
+.pwd-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.pwd-toggle:hover { color: #4b5563; }
+
+/* -- password input in dashboard -- */
+.dash-pwd-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.dash-pwd-wrapper input {
+  padding-right: 2.5rem !important;
+}
+
 /* -- Team Application -- */
 .team-form { max-height: 90vh; overflow-y: auto; text-align: left; }
 .team-form h2 { text-align: center; }

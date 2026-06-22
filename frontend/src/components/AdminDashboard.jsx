@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan } from 'react-icons/fa';
 
 const token = () => localStorage.getItem('cshub_token');
 const TICKET_STATUSES = ['open', 'in-progress', 'resolved', 'closed'];
@@ -85,6 +85,7 @@ function CreateTicketModal({ onClose, onCreated }) {
 function CreateUserModal({ onClose, onCreated }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: '', email: '', password: '', isAdmin: false });
+  const [showPwd, setShowPwd] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,7 +107,12 @@ function CreateUserModal({ onClose, onCreated }) {
         <form onSubmit={handleSubmit}>
           <input placeholder="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          <input type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={6} />
+          <div className="pwd-wrapper">
+            <input type={showPwd ? 'text' : 'password'} placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={6} />
+            <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
+              {showPwd ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#4b5563', marginBottom: '0.5rem' }}>
             <input type="checkbox" checked={form.isAdmin} onChange={(e) => setForm({ ...form, isAdmin: e.target.checked })} />
             Admin privileges

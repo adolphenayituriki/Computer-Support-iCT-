@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function LoginModal({ onClose, onSwitchToRegister, onForgotPassword }) {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
@@ -39,13 +41,18 @@ export default function LoginModal({ onClose, onSwitchToRegister, onForgotPasswo
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
+        <div className="pwd-wrapper">
+          <input
+            type={showPwd ? 'text' : 'password'}
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+          <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
+            {showPwd ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
         {error && <p className="auth-error">{error}</p>}
         <button type="submit" className="btn">Sign In</button>
       </form>

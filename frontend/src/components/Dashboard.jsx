@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaUser, FaKey } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaEyeSlash, FaUndo, FaLightbulb, FaUser, FaKey } from 'react-icons/fa';
 
 const token = () => localStorage.getItem('cshub_token');
 
@@ -372,6 +372,7 @@ function ProfileView() {
   const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
   const [pwd, setPwd] = useState({ current: '', newPwd: '', confirm: '' });
   const [pwdMsg, setPwdMsg] = useState({ text: '', type: '' });
+  const [showPwd, setShowPwd] = useState({ current: false, newPwd: false, confirm: false });
 
   const handleProfile = async (e) => {
     e.preventDefault();
@@ -440,31 +441,46 @@ function ProfileView() {
         <form onSubmit={handlePassword} className="profile-form">
           <div className="profile-field">
             <label>Current password</label>
-            <input
-              type="password"
-              value={pwd.current}
-              onChange={(e) => setPwd({ ...pwd, current: e.target.value })}
-              required
-            />
+            <div className="dash-pwd-wrapper">
+              <input
+                type={showPwd.current ? 'text' : 'password'}
+                value={pwd.current}
+                onChange={(e) => setPwd({ ...pwd, current: e.target.value })}
+                required
+              />
+              <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, current: !showPwd.current })}>
+                {showPwd.current ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           <div className="profile-field">
             <label>New password (min 6 chars)</label>
-            <input
-              type="password"
-              value={pwd.newPwd}
-              onChange={(e) => setPwd({ ...pwd, newPwd: e.target.value })}
-              required
-              minLength={6}
-            />
+            <div className="dash-pwd-wrapper">
+              <input
+                type={showPwd.newPwd ? 'text' : 'password'}
+                value={pwd.newPwd}
+                onChange={(e) => setPwd({ ...pwd, newPwd: e.target.value })}
+                required
+                minLength={6}
+              />
+              <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, newPwd: !showPwd.newPwd })}>
+                {showPwd.newPwd ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           <div className="profile-field">
             <label>Confirm new password</label>
-            <input
-              type="password"
-              value={pwd.confirm}
-              onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })}
-              required
-            />
+            <div className="dash-pwd-wrapper">
+              <input
+                type={showPwd.confirm ? 'text' : 'password'}
+                value={pwd.confirm}
+                onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })}
+                required
+              />
+              <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}>
+                {showPwd.confirm ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           {pwdMsg.text && (
             <p className={`profile-msg ${pwdMsg.type === 'error' ? 'profile-msg-error' : 'profile-msg-success'}`}>{pwdMsg.text}</p>
