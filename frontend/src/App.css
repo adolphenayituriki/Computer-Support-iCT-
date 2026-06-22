@@ -184,6 +184,22 @@ header.scrolled .nav-links a {
 
 .nav-links a:hover { color: #FFCE08; }
 
+.nav-links a.active {
+  color: #FFCE08;
+  position: relative;
+}
+
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #FFCE08;
+  border-radius: 1px;
+}
+
 .nav-links .btn-link {
   font-size: 0.95rem;
   font-weight: 500;
@@ -225,12 +241,12 @@ header.scrolled .hamburger {
 
 /* -- Hero -- */
 .hero {
-  min-height: 100vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 7rem 2rem 5rem;
+  padding: 5rem 2rem 3rem;
   position: relative;
   overflow: hidden;
 }
@@ -268,19 +284,12 @@ header.scrolled .hamburger {
   max-width: 750px;
 }
 
-.hero-logo-showcase {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.hero-logo-img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid rgba(255, 206, 8, 0.4);
-  box-shadow: 0 0 30px rgba(255, 206, 8, 0.15);
+.hero-line {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #FFCE08, transparent);
+  margin: 0.6rem auto 1rem;
+  border-radius: 2px;
 }
 
 .hero-badge {
@@ -296,7 +305,7 @@ header.scrolled .hamburger {
 }
 
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 900;
   line-height: 1.1;
   margin-bottom: 0.8rem;
@@ -307,7 +316,7 @@ header.scrolled .hamburger {
 .hero h1 span { color: #FFCE08; }
 
 .hero-tagline {
-  font-size: 1rem;
+  font-size: 0.75rem;
   color: #e2e8f0;
   margin-bottom: 1.5rem;
   line-height: 1.6;
@@ -328,14 +337,14 @@ header.scrolled .hamburger {
 
 .hero-stat-num {
   display: block;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: #FFCE08;
   text-shadow: 0 0 20px rgba(255, 206, 8, 0.3);
 }
 
 .hero-stat-label {
-  font-size: 0.85rem;
+  font-size: 0.6rem;
   color: #f1f5f9;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -346,6 +355,10 @@ header.scrolled .hamburger {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.hero-btns .btn {
+  padding: 0.55rem 1.4rem;
 }
 
 /* -- How It Works -- */
@@ -788,11 +801,38 @@ header.scrolled .hamburger {
 .form-error { color: #ef4444; }
 
 /* -- Footer -- */
-footer {
-  background: #1e1b4b;
-  color: #cbd5e1;
+.site-footer {
+  background: #1e293b;
+  color: #fff;
   padding: 3rem 2rem 0;
-  font-size: 0.9rem;
+}
+
+.site-footer .footer-col h4 {
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.site-footer .footer-col p {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.site-footer .footer-col a {
+  color: #cbd5e1;
+}
+
+.site-footer .footer-col a:hover { color: #FFCE08; }
+
+.site-footer .footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 1.2rem 0;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #94a3b8;
 }
 
 .footer-content {
@@ -1009,11 +1049,48 @@ footer {
   width: 100%;
   max-width: 420px;
   animation: modalFade 0.2s ease;
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
 }
 
 @keyframes modalFade {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  margin-bottom: 0.7rem;
+}
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+  border-color: #FFCE08;
+  box-shadow: 0 0 0 3px rgba(255, 206, 8, 0.15);
+}
+
+.modal-content h3 {
+  color: #1e1b4b;
+  margin-bottom: 0.5rem;
+}
+
+.modal-content label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 0.2rem;
+  display: block;
 }
 
 .modal-close {

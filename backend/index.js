@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
@@ -11,10 +14,8 @@ import TeamApp from './models/TeamApp.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = 'cshub_ict_secret_key_2026';
-// MongoDB — uses environment variable MONGO_URI or falls back to local
-// Atlas: set MONGO_URI to your connection string and whitelist your IP in Atlas console
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/computer_support';
+const JWT_SECRET = process.env.JWT_SECRET || 'cshub_ict_secret_key_2026';
+const MONGO_URI = process.env.MONGO_URI;
 
 app.use(cors());
 app.use(express.json());
@@ -295,6 +296,34 @@ app.get('/api/admin/users', authenticate, adminOnly, async (_req, res) => {
   }
 });
 
+app.post('/api/admin/users', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { name, email, password, isAdmin } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password are required.' });
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ error: 'Email already registered.' });
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await User.create({ name, email, password: hashed, isAdmin: isAdmin || false });
+    res.status(201).json({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.put('/api/admin/users/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { name, email, isAdmin } = req.body;
+    if (!name || !email) return res.status(400).json({ error: 'Name and email are required.' });
+    const emailTaken = await User.findOne({ email, _id: { $ne: req.params.id } });
+    if (emailTaken) return res.status(409).json({ error: 'Email already in use.' });
+    const user = await User.findByIdAndUpdate(req.params.id, { name, email, isAdmin: isAdmin ?? undefined }, { new: true }).select('-password -resetToken -resetTokenExpires');
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 app.delete('/api/admin/users/:id', authenticate, adminOnly, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
@@ -310,6 +339,18 @@ app.get('/api/admin/tickets', authenticate, adminOnly, async (_req, res) => {
   try {
     const all = await Ticket.find().sort({ createdAt: -1 });
     res.json(all);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/admin/tickets', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { userId, title, description, category, status } = req.body;
+    if (!title || !description) return res.status(400).json({ error: 'Title and description are required.' });
+    const user = userId ? await User.findById(userId) : null;
+    const ticket = await Ticket.create({ userId: user?._id || req.user.id, userName: user?.name || req.user.name, title, description, category: category || 'general', status: status || 'open' });
+    res.status(201).json(ticket);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -343,6 +384,16 @@ app.get('/api/admin/suggestions', authenticate, adminOnly, async (_req, res) => 
   }
 });
 
+app.put('/api/admin/suggestions/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const sug = await Suggestion.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    if (!sug) return res.status(404).json({ error: 'Suggestion not found.' });
+    res.json(sug);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 app.delete('/api/admin/suggestions/:id', authenticate, adminOnly, async (req, res) => {
   try {
     await Suggestion.findByIdAndDelete(req.params.id);
@@ -356,6 +407,16 @@ app.get('/api/admin/contacts', authenticate, adminOnly, async (_req, res) => {
   try {
     const all = await Contact.find().sort({ createdAt: -1 });
     res.json(all);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.put('/api/admin/contacts/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const contact = await Contact.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    if (!contact) return res.status(404).json({ error: 'Contact not found.' });
+    res.json(contact);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -379,6 +440,16 @@ app.get('/api/admin/team-apps', authenticate, adminOnly, async (_req, res) => {
   }
 });
 
+app.put('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const app = await TeamApp.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    if (!app) return res.status(404).json({ error: 'Application not found.' });
+    res.json(app);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 app.delete('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res) => {
   try {
     await TeamApp.findByIdAndDelete(req.params.id);
@@ -390,4 +461,16 @@ app.delete('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res)
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    const fallback = PORT + 1;
+    console.log(`Port ${PORT} is in use. Trying ${fallback}...`);
+    app.listen(fallback, () => {
+      console.log(`Server running on http://localhost:${fallback}`);
+    });
+  } else {
+    console.error('Server error:', err.message);
+  }
 });

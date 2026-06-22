@@ -178,10 +178,7 @@ export default function Hero() {
       <canvas ref={canvasRef} className="hero-canvas" />
       <div className="hero-overlay" />
       <div className="hero-content">
-        <div className="hero-logo-showcase">
-          <img src="/final-logo.jpg" alt="CS hub (iCT)" className="hero-logo-img" />
-        </div>
-        <span className="hero-badge">&#9733; CS hub (iCT)</span>
+        <div className="hero-line"></div>
         <h1>CS hub <span>(iCT)</span></h1>
         <p className="hero-tagline">
           We help students, teachers, and anyone who needs digital skills and computer support — whether <strong>on-site</strong> or <strong>remotely</strong>. Founded by students who saw the challenges many face with computers and ICT, we are here for you wherever you are.

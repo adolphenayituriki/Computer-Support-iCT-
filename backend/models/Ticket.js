@@ -6,7 +6,7 @@ const ticketSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   category: { type: String, default: 'general' },
-  status: { type: String, enum: ['open', 'closed'], default: 'open' },
+  status: { type: String, enum: ['open', 'in-progress', 'resolved', 'closed'], default: 'open' },
 }, { timestamps: true });
 
 export default mongoose.model('Ticket', ticketSchema);

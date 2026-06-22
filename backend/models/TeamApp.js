@@ -9,6 +9,7 @@ const teamAppSchema = new mongoose.Schema({
   involvement: { type: String, default: 'member' },
   skills: [{ type: String }],
   message: { type: String, required: true },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
 }, { timestamps: true });
 
 export default mongoose.model('TeamApp', teamAppSchema);

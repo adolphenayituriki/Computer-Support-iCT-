@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer>
+    <footer className="site-footer">
       <div className="footer-content">
         <div className="footer-col">
           <h4>CS hub (iCT)</h4>
