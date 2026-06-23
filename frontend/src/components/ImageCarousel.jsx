@@ -22,7 +22,7 @@ export default function ImageCarousel() {
       <div className="carousel-track" style={{ transform: `translateX(-${current * 100}%)` }}>
         {images.map((src, i) => (
           <div className="carousel-slide" key={i}>
-            <img src={src} alt={`CS hub ${i + 1}`} />
+            <img src={src} alt="CS hub (iCT) — Computer Support and IT Services in Rwanda" />
           </div>
         ))}
       </div>

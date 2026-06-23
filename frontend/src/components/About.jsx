@@ -3,7 +3,7 @@ import ImageCarousel from './ImageCarousel';
 export default function About() {
   return (
     <section id="about" className="about section-reveal">
-      <h2>Our Story</h2>
+      <h2 className="section-title">Our Story</h2>
       <div className="about-grid">
         <div className="about-text">
           <p>

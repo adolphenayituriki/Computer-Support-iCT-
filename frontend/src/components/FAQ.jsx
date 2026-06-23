@@ -25,6 +25,26 @@ const faqs = [
     q: 'What if I have no computer knowledge?',
     a: 'That is exactly who we are here for! Our training sessions start from the absolute basics. No question is too simple.',
   },
+  {
+    q: 'Can you fix hardware issues like broken screens or keyboards?',
+    a: 'Yes. We diagnose and repair common hardware problems including cracked screens, faulty keyboards, dead batteries, charging port issues, and hard drive failures. We provide advice on replacement parts and repair costs before proceeding.',
+  },
+  {
+    q: 'Do you offer ICT training for teachers and staff?',
+    a: 'Absolutely. We train teachers and staff on using ICT tools for lesson planning, online teaching platforms, grading software, email communication, and digital record-keeping. We also offer group training sessions for schools and departments.',
+  },
+  {
+    q: 'What kind of software do you help install?',
+    a: 'We install and configure Microsoft Office (Word, Excel, PowerPoint, Outlook), Google Chrome, Mozilla Firefox, antivirus software (Kaspersky, Avast, McAfee), Adobe Acrobat Reader, Zoom, Google Meet, school management systems, programming tools (VS Code, Python, Git), and any other educational or productivity software you need.',
+  },
+  {
+    q: 'Do you provide remote IT support?',
+    a: 'Yes. If you cannot bring your device to us, we offer remote support using secure tools. Our team can remotely diagnose issues, install software, remove viruses, and guide you through configurations — all from a distance.',
+  },
+  {
+    q: 'How can I improve my digital literacy skills?',
+    a: 'We offer a structured digital literacy program covering basic computer operations, internet browsing, email and communication tools, cloud storage (Google Drive, OneDrive), online safety and privacy, and workplace productivity tools. Sessions are available for individuals and groups.',
+  },
 ];
 
 export default function FAQ() {

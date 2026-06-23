@@ -179,9 +179,9 @@ export default function Hero() {
       <div className="hero-overlay" />
       <div className="hero-content">
         <div className="hero-line"></div>
-        <h1>CS hub <span>(iCT)</span></h1>
+        <h1>CS hub <span>(iCT)</span> — Computer Support &amp; IT Services in Rwanda</h1>
         <p className="hero-tagline">
-          We help students, teachers, and anyone who needs digital skills and computer support — whether <strong>on-site</strong> or <strong>remotely</strong>. Founded by students who saw the challenges many face with computers and ICT, we are here for you wherever you are.
+          We help students, teachers, and anyone who needs <strong>digital skills</strong>, <strong>computer repair</strong>, <strong>software installation</strong>, and <strong>ICT support</strong> — whether <strong>on-site</strong> or <strong>remotely</strong> across Rwanda. Founded by students who saw the challenges many face with computers and ICT, we are here for you wherever you are.
         </p>
 
         <div className="hero-stats">
