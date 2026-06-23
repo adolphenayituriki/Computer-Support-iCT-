@@ -113,9 +113,12 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             </>
           )}
         </ul>
-        <button className="hamburger" aria-label="Menu" onClick={() => setOpen((v) => !v)}>
-          &#9776;
+        <button className={`hamburger${open ? ' open' : ''}`} aria-label="Menu" onClick={() => setOpen((v) => !v)}>
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
+        {open && <div className="nav-overlay" onClick={() => setOpen(false)} />}
       </nav>
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </header>
