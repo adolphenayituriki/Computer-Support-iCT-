@@ -1019,6 +1019,45 @@ header.dash-header .hamburger span {
 
 .footer-whatsapp:hover { opacity: 0.8; color: #25D366 !important; }
 
+.footer-social {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.footer-social a {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #334155;
+  color: #cbd5e1 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.footer-social a:hover {
+  background: #FFCE08;
+  color: #1e1b4b !important;
+  transform: translateY(-2px);
+}
+
+.footer-link-icon {
+  font-size: 0.65rem;
+  margin-right: 0.4rem;
+  color: #FFCE08;
+  vertical-align: middle;
+}
+
+.footer-contact-icon {
+  margin-right: 0.5rem;
+  color: #FFCE08;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
 .site-footer .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.1);
   padding: 1.2rem 0;
@@ -1044,10 +1083,12 @@ header.dash-header .hamburger span {
 }
 
 .footer-col p {
+  display: flex;
+  align-items: center;
   color: #94a3b8;
   line-height: 1.6;
   font-size: 0.85rem;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .footer-logo {
@@ -1060,7 +1101,8 @@ header.dash-header .hamburger span {
 }
 
 .footer-col a {
-  display: block;
+  display: flex;
+  align-items: center;
   color: #94a3b8;
   text-decoration: none;
   font-size: 0.85rem;
