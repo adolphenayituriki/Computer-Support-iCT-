@@ -307,19 +307,19 @@ function AdminTickets() {
       ) : (
         <div className="ticket-list">
           {filtered.map((t) => (
-            <div key={tid(t)} className="ticket-item admin-ticket-item">
+            <div key={tid(t)} className="ticket-item admin-ticket-item" style={{ cursor: 'pointer' }} onClick={() => setViewTicket(t)}>
               <div className="ticket-top">
                 <StatusBadge status={t.status} />
                 <span className="ticket-category">{t.category}</span>
                 <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: '0.3rem' }}>{t.userName}</span>
-                <div className="ticket-actions">
+                <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
                   <button className="ticket-action-btn" title="Edit" onClick={() => { setEditingId(tid(t)); setEditForm({ title: t.title, description: t.description, category: t.category, status: t.status }); }}><FaEdit /></button>
                   <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
                 </div>
               </div>
               {editingId === tid(t) ? (
-                <div className="ticket-edit-form">
+                <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
                   <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
                   <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
                     <option value="general">General</option><option value="hardware">Hardware</option><option value="software">Software</option>
@@ -339,9 +339,11 @@ function AdminTickets() {
                   <h4 style={{ fontSize: '0.9rem' }}>{t.title}</h4>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="ticket-date">{new Date(t.createdAt).toLocaleDateString()}</span>
-                    <select value={t.status} onChange={(e) => handleStatus(tid(t), e.target.value)} style={{ padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.75rem' }}>
-                      {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <select value={t.status} onChange={(e) => handleStatus(tid(t), e.target.value)} style={{ padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.75rem' }}>
+                        {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </>
               )}

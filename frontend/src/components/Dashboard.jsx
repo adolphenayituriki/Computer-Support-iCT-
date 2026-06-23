@@ -211,13 +211,13 @@ function TicketsView({ tickets, setTickets }) {
           ) : (
             <div className="ticket-list">
               {filteredTickets.map((t) => (
-                <div key={t.id} className="ticket-item">
+                <div key={t.id} className="ticket-item" style={{ cursor: 'pointer' }} onClick={() => setViewTicket(t)}>
                   <div className="ticket-top">
                     <span className={`ticket-status status-${t.status}`}>
                       {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
                     </span>
                     <span className="ticket-category">{t.category}</span>
-                    <div className="ticket-actions">
+                    <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
                       <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
                       <button className="ticket-action-btn" title="Edit" onClick={() => startEdit(t)}><FaEdit /></button>
                       <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(t.id)} style={{ color: '#ef4444' }}><FaTrash /></button>
@@ -225,7 +225,7 @@ function TicketsView({ tickets, setTickets }) {
                   </div>
 
                   {editingId === t.id ? (
-                    <div className="ticket-edit-form">
+                    <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
                       <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
                       <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
                         <option value="general">General</option>
@@ -249,16 +249,18 @@ function TicketsView({ tickets, setTickets }) {
                         <span className="ticket-date">
                           {new Date(t.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
-                        {(t.status === 'open' || t.status === 'in-progress') && (
-                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(t.id, 'resolved')}>
-                            <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
-                          </button>
-                        )}
-                        {t.status === 'resolved' && (
-                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(t.id, 'open')}>
-                            <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
-                          </button>
-                        )}
+                        <div onClick={(e) => e.stopPropagation()}>
+                          {(t.status === 'open' || t.status === 'in-progress') && (
+                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(t.id, 'resolved')}>
+                              <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
+                            </button>
+                          )}
+                          {t.status === 'resolved' && (
+                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(t.id, 'open')}>
+                              <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </>
                   )}
