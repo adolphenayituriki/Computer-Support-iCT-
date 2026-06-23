@@ -273,23 +273,36 @@ header.dash-header .nav-links a:hover {
 .nav-avatar {
   width: 34px;
   height: 34px;
-  background: #FFCE08;
-  color: #1e1b4b;
+  background: transparent;
+  color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
   font-size: 0.75rem;
-  border: 2px solid transparent;
+  border: 2px solid #fff;
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
   font-family: inherit;
 }
 
 .nav-avatar:hover {
-  border-color: #1e1b4b;
+  border-color: #FFCE08;
+  color: #FFCE08;
   transform: scale(1.05);
+}
+
+header.scrolled .nav-avatar,
+header.dash-header .nav-avatar {
+  color: #1e1b4b;
+  border-color: #1e1b4b;
+}
+
+header.scrolled .nav-avatar:hover,
+header.dash-header .nav-avatar:hover {
+  border-color: #FFCE08;
+  color: #FFCE08;
 }
 
 .nav-avatar-guest {
