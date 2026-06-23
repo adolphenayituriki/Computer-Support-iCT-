@@ -3,11 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { FaUser } from 'react-icons/fa';
 
+import SettingsModal from './SettingsModal';
+
 export default function Navbar({ onLoginClick, onRegisterClick }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('home');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,7 +79,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu">
                     <div className="nav-profile-name">{user?.name}</div>
-                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Settings</a>
+                    <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>Settings</button>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
@@ -95,7 +98,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu">
                     <div className="nav-profile-name">{user?.name}</div>
-                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Settings</a>
+                    <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>Settings</button>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
@@ -114,6 +117,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
           &#9776;
         </button>
       </nav>
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </header>
   );
 }
