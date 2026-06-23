@@ -414,6 +414,10 @@ header.dash-header .hamburger span {
   display: none;
 }
 
+.nav-mobile-only {
+  display: none;
+}
+
 /* -- Hero -- */
 .hero {
   min-height: 70vh;
@@ -2015,6 +2019,42 @@ header.dash-header .hamburger span {
   .nav-avatar-guest:active {
     background: #334155 !important;
     color: #FFCE08 !important;
+  }
+
+  /* ─── Mobile-only settings & logout ─── */
+  .nav-mobile-only {
+    display: block;
+    margin-top: 0.5rem;
+  }
+  .nav-mobile-settings,
+  .nav-mobile-logout {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+  }
+  .nav-mobile-settings {
+    background: #1e293b;
+    color: #e2e8f0;
+  }
+  .nav-mobile-settings:active {
+    background: #334155;
+    color: #FFCE08;
+  }
+  .nav-mobile-logout {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    margin-top: 0.4rem;
+  }
+  .nav-mobile-logout:active {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
   }
 
   /* ─── Header / Nav spacing ─── */

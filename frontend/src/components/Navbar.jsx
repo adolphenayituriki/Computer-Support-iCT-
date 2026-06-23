@@ -84,6 +84,8 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                   </div>
                 )}
               </li>
+              <li className="nav-mobile-only"><button className="nav-mobile-settings" onClick={() => { setOpen(false); setShowSettings(true); }}>Settings</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>Logout</button></li>
             </>
           ) : user ? (
             <>
@@ -103,6 +105,8 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                   </div>
                 )}
               </li>
+              <li className="nav-mobile-only"><button className="nav-mobile-settings" onClick={() => { setOpen(false); setShowSettings(true); }}>Settings</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>Logout</button></li>
             </>
           ) : (
             <>
