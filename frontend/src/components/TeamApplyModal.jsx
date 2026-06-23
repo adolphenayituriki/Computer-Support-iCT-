@@ -108,54 +108,57 @@ export default function TeamApplyModal({ onClose }) {
       <p className="auth-sub">We are looking for passionate people to join, partner, or volunteer with CS hub (iCT)</p>
 
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Full Name *"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email Address *"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <input
-          type="tel"
-          placeholder="Phone Number"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-
-        <select
-          value={form.education}
-          onChange={(e) => setForm({ ...form, education: e.target.value })}
-          required
-        >
-          <option value="">— Level of Education * —</option>
-          {educationLevels.map((level) => (
-            <option key={level} value={level}>{level}</option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          placeholder="Your Location (e.g., Kigali, Huye) *"
-          value={form.location}
-          onChange={(e) => setForm({ ...form, location: e.target.value })}
-          required
-        />
-
-        <select
-          value={form.involvement}
-          onChange={(e) => setForm({ ...form, involvement: e.target.value })}
-        >
-          {involvementTypes.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        <div className="form-row">
+          <input
+            type="text"
+            placeholder="Full Name *"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email Address *"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
+        </div>
+        <div className="form-row">
+          <input
+            type="tel"
+            placeholder="Phone Number"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <select
+            value={form.education}
+            onChange={(e) => setForm({ ...form, education: e.target.value })}
+            required
+          >
+            <option value="">— Level of Education * —</option>
+            {educationLevels.map((level) => (
+              <option key={level} value={level}>{level}</option>
+            ))}
+          </select>
+        </div>
+        <div className="form-row">
+          <input
+            type="text"
+            placeholder="Your Location (e.g., Kigali, Huye) *"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            required
+          />
+          <select
+            value={form.involvement}
+            onChange={(e) => setForm({ ...form, involvement: e.target.value })}
+          >
+            {involvementTypes.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
 
         <div className="skills-group">
           <label>Your ICT / Computer Skills (select all that apply)</label>
@@ -174,7 +177,7 @@ export default function TeamApplyModal({ onClose }) {
         </div>
 
         <textarea
-          rows="4"
+          rows="3"
           placeholder="Why do you want to join or partner with us? Tell us about yourself... *"
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}

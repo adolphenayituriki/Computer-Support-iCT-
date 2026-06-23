@@ -133,7 +133,7 @@ export default function App() {
           <Modal open={showRegister} onClose={closeAll}>
             <RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} />
           </Modal>
-          <Modal open={showTeam} onClose={closeAll}>
+          <Modal open={showTeam} onClose={closeAll} wide>
             <TeamApplyModal onClose={closeAll} />
           </Modal>
           <Modal open={showForgot} onClose={closeAll}>
