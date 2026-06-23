@@ -10,6 +10,27 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   color: #1e1b4b;
   line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+a, button, input, select, textarea, .btn, .hamburger, .dash-tab, .filter-btn {
+  touch-action: manipulation;
+}
+
+/* -- Mobile tap feedback -- */
+@media (hover: none) and (pointer: coarse) {
+  .btn:active,
+  .card:active,
+  .why-card:active,
+  .step:active,
+  .faq-question:active,
+  .dash-tab:active,
+  .filter-btn:active,
+  .ticket-item:active {
+    transform: scale(0.97);
+    transition: transform 0.12s;
+  }
 }
 
 .container { max-width: 1100px; margin: 0 auto; }
@@ -1869,74 +1890,65 @@ header.dash-header .hamburger span {
   to { opacity: 1; }
 }
 
-/* -- Responsive -- */
+/* -- Responsive / Mobile App Enhancements -- */
 @media (max-width: 768px) {
+  /* ─── Overlay ─── */
   .nav-overlay {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.55);
     z-index: 199;
     animation: fadeIn 0.25s;
   }
 
+  /* ─── Navigation (app-drawer) ─── */
   .nav-links {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 75%;
-    max-width: 320px;
-    height: 100vh;
+    width: 78%;
+    max-width: 340px;
+    height: 100dvh;
     background: #0f172a;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    padding: 5rem 2rem 2rem;
-    gap: 0.5rem;
-    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.4);
+    padding: 5rem 1.5rem 2rem;
+    gap: 0.25rem;
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
     transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 200;
+    overflow-y: auto;
   }
-
   .nav-links.active { right: 0; }
 
-  .hamburger {
-    display: flex;
-  }
+  .hamburger { display: flex; }
 
-  .nav-links li {
-    width: 100%;
-  }
+  .nav-links li { width: 100%; list-style: none; }
 
   .nav-links a,
   .nav-links .btn-link {
     color: #e2e8f0 !important;
-    font-size: 1.05rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
     transition: background 0.2s, color 0.2s;
     display: block;
+    font-weight: 500;
   }
-
-  .nav-links a:hover,
-  .nav-links .btn-link:hover {
+  .nav-links a:active,
+  .nav-links .btn-link:active {
+    background: #334155 !important;
+    color: #FFCE08 !important;
+  }
+  .nav-links a.active {
     background: #1e293b;
     color: #FFCE08 !important;
   }
 
-  .nav-links a.active {
-    background: #334155;
-    color: #FFCE08 !important;
-  }
-
-  .nav-profile-wrap {
-    position: static;
-    margin-top: 0.5rem;
-  }
-
-  .nav-avatar {
-    display: none;
-  }
+  .nav-profile-wrap { position: static; margin-top: 0.75rem; }
+  .nav-avatar { display: none; }
 
   .nav-profile-menu {
     position: static;
@@ -1948,45 +1960,42 @@ header.dash-header .hamburger span {
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.15rem;
   }
-
   .nav-profile-name {
     color: #94a3b8;
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem 0.2rem;
     text-align: left;
+    font-weight: 600;
   }
-
   .nav-profile-menu button {
     color: #e2e8f0 !important;
     text-align: left;
-    padding: 0.75rem 1rem;
-    font-size: 1.05rem;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
     border: none;
     background: transparent;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     width: 100%;
     font-family: inherit;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s;
+    font-weight: 500;
   }
-
-  .nav-profile-menu button:hover {
-    background: #1e293b;
+  .nav-profile-menu button:active {
+    background: #334155 !important;
     color: #FFCE08 !important;
   }
-
   .nav-profile-menu button:last-child {
     color: #f87171 !important;
     border-top: 1px solid #334155;
-    margin-top: 0.25rem;
-    padding-top: 0.75rem;
+    margin-top: 0.4rem;
+    padding-top: 0.8rem;
   }
-
-  .nav-profile-menu button:last-child:hover {
+  .nav-profile-menu button:last-child:active {
     color: #ef4444 !important;
-    background: #1e293b;
+    background: #1e293b !important;
   }
 
   .nav-avatar-guest {
@@ -1994,79 +2003,187 @@ header.dash-header .hamburger span {
     border: none !important;
     background: #1e293b !important;
     width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 1.05rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    font-weight: 500;
   }
-  .nav-avatar-guest:hover {
+  .nav-avatar-guest:active {
     background: #334155 !important;
     color: #FFCE08 !important;
   }
 
-  header { padding: 0.5rem 0; }
-  nav { padding: 0.5rem 1rem; }
+  /* ─── Header / Nav spacing ─── */
+  header { padding: 0.4rem 0; }
+  nav { padding: 0.4rem 1rem; }
 
-  .hero { padding: 6rem 1.2rem 3rem; }
-  .hero h1 { font-size: 2rem; }
-  .hero-tagline { font-size: 0.95rem; max-width: 100%; }
-  .hero-stats { gap: 1.2rem; }
-  .hero-stat-num { font-size: 1.3rem; }
-  .hero-stat-label { font-size: 0.8rem; }
+  /* ─── Hero (app-style splash) ─── */
+  .hero {
+    padding: 5.5rem 1.2rem 2.5rem;
+    min-height: 85dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero h1 { font-size: 1.85rem; letter-spacing: -0.02em; }
+  .hero-tagline { font-size: 0.9rem; max-width: 100%; }
+  .hero-stats { gap: 1rem; }
+  .hero-stat-num { font-size: 1.2rem; }
+  .hero-stat-label { font-size: 0.7rem; }
+  .hero-badge { font-size: 0.7rem; }
+  .hero-btns { gap: 0.7rem; flex-direction: column; align-items: center; }
+  .hero-btns .btn {
+    width: 100%;
+    max-width: 260px;
+    justify-content: center;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.95rem;
+  }
 
-  section { padding: 3rem 1.2rem !important; }
-  .section-title { font-size: 1.6rem; }
-  .section-sub { font-size: 0.95rem; margin-bottom: 2rem; }
+  /* ─── Section defaults ─── */
+  section { padding: 2.5rem 1.2rem !important; }
+  .section-title { font-size: 1.5rem; }
+  .section-sub { font-size: 0.9rem; margin-bottom: 1.5rem; }
 
-  .cards { gap: 1.2rem; }
-  .card { padding: 1.8rem 1.2rem; }
+  /* ─── Services cards (app-feed style) ─── */
+  .cards { gap: 1rem; }
+  .card {
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding: 1.5rem 1.2rem;
+    border-radius: 16px;
+  }
 
-  .why-grid { flex-direction: column; gap: 1rem; }
-  .why-card { padding: 1.2rem; }
+  /* ─── Why Us ─── */
+  .why-grid { flex-direction: column; gap: 0.8rem; }
+  .why-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding: 1.2rem;
+    border-radius: 14px;
+  }
 
-  .steps { gap: 1.5rem; }
+  /* ─── Steps / How It Works ─── */
+  .steps { gap: 1.2rem; }
   .step { flex: 1 1 100%; max-width: 100%; }
+  .step-num { width: 50px; height: 50px; font-size: 1.2rem; }
 
-  .testimonial-grid { grid-template-columns: 1fr; gap: 1rem; }
+  /* ─── Testimonials (horizontal swipe) ─── */
+  .testimonial-grid {
+    display: flex;
+    gap: 0.8rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.5rem 0 1rem;
+    scrollbar-width: none;
+  }
+  .testimonial-grid::-webkit-scrollbar { display: none; }
+  .testi-card {
+    flex: 0 0 80%;
+    max-width: 80%;
+    scroll-snap-align: start;
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
 
+  /* ─── FAQ ─── */
   .faq-list { padding: 0; }
-  .faq-question { font-size: 0.9rem; padding: 0.8rem 1rem; }
+  .faq-question { font-size: 0.85rem; padding: 0.8rem 1rem; }
+  .faq-answer { font-size: 0.85rem; padding: 0 1rem 0.8rem; }
+  .faq-item { border-radius: 10px; }
 
-  .cta-section h2 { font-size: 1.5rem; }
-  .cta-section p { font-size: 0.95rem; }
+  /* ─── CTA ─── */
+  .cta-section { padding: 3rem 1.2rem !important; }
+  .cta-section h2 { font-size: 1.4rem; }
+  .cta-section p { font-size: 0.9rem; }
 
-  .contact-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-  .contact-info-col { padding: 1.5rem; }
+  /* ─── Contact ─── */
+  .contact { padding: 2.5rem 1.2rem !important; }
+  .contact-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .contact-info-col { padding: 1.2rem; border-radius: 14px; }
+  .contact-form-col input,
+  .contact-form-col textarea { font-size: 0.85rem; padding: 0.7rem 1rem; }
 
-  .about-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-  .about-text p { font-size: 0.95rem; }
+  /* ─── About ─── */
+  .about-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .about-text p { font-size: 0.9rem; }
+  .carousel-slide img { height: 220px; }
 
-  .footer-content { 
-    grid-template-columns: 1fr 1fr;
+  /* ─── Footer ─── */
+  .footer-content {
+    grid-template-columns: 1fr;
     text-align: center;
     gap: 1.5rem;
   }
-  .footer-content .footer-col:first-child {
-    grid-column: 1 / -1;
+  .footer-logo { margin: 0 auto 0.6rem; }
+  .site-footer { padding: 2rem 1.2rem 0; }
+  .footer-bottom { padding: 1rem; font-size: 0.78rem; }
+
+  /* ─── Dashboard ─── */
+  .dashboard { padding: 5rem 1rem 2.5rem; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .dash-welcome {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
   }
-  .footer-logo { margin-left: auto; margin-right: auto; }
+  .dash-welcome h2 { font-size: 1.3rem; }
+  .dash-welcome p { font-size: 0.82rem; }
+  .dash-stats { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .dash-stat-card { padding: 0.8rem; border-radius: 12px; }
+  .dash-stat-card strong { font-size: 1.1rem; }
+  .dash-card { padding: 1.2rem; border-radius: 14px; }
+  .dash-tabs { gap: 0.3rem; }
+  .dash-tab { font-size: 0.78rem; padding: 0.45rem 0.7rem; }
+  .request-card input,
+  .request-card select,
+  .request-card textarea { font-size: 0.85rem; padding: 0.65rem 0.9rem; }
 
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .dash-stats { grid-template-columns: repeat(2, 1fr); }
-  .dash-stat-card { padding: 1rem; }
-  .dash-welcome { flex-direction: column; text-align: center; }
-  .modal-auth { padding: 1.2rem 0.8rem; }
+  /* ─── Auth modal ─── */
+  .modal-auth {
+    padding: 1.2rem 0.8rem;
+    border-radius: 16px;
+  }
   .auth-logo { font-size: 1rem; }
+  .modal-auth h2 { font-size: 1.15rem; }
+  .modal-auth .auth-sub { font-size: 0.8rem; }
+  .form-row { flex-direction: column; gap: 0.7rem; }
+  .modal-content { padding: 1.5rem; border-radius: 16px; }
 
-  .hero-badge { font-size: 0.75rem; }
-  .hero-btns { gap: 0.8rem; flex-direction: column; align-items: center; }
-  .hero-btns .btn { width: 100%; max-width: 240px; justify-content: center; }
+  /* ─── WhatsApp float ─── */
+  .whatsapp-float {
+    bottom: 16px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.4rem;
+  }
 
-  .contact-form-col input,
-  .contact-form-col textarea { font-size: 0.9rem; padding: 0.75rem 1rem; }
+  /* ─── Settings modal ─── */
+  .settings-modal {
+    max-width: 100%;
+    width: 92%;
+    padding: 1.5rem;
+    border-radius: 14px;
+  }
+
+  /* ─── Ticket list ─── */
+  .ticket-list { max-height: 400px; }
+  .ticket-item { padding: 0.8rem; border-radius: 10px; }
+  .ticket-item h4 { font-size: 0.88rem; }
+  .ticket-item p { font-size: 0.8rem; }
+
+  /* ─── Admin ─── */
+  .admin-list { gap: 0.4rem; }
+
+  /* ─── Bottom safe area ─── */
+  .site-footer { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
 }
 
 /* -- Scroll Reveal -- */
