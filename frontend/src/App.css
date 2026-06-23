@@ -185,29 +185,24 @@ header.scrolled .logo-text small { color: #6b7280; }
   text-decoration: none;
   color: #e2e8f0;
   font-weight: 500;
-  transition: color 0.3s;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  transition: color 0.3s, background 0.3s;
 }
 
 header.scrolled .nav-links a {
   color: #4b5563;
 }
 
-.nav-links a:hover { color: #FFCE08; }
-
-.nav-links a.active {
-  color: #FFCE08;
-  position: relative;
+.nav-links a:hover {
+  color: #1e293b;
+  background: rgba(255, 206, 8, 0.5);
 }
 
-.nav-links a.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
+.nav-links a.active {
+  color: #1e293b;
   background: #FFCE08;
-  border-radius: 1px;
+  font-weight: 700;
 }
 
 .nav-links .btn-link {
