@@ -227,6 +227,34 @@ header.scrolled .nav-links .btn-link {
   text-decoration: none;
 }
 
+header.dash-header .nav-links a {
+  color: #4b5563;
+}
+
+header.dash-header .nav-links a:hover {
+  color: #1e293b;
+  background: rgba(255, 206, 8, 0.5);
+}
+
+.dash-logout-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #FFCE08;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  list-style: none;
+  transition: color 0.3s;
+}
+
+.dash-logout-btn:hover {
+  color: #e6b800;
+  text-decoration: underline;
+  background: none;
+}
+
 .nav-cta {
   background: #FFCE08 !important;
   color: #1e1b4b !important;
@@ -1822,4 +1850,87 @@ header.scrolled .hamburger {
 .section-reveal.revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* -- Message Thread -- */
+.msg-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.msg-bubble {
+  max-width: 85%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.msg-bubble.msg-admin {
+  align-self: flex-end;
+  background: #FFCE08;
+  color: #1e1b4b;
+  border-bottom-right-radius: 2px;
+}
+
+.msg-bubble.msg-user {
+  align-self: flex-start;
+  background: #f1f5f9;
+  color: #334155;
+  border-bottom-left-radius: 2px;
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+}
+
+.msg-header strong {
+  opacity: 0.8;
+}
+
+.msg-header span {
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.msg-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg-reply-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.msg-reply-form input {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.msg-reply-form input:focus {
+  border-color: #FFCE08;
+}
+
+.msg-reply-form .btn {
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
 }

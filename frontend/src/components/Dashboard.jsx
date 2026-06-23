@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaEyeSlash, FaUndo, FaLightbulb, FaUser, FaKey } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaEyeSlash, FaUndo, FaLightbulb, FaUser, FaKey, FaReply } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -17,6 +17,10 @@ function TicketsView({ tickets, setTickets }) {
   const [viewTicket, setViewTicket] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [savingId, setSavingId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const msgEndRef = useRef(null);
+  useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewTicket?.messages]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,7 +108,29 @@ function TicketsView({ tickets, setTickets }) {
     return true;
   });
 
+  const handleSendReply = async () => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/tickets/${viewTicket.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ text: replyText }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setViewTicket(data);
+        setTickets((prev) => prev.map((t) => (t.id === data.id ? data : t)));
+        setReplyText('');
+      } else {
+        showToast('Failed to send.', 'error');
+      }
+    } catch { showToast('Could not reach server.', 'error'); }
+    setSendingReply(false);
+  };
+
   if (viewTicket) {
+    const msgs = viewTicket.messages || [];
     return (
       <>
         <div className="dash-welcome" style={{ marginTop: '1.5rem' }}>
@@ -138,6 +164,35 @@ function TicketsView({ tickets, setTickets }) {
             <button className="btn btn-outline" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(viewTicket.id); }}>
               <FaTrash style={{ marginRight: '0.4rem' }} /> Delete
             </button>
+          </div>
+        </div>
+        <div className="dash-card" style={{ marginTop: '1rem' }}>
+          <h4 style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
+          <div className="msg-thread">
+            {msgs.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+            ) : (
+              msgs.map((m, i) => (
+                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                  <div className="msg-header">
+                    <strong>{m.senderName}</strong>
+                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p>{m.text}</p>
+                </div>
+              ))
+            )}
+            <div ref={msgEndRef} />
+          </div>
+          <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
+            <input
+              type="text"
+              placeholder="Type your reply..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }}
+            />
+            <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
           </div>
         </div>
       </>
@@ -288,6 +343,11 @@ function SuggestionsView() {
   const [suggestions, setSuggestions] = useState([]);
   const [form, setForm] = useState({ title: '', description: '' });
   const [feedback, setFeedback] = useState('');
+  const [viewSug, setViewSug] = useState(null);
+  const [sugReplyText, setSugReplyText] = useState('');
+  const [sugSendingReply, setSugSendingReply] = useState(false);
+  const sugMsgEndRef = useRef(null);
+  useEffect(() => { sugMsgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewSug?.messages]);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/suggestions`, { headers: { Authorization: `Bearer ${token()}` } })
@@ -297,6 +357,27 @@ function SuggestionsView() {
   }, []);
 
   const [suggesting, setSuggesting] = useState(false);
+
+  const handleSugReply = async () => {
+    if (!sugReplyText.trim()) return;
+    setSugSendingReply(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/suggestions/${viewSug.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ text: sugReplyText }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setViewSug(data);
+        setSuggestions((prev) => prev.map((s) => (s.id === data.id ? data : s)));
+        setSugReplyText('');
+      } else {
+        showToast('Failed to send.', 'error');
+      }
+    } catch { showToast('Could not reach server.', 'error'); }
+    setSugSendingReply(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -322,6 +403,52 @@ function SuggestionsView() {
       setSuggesting(false);
     }
   };
+
+  if (viewSug) {
+    const msgs = viewSug.messages || [];
+    return (
+      <div className="dashboard-grid">
+        <div className="dash-card request-card" style={{ gridColumn: '1 / -1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+            <button className="btn btn-outline btn-sm" onClick={() => setViewSug(null)}><FaTimes /> Back</button>
+            <h3 style={{ margin: 0 }}>{viewSug.title}</h3>
+          </div>
+          <p style={{ lineHeight: '1.7', color: '#334155', marginBottom: '1rem' }}>{viewSug.description}</p>
+          <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: '1.5rem' }}>
+            {new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </p>
+
+          <h4 style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
+          <div className="msg-thread">
+            {msgs.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+            ) : (
+              msgs.map((m, i) => (
+                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                  <div className="msg-header">
+                    <strong>{m.senderName}</strong>
+                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p>{m.text}</p>
+                </div>
+              ))
+            )}
+            <div ref={sugMsgEndRef} />
+          </div>
+          <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
+            <input
+              type="text"
+              placeholder="Type your reply..."
+              value={sugReplyText}
+              onChange={(e) => setSugReplyText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }}
+            />
+            <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-grid">
@@ -361,12 +488,17 @@ function SuggestionsView() {
         ) : (
           <div className="ticket-list">
             {suggestions.map((s) => (
-              <div key={s.id} className="ticket-item" style={{ borderLeftColor: '#60a5fa' }}>
+              <div key={s.id} className="ticket-item" style={{ borderLeftColor: '#60a5fa', cursor: 'pointer' }} onClick={() => setViewSug(s)}>
                 <h4 style={{ color: '#1e1b4b', fontSize: '0.95rem', marginBottom: '0.25rem' }}>{s.title}</h4>
                 <p style={{ fontSize: '0.85rem', color: '#6b7280', lineHeight: '1.5' }}>{s.description}</p>
                 <span className="ticket-date">
                   {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </span>
+                {(s.messages || []).length > 0 && (
+                  <span style={{ fontSize: '0.75rem', color: '#60a5fa', marginLeft: '0.5rem' }}>
+                    <FaReply style={{ transform: 'scaleX(-1)', marginRight: '0.2rem' }} />{s.messages.length}
+                  </span>
+                )}
               </div>
             ))}
           </div>

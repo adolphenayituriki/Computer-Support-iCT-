@@ -235,6 +235,20 @@ app.delete('/api/tickets/:id', authenticate, async (req, res) => {
   }
 });
 
+app.post('/api/tickets/:id/messages', authenticate, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const ticket = await Ticket.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
+    ticket.messages.push({ sender: 'user', senderName: req.user.name, text });
+    await ticket.save();
+    res.status(201).json(ticket);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 // ── Contact (public) ──
 app.post('/api/contact', async (req, res) => {
   try {
@@ -274,6 +288,20 @@ app.get('/api/suggestions', authenticate, async (req, res) => {
   try {
     const userSuggestions = await Suggestion.find({ userId: req.user.id }).sort({ createdAt: -1 });
     res.json(userSuggestions);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/suggestions/:id/messages', authenticate, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const sug = await Suggestion.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!sug) return res.status(404).json({ error: 'Suggestion not found.' });
+    sug.messages.push({ sender: 'user', senderName: req.user.name, text });
+    await sug.save();
+    res.status(201).json(sug);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -352,6 +380,20 @@ app.get('/api/admin/tickets', authenticate, adminOnly, async (_req, res) => {
   }
 });
 
+app.post('/api/admin/tickets/:id/messages', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
+    ticket.messages.push({ sender: 'admin', senderName: req.user.name, text });
+    await ticket.save();
+    res.status(201).json(ticket);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 app.post('/api/admin/tickets', authenticate, adminOnly, async (req, res) => {
   try {
     const { userId, title, description, category, status } = req.body;
@@ -387,6 +429,20 @@ app.get('/api/admin/suggestions', authenticate, adminOnly, async (_req, res) => 
   try {
     const all = await Suggestion.find().sort({ createdAt: -1 });
     res.json(all);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/admin/suggestions/:id/messages', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const sug = await Suggestion.findById(req.params.id);
+    if (!sug) return res.status(404).json({ error: 'Suggestion not found.' });
+    sug.messages.push({ sender: 'admin', senderName: req.user.name, text });
+    await sug.save();
+    res.status(201).json(sug);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }

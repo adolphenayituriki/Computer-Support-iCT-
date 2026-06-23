@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -135,6 +135,12 @@ function DetailModal({ item, type, onClose, onUpdated }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({ ...item });
   const [saving, setSaving] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const [currentItem, setCurrentItem] = useState(item);
+  const msgEndRef = useRef(null);
+
+  useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [currentItem?.messages]);
 
   const handleUpdate = async () => {
     setSaving(true);
@@ -149,6 +155,24 @@ function DetailModal({ item, type, onClose, onUpdated }) {
     showToast('Updated.');
     onUpdated();
     onClose();
+  };
+
+  const handleSendReply = async () => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    const res = await fetch(`${API_BASE}/api/admin/${type === 'suggestion' ? 'suggestions' : 'tickets'}/${item.id}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ text: replyText }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setCurrentItem(data);
+      setReplyText('');
+    } else {
+      showToast('Failed to send.', 'error');
+    }
+    setSendingReply(false);
   };
 
   const statusOpts = {
@@ -166,15 +190,40 @@ function DetailModal({ item, type, onClose, onUpdated }) {
         </div>
         {type === 'suggestion' && (
           <>
-            <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '0.5rem' }}><strong>{item.title}</strong></p>
-            <p style={{ lineHeight: '1.6', color: '#334155', marginBottom: '1rem' }}>{item.description}</p>
+            <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '0.5rem' }}><strong>{currentItem.title}</strong></p>
+            <p style={{ lineHeight: '1.6', color: '#334155', marginBottom: '1rem' }}>{currentItem.description}</p>
             <label style={{ fontSize: '0.8rem', color: '#6b7280' }}>Status</label>
             <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} style={{ width: '100%', marginBottom: '0.7rem' }}>
               {statusOpts[type].map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-            <label style={{ fontSize: '0.8rem', color: '#6b7280' }}>Admin Response</label>
-            <textarea rows="3" value={form.adminResponse || ''} onChange={(e) => setForm({ ...form, adminResponse: e.target.value })} placeholder="Write your response..." />
-            <button className="btn" style={{ width: '100%', marginTop: '0.5rem' }} disabled={saving} onClick={handleUpdate}>{saving ? <><span className="btn-spinner"></span> Saving...</> : <><FaSave /> Save</>}</button>
+            <button className="btn" style={{ width: '100%', marginBottom: '1rem' }} disabled={saving} onClick={handleUpdate}>{saving ? <><span className="btn-spinner"></span> Saving...</> : <><FaSave /> Save</>}</button>
+            <h5 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation</h5>
+            <div className="msg-thread" style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '0.7rem' }}>
+              {(currentItem.messages || []).length === 0 ? (
+                <p style={{ fontSize: '0.82rem', color: '#9ca3af', textAlign: 'center', padding: '0.5rem 0' }}>No messages yet.</p>
+              ) : (
+                currentItem.messages.map((m, i) => (
+                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                    <div className="msg-header">
+                      <strong>{m.senderName}</strong>
+                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p>{m.text}</p>
+                  </div>
+                ))
+              )}
+              <div ref={msgEndRef} />
+            </div>
+            <div className="msg-reply-form">
+              <input
+                type="text"
+                placeholder="Type your reply..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }}
+              />
+              <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+            </div>
           </>
         )}
         {type === 'contact' && (
@@ -224,9 +273,30 @@ function AdminTickets() {
   const [savingId, setSavingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
 
   const fetchData = () => {
     api('/api/admin/tickets').then(setTickets).catch(() => {});
+  };
+
+  const handleSendReply = async () => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    const res = await fetch(`${API_BASE}/api/admin/tickets/${tid(viewTicket)}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ text: replyText }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setViewTicket(data);
+      setTickets((prev) => prev.map((t) => (tid(t) === tid(data) ? data : t)));
+      setReplyText('');
+    } else {
+      showToast(res.error || 'Failed to send.', 'error');
+    }
+    setSendingReply(false);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -278,7 +348,11 @@ function AdminTickets() {
     return t.status === filter;
   });
 
+  const messagesEndRef = useRef(null);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewTicket?.messages]);
+
   if (viewTicket) {
+    const msgs = viewTicket.messages || [];
     return (
       <>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -298,6 +372,35 @@ function AdminTickets() {
               {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <button className="btn btn-sm btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} disabled={deletingId === tid(viewTicket)} onClick={() => { handleDelete(tid(viewTicket)); }}>{deletingId === tid(viewTicket) ? <><span className="btn-spinner"></span></> : <><FaTrash /> Delete</>}</button>
+          </div>
+        </div>
+        <div className="dash-card" style={{ marginTop: '1rem' }}>
+          <h4 style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
+          <div className="msg-thread">
+            {msgs.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center', padding: '1rem 0' }}>No messages yet. Reply to start a conversation.</p>
+            ) : (
+              msgs.map((m, i) => (
+                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                  <div className="msg-header">
+                    <strong>{m.senderName}</strong>
+                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p>{m.text}</p>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="msg-reply-form">
+            <input
+              type="text"
+              placeholder="Type your reply..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }}
+            />
+            <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
           </div>
         </div>
       </>
