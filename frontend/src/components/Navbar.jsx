@@ -60,7 +60,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             <>
               <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>Home</a></li>
               <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>Services</a></li>
-              <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About</a></li>
+              <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About Us</a></li>
               <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
               <li><a href="/dashboard" onClick={() => setOpen(false)}>Dashboard</a></li>
               <li><button className="btn logout-btn" onClick={handleLogout}>Logout</button></li>
@@ -68,6 +68,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             </>
           ) : (
             <>
+              <li><a href="/#home" onClick={() => setOpen(false)}>Home</a></li>
+              <li><a href="/#about" onClick={() => setOpen(false)}>About Us</a></li>
+              <li><a href="/#contact" onClick={() => setOpen(false)}>Contact</a></li>
               <li><button className="btn-link" onClick={() => { setOpen(false); onLoginClick(); }}>Sign In</button></li>
               <li><button className="btn-link nav-cta" onClick={() => { setOpen(false); onRegisterClick(); }}>Get Started</button></li>
             </>
