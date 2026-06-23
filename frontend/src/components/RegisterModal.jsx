@@ -42,43 +42,47 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
       <h2>Create Account</h2>
       <p className="auth-sub">Join CS hub (iCT) — Tech support for everyone</p>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <div className="pwd-wrapper">
+        <div className="form-row">
           <input
-            type={showPwd.password ? 'text' : 'password'}
-            placeholder="Password (min 6 chars)"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            type="text"
+            placeholder="Full Name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
           />
-          <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, password: !showPwd.password })}>
-            {showPwd.password ? <FaEyeSlash /> : <FaEye />}
-          </button>
+          <input
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
         </div>
-        <div className="pwd-wrapper">
-          <input
-            type={showPwd.confirm ? 'text' : 'password'}
-            placeholder="Confirm Password"
-            value={form.confirm}
-            onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-            required
-          />
-          <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}>
-            {showPwd.confirm ? <FaEyeSlash /> : <FaEye />}
-          </button>
+        <div className="form-row">
+          <div className="pwd-wrapper">
+            <input
+              type={showPwd.password ? 'text' : 'password'}
+              placeholder="Password (min 6 chars)"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+            />
+            <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, password: !showPwd.password })}>
+              {showPwd.password ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+          <div className="pwd-wrapper">
+            <input
+              type={showPwd.confirm ? 'text' : 'password'}
+              placeholder="Confirm Password"
+              value={form.confirm}
+              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+              required
+            />
+            <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}>
+              {showPwd.confirm ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
         </div>
         {error && <p className="auth-error">{error}</p>}
         <button type="submit" className="btn">Create Account</button>

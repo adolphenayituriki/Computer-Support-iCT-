@@ -34,24 +34,26 @@ export default function LoginModal({ onClose, onSwitchToRegister, onForgotPasswo
       <h2>Sign In</h2>
       <p className="auth-sub">Access your CS hub dashboard</p>
       <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <div className="pwd-wrapper">
+        <div className="form-row">
           <input
-            type={showPwd ? 'text' : 'password'}
-            placeholder="Password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
           />
-          <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
-            {showPwd ? <FaEyeSlash /> : <FaEye />}
-          </button>
+          <div className="pwd-wrapper">
+            <input
+              type={showPwd ? 'text' : 'password'}
+              placeholder="Password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+            />
+            <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
+              {showPwd ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
         </div>
         {error && <p className="auth-error">{error}</p>}
         <button type="submit" className="btn">Sign In</button>

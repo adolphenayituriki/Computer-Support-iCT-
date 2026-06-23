@@ -86,24 +86,26 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
           <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '1rem', textAlign: 'center' }}>
             A reset code was generated for <strong>{email}</strong>. Use it below.
           </p>
-          <input
-            type="text"
-            placeholder="Reset code"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            required
-          />
-          <div className="pwd-wrapper">
+          <div className="form-row">
             <input
-              type={showPwd ? 'text' : 'password'}
-              placeholder="New password (min 6 chars)"
-              value={newPwd}
-              onChange={(e) => setNewPwd(e.target.value)}
+              type="text"
+              placeholder="Reset code"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
               required
             />
-            <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
-              {showPwd ? <FaEyeSlash /> : <FaEye />}
-            </button>
+            <div className="pwd-wrapper">
+              <input
+                type={showPwd ? 'text' : 'password'}
+                placeholder="New password (min 6 chars)"
+                value={newPwd}
+                onChange={(e) => setNewPwd(e.target.value)}
+                required
+              />
+              <button type="button" className="pwd-toggle" onClick={() => setShowPwd(!showPwd)}>
+                {showPwd ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           {message.text && <p className={`auth-error ${message.type === 'success' ? 'auth-success' : ''}`}>{message.text}</p>}
           <button type="submit" className="btn">Reset Password</button>
