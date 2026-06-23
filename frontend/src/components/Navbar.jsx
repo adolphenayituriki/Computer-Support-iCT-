@@ -76,7 +76,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu">
                     <div className="nav-profile-name">{user?.name}</div>
-                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Dashboard</a>
+                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Settings</a>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
@@ -95,7 +95,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu">
                     <div className="nav-profile-name">{user?.name}</div>
-                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Dashboard</a>
+                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Settings</a>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
