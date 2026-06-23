@@ -16,6 +16,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
   const menuRef = useRef(null);
+  const hideTimer = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -55,6 +56,15 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     navigate('/');
   };
 
+  const handleMouseEnter = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    setShowProfileMenu(true);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimer.current = setTimeout(() => setShowProfileMenu(false), 250);
+  };
+
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   return (
@@ -72,12 +82,12 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             <>
               <li><a href="/" onClick={() => setOpen(false)}><span style={{ fontSize: '0.85rem' }}>&larr;</span> Back to Home</a></li>
               <li><a href="/dashboard" onClick={() => setOpen(false)}>Dashboard</a></li>
-              <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={() => setShowProfileMenu(true)} onMouseLeave={() => setShowProfileMenu(false)}>
+              <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className="nav-avatar" onClick={() => setShowProfileMenu((v) => !v)}>
                   {initials}
                 </button>
                 {showProfileMenu && (
-                  <div className="nav-profile-menu">
+                  <div className="nav-profile-menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <div className="nav-profile-name">{user?.name}</div>
                     <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>Settings</button>
                     <button onClick={handleLogout}>Logout</button>
@@ -93,12 +103,12 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
               <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>Services</a></li>
               <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About Us</a></li>
               <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
-              <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={() => setShowProfileMenu(true)} onMouseLeave={() => setShowProfileMenu(false)}>
+              <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className="nav-avatar" onClick={() => setShowProfileMenu((v) => !v)}>
                   {initials}
                 </button>
                 {showProfileMenu && (
-                  <div className="nav-profile-menu">
+                  <div className="nav-profile-menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <div className="nav-profile-name">{user?.name}</div>
                     <button onClick={() => { setShowProfileMenu(false); navigate('/dashboard'); }}>Go to Dashboard</button>
                     <button onClick={handleLogout}>Logout</button>
