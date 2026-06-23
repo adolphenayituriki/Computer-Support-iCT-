@@ -100,12 +100,12 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu">
                     <div className="nav-profile-name">{user?.name}</div>
-                    <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>Settings</button>
+                    <button onClick={() => { setShowProfileMenu(false); navigate('/dashboard'); }}>Go to Dashboard</button>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
               </li>
-              <li className="nav-mobile-only"><button className="nav-mobile-settings" onClick={() => { setOpen(false); setShowSettings(true); }}>Settings</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-dashboard" onClick={() => { setOpen(false); navigate('/dashboard'); }}>Go to Dashboard</button></li>
               <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>Logout</button></li>
             </>
           ) : (

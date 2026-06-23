@@ -2098,6 +2098,24 @@ header.dash-header .hamburger span {
     background: rgba(239, 68, 68, 0.25);
     color: #ef4444;
   }
+  .nav-mobile-dashboard {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    background: #FFCE08;
+    color: #1e1b4b;
+    transition: opacity 0.2s;
+    margin-top: 0.5rem;
+  }
+  .nav-mobile-dashboard:active {
+    opacity: 0.8;
+  }
 
   /* ─── Header / Nav spacing ─── */
   header { padding: 0.4rem 0; }
