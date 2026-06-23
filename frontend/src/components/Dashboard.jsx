@@ -86,11 +86,12 @@ function TicketsView({ tickets, setTickets }) {
     setEditForm({ title: t.title, description: t.description, category: t.category });
   };
 
-  const openTickets = tickets.filter((t) => t.status === 'open').length;
-  const closedTickets = tickets.filter((t) => t.status === 'closed').length;
+  const openTickets = tickets.filter((t) => t.status === 'open' || t.status === 'in-progress').length;
+  const resolvedTickets = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
   const filteredTickets = tickets.filter((t) => {
-    if (filter === 'open') return t.status === 'open';
-    if (filter === 'closed') return t.status === 'closed';
+    if (filter === 'all') return true;
+    if (filter === 'open') return t.status === 'open' || t.status === 'in-progress';
+    if (filter === 'closed') return t.status === 'resolved' || t.status === 'closed';
     return true;
   });
 
@@ -104,7 +105,7 @@ function TicketsView({ tickets, setTickets }) {
           <div>
             <h2 style={{ fontSize: '1.2rem' }}>{viewTicket.title}</h2>
             <span className={`ticket-status status-${viewTicket.status}`}>
-              {viewTicket.status === 'open' ? 'OPEN' : 'RESOLVED'}
+              {viewTicket.status.toUpperCase()}
             </span>
             <span className="ticket-category" style={{ marginLeft: '0.5rem' }}>{viewTicket.category}</span>
           </div>
@@ -139,31 +140,19 @@ function TicketsView({ tickets, setTickets }) {
       <div className="dash-stats">
         <div className="dash-stat-card">
           <FaTicketAlt className="dash-stat-icon" />
-          <div>
-            <strong>{tickets.length}</strong>
-            <span>Total Tickets</span>
-          </div>
+          <div><strong>{tickets.length}</strong><span>Total Tickets</span></div>
         </div>
         <div className="dash-stat-card">
           <FaExclamationCircle className="dash-stat-icon" style={{ color: '#f59e0b' }} />
-          <div>
-            <strong>{openTickets}</strong>
-            <span>Open</span>
-          </div>
+          <div><strong>{openTickets}</strong><span>Open / In Progress</span></div>
         </div>
         <div className="dash-stat-card">
           <FaCheckCircle className="dash-stat-icon" style={{ color: '#16a34a' }} />
-          <div>
-            <strong>{closedTickets}</strong>
-            <span>Resolved</span>
-          </div>
+          <div><strong>{resolvedTickets}</strong><span>Resolved / Closed</span></div>
         </div>
         <div className="dash-stat-card">
           <FaClock className="dash-stat-icon" style={{ color: '#3b82f6' }} />
-          <div>
-            <strong>{new Date().toLocaleDateString()}</strong>
-            <span>Today</span>
-          </div>
+          <div><strong>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</strong><span>{new Date().getFullYear()}</span></div>
         </div>
       </div>
 
@@ -225,7 +214,7 @@ function TicketsView({ tickets, setTickets }) {
                 <div key={t.id} className="ticket-item">
                   <div className="ticket-top">
                     <span className={`ticket-status status-${t.status}`}>
-                      {t.status === 'open' ? 'OPEN' : 'RESOLVED'}
+                      {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
                     </span>
                     <span className="ticket-category">{t.category}</span>
                     <div className="ticket-actions">
@@ -260,9 +249,14 @@ function TicketsView({ tickets, setTickets }) {
                         <span className="ticket-date">
                           {new Date(t.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
-                        {t.status === 'open' && (
-                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(t.id, 'closed')}>
+                        {(t.status === 'open' || t.status === 'in-progress') && (
+                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(t.id, 'resolved')}>
                             <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
+                          </button>
+                        )}
+                        {t.status === 'resolved' && (
+                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(t.id, 'open')}>
+                            <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
                           </button>
                         )}
                       </div>
@@ -513,7 +507,7 @@ export default function Dashboard() {
         <div className="dash-avatar">{initials}</div>
         <div>
           <h2>Welcome, {user?.name}</h2>
-          <p>Manage your support requests and suggestions below.</p>
+          <p>Submit and manage your support requests, share suggestions, and update your profile.</p>
         </div>
       </div>
 

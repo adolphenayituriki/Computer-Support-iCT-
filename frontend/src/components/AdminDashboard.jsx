@@ -593,6 +593,19 @@ function AdminTeams() {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [tab, setTab] = useState('tickets');
+  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0 });
+
+  useEffect(() => {
+    Promise.all([
+      api('/api/admin/users'),
+      api('/api/admin/tickets'),
+      api('/api/admin/suggestions'),
+      api('/api/admin/contacts'),
+      api('/api/admin/team-apps'),
+    ]).then(([users, tickets, suggestions, contacts, teams]) => {
+      setStats({ users: users.length, tickets: tickets.length, suggestions: suggestions.length, contacts: contacts.length, teams: teams.length });
+    }).catch(() => {});
+  }, []);
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'A';
 
@@ -603,6 +616,29 @@ export default function AdminDashboard() {
         <div>
           <h2>Admin Dashboard</h2>
           <p>Full CRUD management — tickets, users, suggestions, contacts, and applications.</p>
+        </div>
+      </div>
+
+      <div className="dash-stats">
+        <div className="dash-stat-card">
+          <FaTicketAlt className="dash-stat-icon" />
+          <div><strong>{stats.tickets}</strong><span>Tickets</span></div>
+        </div>
+        <div className="dash-stat-card">
+          <FaUsers className="dash-stat-icon" style={{ color: '#3b82f6' }} />
+          <div><strong>{stats.users}</strong><span>Users</span></div>
+        </div>
+        <div className="dash-stat-card">
+          <FaLightbulb className="dash-stat-icon" style={{ color: '#f59e0b' }} />
+          <div><strong>{stats.suggestions}</strong><span>Suggestions</span></div>
+        </div>
+        <div className="dash-stat-card">
+          <FaEnvelope className="dash-stat-icon" style={{ color: '#8b5cf6' }} />
+          <div><strong>{stats.contacts}</strong><span>Messages</span></div>
+        </div>
+        <div className="dash-stat-card">
+          <FaUserTie className="dash-stat-icon" style={{ color: '#06b6d4' }} />
+          <div><strong>{stats.teams}</strong><span>Applications</span></div>
         </div>
       </div>
 

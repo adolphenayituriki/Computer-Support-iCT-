@@ -1190,7 +1190,7 @@ header.scrolled .hamburger {
 
 .dash-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -1292,7 +1292,9 @@ header.scrolled .hamburger {
 }
 
 .status-open { background: #fef9c3; color: #a16207; }
-.status-closed { background: #dcfce7; color: #16a34a; }
+.status-in-progress { background: #dbeafe; color: #1d4ed8; }
+.status-resolved { background: #d1fae5; color: #047857; }
+.status-closed { background: #e5e7eb; color: #4b5563; }
 
 .ticket-category {
   font-size: 0.7rem;
