@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { FaUser } from 'react-icons/fa';
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('home');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -33,10 +36,23 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogout = () => {
+    setShowProfileMenu(false);
     logout();
     navigate('/');
   };
+
+  const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   return (
     <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
@@ -53,8 +69,18 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             <>
               <li><a href="/" onClick={() => setOpen(false)}><span style={{ fontSize: '0.85rem' }}>&larr;</span> Back to Home</a></li>
               <li><a href="/dashboard" onClick={() => setOpen(false)}>Dashboard</a></li>
-              <li><button className="dash-logout-btn" onClick={handleLogout}>Logout</button></li>
               <li className="nav-user-name">{user?.name}</li>
+              <li className="nav-profile-wrap" ref={menuRef}>
+                <button className="nav-avatar" onClick={() => setShowProfileMenu(!showProfileMenu)}>
+                  {initials}
+                </button>
+                {showProfileMenu && (
+                  <div className="nav-profile-menu">
+                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Dashboard</a>
+                    <button onClick={handleLogout}>Logout</button>
+                  </div>
+                )}
+              </li>
             </>
           ) : user ? (
             <>
@@ -62,17 +88,25 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
               <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>Services</a></li>
               <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About Us</a></li>
               <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
-              <li><a href="/dashboard" onClick={() => setOpen(false)}>Dashboard</a></li>
-              <li><button className="dash-logout-btn" onClick={handleLogout}>Logout</button></li>
               <li className="nav-user-name">{user?.name}</li>
+              <li className="nav-profile-wrap" ref={menuRef}>
+                <button className="nav-avatar" onClick={() => setShowProfileMenu(!showProfileMenu)}>
+                  {initials}
+                </button>
+                {showProfileMenu && (
+                  <div className="nav-profile-menu">
+                    <a href="/dashboard" onClick={() => { setShowProfileMenu(false); setOpen(false); }}>Dashboard</a>
+                    <button onClick={handleLogout}>Logout</button>
+                  </div>
+                )}
+              </li>
             </>
           ) : (
             <>
               <li><a href="/#home" onClick={() => setOpen(false)}>Home</a></li>
               <li><a href="/#about" onClick={() => setOpen(false)}>About Us</a></li>
               <li><a href="/#contact" onClick={() => setOpen(false)}>Contact</a></li>
-              <li><button className="btn-link" onClick={() => { setOpen(false); onLoginClick(); }}>Sign In</button></li>
-              <li><button className="btn-link nav-cta" onClick={() => { setOpen(false); onRegisterClick(); }}>Get Started</button></li>
+              <li><button className="nav-avatar nav-avatar-guest" onClick={() => { setOpen(false); onLoginClick(); }}><FaUser /></button></li>
             </>
           )}
         </ul>
