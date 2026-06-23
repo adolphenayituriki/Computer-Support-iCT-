@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaEyeSlash, FaUndo, FaLightbulb, FaUser, FaKey, FaReply } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -508,141 +508,6 @@ function SuggestionsView() {
   );
 }
 
-function ProfileView() {
-  const { user, updateProfile, changePassword } = useAuth();
-  const { showToast } = useToast();
-  const [profile, setProfile] = useState({ name: user?.name || '', email: user?.email || '' });
-  const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
-  const [pwd, setPwd] = useState({ current: '', newPwd: '', confirm: '' });
-  const [pwdMsg, setPwdMsg] = useState({ text: '', type: '' });
-  const [showPwd, setShowPwd] = useState({ current: false, newPwd: false, confirm: false });
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [savingPwd, setSavingPwd] = useState(false);
-
-  const handleProfile = async (e) => {
-    e.preventDefault();
-    setProfileMsg({ text: '', type: '' });
-    setSavingProfile(true);
-    try {
-      await updateProfile(profile.name, profile.email);
-      showToast('Profile updated successfully!');
-    } catch (err) {
-      setProfileMsg({ text: err.message, type: 'error' });
-    } finally {
-      setSavingProfile(false);
-    }
-  };
-
-  const handlePassword = async (e) => {
-    e.preventDefault();
-    setPwdMsg({ text: '', type: '' });
-    if (pwd.newPwd !== pwd.confirm) {
-      return setPwdMsg({ text: 'New passwords do not match.', type: 'error' });
-    }
-    setSavingPwd(true);
-    try {
-      await changePassword(pwd.current, pwd.newPwd);
-      setPwd({ current: '', newPwd: '', confirm: '' });
-      showToast('Password changed successfully!');
-    } catch (err) {
-      setPwdMsg({ text: err.message, type: 'error' });
-    } finally {
-      setSavingPwd(false);
-    }
-  };
-
-  return (
-    <div className="profile-grid">
-      <div className="profile-card">
-        <div className="profile-card-header">
-          <FaUser className="profile-card-icon" />
-          <h3>Edit Profile</h3>
-        </div>
-        <form onSubmit={handleProfile} className="profile-form">
-          <div className="profile-field">
-            <label>Name</label>
-            <input
-              type="text"
-              value={profile.name}
-              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              required
-            />
-          </div>
-          <div className="profile-field">
-            <label>Email</label>
-            <input
-              type="email"
-              value={profile.email}
-              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-              required
-            />
-          </div>
-          {profileMsg.text && (
-            <p className={`profile-msg ${profileMsg.type === 'error' ? 'profile-msg-error' : 'profile-msg-success'}`}>{profileMsg.text}</p>
-          )}
-          <button type="submit" className="btn btn-sm" disabled={savingProfile}>{savingProfile ? <><span className="btn-spinner"></span> Saving...</> : 'Save Changes'}</button>
-        </form>
-      </div>
-
-      <div className="profile-card">
-        <div className="profile-card-header">
-          <FaKey className="profile-card-icon" />
-          <h3>Change Password</h3>
-        </div>
-        <form onSubmit={handlePassword} className="profile-form">
-          <div className="profile-field">
-            <label>Current password</label>
-            <div className="dash-pwd-wrapper">
-              <input
-                type={showPwd.current ? 'text' : 'password'}
-                value={pwd.current}
-                onChange={(e) => setPwd({ ...pwd, current: e.target.value })}
-                required
-              />
-              <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, current: !showPwd.current })}>
-                {showPwd.current ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-          <div className="profile-field">
-            <label>New password (min 6 chars)</label>
-            <div className="dash-pwd-wrapper">
-              <input
-                type={showPwd.newPwd ? 'text' : 'password'}
-                value={pwd.newPwd}
-                onChange={(e) => setPwd({ ...pwd, newPwd: e.target.value })}
-                required
-                minLength={6}
-              />
-              <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, newPwd: !showPwd.newPwd })}>
-                {showPwd.newPwd ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-          <div className="profile-field">
-            <label>Confirm new password</label>
-            <div className="dash-pwd-wrapper">
-              <input
-                type={showPwd.confirm ? 'text' : 'password'}
-                value={pwd.confirm}
-                onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })}
-                required
-              />
-              <button type="button" className="pwd-toggle" onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}>
-                {showPwd.confirm ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-          {pwdMsg.text && (
-            <p className={`profile-msg ${pwdMsg.type === 'error' ? 'profile-msg-error' : 'profile-msg-success'}`}>{pwdMsg.text}</p>
-          )}
-          <button type="submit" className="btn btn-sm" disabled={savingPwd}>{savingPwd ? <><span className="btn-spinner"></span> Updating...</> : 'Update Password'}</button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -663,7 +528,7 @@ export default function Dashboard() {
         <div className="dash-avatar">{initials}</div>
         <div>
           <h2>Welcome, {user?.name}</h2>
-          <p>Submit and manage your support requests, share suggestions, and update your profile.</p>
+          <p>Submit and manage your support requests and share suggestions.</p>
         </div>
       </div>
 
@@ -674,17 +539,12 @@ export default function Dashboard() {
         <button className={`dash-tab${tab === 'suggestions' ? ' active' : ''}`} onClick={() => setTab('suggestions')}>
           <FaLightbulb /> Suggestions
         </button>
-        <button className={`dash-tab${tab === 'profile' ? ' active' : ''}`} onClick={() => setTab('profile')}>
-          <FaUser /> Profile & Security
-        </button>
       </div>
 
       {tab === 'tickets' ? (
         <TicketsView tickets={tickets} setTickets={setTickets} />
-      ) : tab === 'suggestions' ? (
-        <SuggestionsView />
       ) : (
-        <ProfileView />
+        <SuggestionsView />
       )}
     </div>
   );
