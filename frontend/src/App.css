@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   margin: 0;
   padding: 0;
@@ -1213,12 +1217,6 @@ header.dash-header .hamburger span {
 
 .modal-auth .auth-error {
   color: #ef4444;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.modal-auth .auth-success {
-  color: #16a34a;
   font-size: 0.9rem;
   font-weight: 500;
 }

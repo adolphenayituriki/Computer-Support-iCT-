@@ -12,6 +12,7 @@ import Contact from './models/Contact.js';
 import Suggestion from './models/Suggestion.js';
 import TeamApp from './models/TeamApp.js';
 import Conversation from './models/Conversation.js';
+import { sendResetEmail } from './mailer.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 
@@ -157,9 +158,36 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     user.resetToken = token;
     user.resetTokenExpires = Date.now() + 30 * 60 * 1000;
     await user.save();
-    console.log(`Reset token for ${email}: ${token}`);
-    res.json({ success: true, token, message: `Use this code to reset your password: ${token}` });
+    try {
+      await sendResetEmail(email, token);
+    } catch (emailErr) {
+      console.error('Email send failed:', emailErr.message);
+    }
+    res.json({ success: true, message: 'A reset code has been sent to your email.' });
   } catch (err) {
+    console.error('Forgot password error:', err.message);
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/auth/resend-code', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required.' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: 'No account found with that email.' });
+    const token = Math.random().toString(36).substring(2, 10).toUpperCase();
+    user.resetToken = token;
+    user.resetTokenExpires = Date.now() + 30 * 60 * 1000;
+    await user.save();
+    try {
+      await sendResetEmail(email, token);
+    } catch (emailErr) {
+      console.error('Email send failed:', emailErr.message);
+    }
+    res.json({ success: true, message: 'A new reset code has been sent to your email.' });
+  } catch (err) {
+    console.error('Resend code error:', err.message);
     res.status(500).json({ error: 'Server error.' });
   }
 });
