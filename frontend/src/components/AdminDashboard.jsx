@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan } from 'react-icons/fa';
+import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
 const TICKET_STATUSES = ['open', 'in-progress', 'resolved', 'closed'];
@@ -10,7 +11,7 @@ const CONTACT_STATUSES = ['new', 'read', 'responded'];
 const TEAM_STATUSES = ['pending', 'approved', 'rejected'];
 
 function api(url, opts = {}) {
-  return fetch(url, {
+  return fetch(`${API_BASE}${url}`, {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}`, ...opts.headers },
     ...opts,
   }).then((r) => r.json());
@@ -130,9 +131,9 @@ function DetailModal({ item, type, onClose, onUpdated }) {
 
   const handleUpdate = async () => {
     const urlMap = {
-      suggestion: `/api/admin/suggestions/${item.id}`,
-      contact: `/api/admin/contacts/${item.id}`,
-      team: `/api/admin/team-apps/${item.id}`,
+      suggestion: `${API_BASE}/api/admin/suggestions/${item.id}`,
+      contact: `${API_BASE}/api/admin/contacts/${item.id}`,
+      team: `${API_BASE}/api/admin/team-apps/${item.id}`,
     };
     const res = await api(urlMap[type], { method: 'PUT', body: JSON.stringify(form) });
     if (res.error) return showToast(res.error, 'error');
@@ -219,7 +220,7 @@ function AdminTickets() {
   useEffect(() => { fetchData(); }, []);
 
   const handleUpdate = async (id) => {
-    await fetch(`/api/admin/tickets/${id}`, {
+    await fetch(`${API_BASE}/api/admin/tickets/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
       body: JSON.stringify(editForm),
@@ -232,7 +233,7 @@ function AdminTickets() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this ticket?')) return;
-    await fetch(`/api/admin/tickets/${id}`, {
+    await fetch(`${API_BASE}/api/admin/tickets/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token()}` },
     });
@@ -242,7 +243,7 @@ function AdminTickets() {
   };
 
   const handleStatus = async (id, status) => {
-    await fetch(`/api/admin/tickets/${id}`, {
+    await fetch(`${API_BASE}/api/admin/tickets/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
       body: JSON.stringify({ status }),
@@ -370,7 +371,7 @@ function AdminUsers() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this user? All their data will be lost.')) return;
-    await fetch(`/api/admin/users/${id}`, {
+    await fetch(`${API_BASE}/api/admin/users/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token()}` },
     });
@@ -379,7 +380,7 @@ function AdminUsers() {
   };
 
   const handleUpdate = async (id) => {
-    const res = await api(`/api/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
+    const res = await api(`${API_BASE}/api/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
     if (res.error) return showToast(res.error, 'error');
     setUsers((prev) => prev.map((u) => (u.id === id || u._id === id ? res : u)));
     setEditingId(null);
@@ -452,7 +453,7 @@ function AdminSuggestions() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this suggestion?')) return;
-    await fetch(`/api/admin/suggestions/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+    await fetch(`${API_BASE}/api/admin/suggestions/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     setItems((prev) => prev.filter((i) => i.id !== id && i._id !== id));
     showToast('Suggestion deleted.');
   };
@@ -502,7 +503,7 @@ function AdminContacts() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this message?')) return;
-    await fetch(`/api/admin/contacts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+    await fetch(`${API_BASE}/api/admin/contacts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     setItems((prev) => prev.filter((i) => i.id !== id && i._id !== id));
     showToast('Message deleted.');
   };
@@ -552,7 +553,7 @@ function AdminTeams() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this application?')) return;
-    await fetch(`/api/admin/team-apps/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+    await fetch(`${API_BASE}/api/admin/team-apps/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     setItems((prev) => prev.filter((i) => i.id !== id && i._id !== id));
     showToast('Application deleted.');
   };

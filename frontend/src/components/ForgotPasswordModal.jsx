@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useToast } from '../ToastContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import API_BASE from '../api';
 
 export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
   const { showToast } = useToast();
@@ -15,7 +16,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
     e.preventDefault();
     setMessage({ text: '', type: '' });
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -40,7 +41,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
       return setMessage({ text: 'Password must be at least 6 characters.', type: 'error' });
     }
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, token, newPassword: newPwd }),

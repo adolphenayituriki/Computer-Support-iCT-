@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '../ToastContext';
+import API_BASE from '../api';
 
 const skillOptions = [
   'Laptop & PC Repair',
@@ -66,7 +67,7 @@ export default function TeamApplyModal({ onClose }) {
     setFeedback(null);
 
     try {
-      const res = await fetch('/api/team/apply', {
+      const res = await fetch(`${API_BASE}/api/team/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

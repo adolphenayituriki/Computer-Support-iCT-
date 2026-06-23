@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaClock, FaWhatsapp } from 'react-icons/fa';
 import { useToast } from '../ToastContext';
+import API_BASE from '../api';
 
 export default function Contact() {
   const { showToast } = useToast();
@@ -21,7 +22,7 @@ export default function Contact() {
     }
 
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaEyeSlash, FaUndo, FaLightbulb, FaUser, FaKey } from 'react-icons/fa';
+import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
 
@@ -19,7 +20,7 @@ function TicketsView({ tickets, setTickets }) {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await fetch('/api/tickets', {
+      const res = await fetch(`${API_BASE}/api/tickets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify(form),
@@ -39,7 +40,7 @@ function TicketsView({ tickets, setTickets }) {
 
   const handleUpdate = async (id) => {
     try {
-      const res = await fetch(`/api/tickets/${id}`, {
+      const res = await fetch(`${API_BASE}/api/tickets/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify(editForm),
@@ -56,7 +57,7 @@ function TicketsView({ tickets, setTickets }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this ticket?')) return;
     try {
-      const res = await fetch(`/api/tickets/${id}`, {
+      const res = await fetch(`${API_BASE}/api/tickets/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token()}` },
       });
@@ -70,7 +71,7 @@ function TicketsView({ tickets, setTickets }) {
 
   const handleStatus = async (id, status) => {
     try {
-      await fetch(`/api/tickets/${id}`, {
+      await fetch(`${API_BASE}/api/tickets/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ status }),
@@ -281,7 +282,7 @@ function SuggestionsView() {
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
-    fetch('/api/suggestions', { headers: { Authorization: `Bearer ${token()}` } })
+    fetch(`${API_BASE}/api/suggestions`, { headers: { Authorization: `Bearer ${token()}` } })
       .then((r) => r.json())
       .then(setSuggestions)
       .catch(() => {});
@@ -291,7 +292,7 @@ function SuggestionsView() {
     e.preventDefault();
     setFeedback('');
     try {
-      const res = await fetch('/api/suggestions', {
+      const res = await fetch(`${API_BASE}/api/suggestions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify(form),
