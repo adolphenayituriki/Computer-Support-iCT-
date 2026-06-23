@@ -39,7 +39,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   };
 
   return (
-    <header className={scrolled ? 'scrolled' : ''}>
+    <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
       <nav>
         <a href="/" className="logo">
           <img src="/final-logo.jpg" alt="CS hub (iCT)" className="logo-img" />

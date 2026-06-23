@@ -121,6 +121,11 @@ header.scrolled {
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
 }
 
+header.dash-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
 nav {
   max-width: 1100px;
   margin: 0 auto;
