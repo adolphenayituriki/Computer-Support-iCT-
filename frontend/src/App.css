@@ -307,6 +307,15 @@ header.scrolled .nav-avatar-guest:hover {
   z-index: 200;
 }
 
+.nav-profile-name {
+  padding: 0.6rem 1rem 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e1b4b;
+  border-bottom: 1px solid #f1f5f9;
+  pointer-events: none;
+}
+
 .nav-profile-menu a,
 .nav-profile-menu button {
   display: block;
