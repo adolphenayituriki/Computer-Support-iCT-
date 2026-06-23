@@ -1,4 +1,4 @@
-import { FaWhatsapp } from 'react-icons/fa';
+import { FaWhatsapp, FaBook } from 'react-icons/fa';
 
 export default function Footer() {
   return (
@@ -17,6 +17,7 @@ export default function Footer() {
           <a href="#home">Home</a>
           <a href="#services">Services</a>
           <a href="#contact">Contact</a>
+          <a href="/api-docs" target="_blank" rel="noopener noreferrer"><FaBook style={{ marginRight: '0.3rem' }} />API Docs</a>
         </div>
         <div className="footer-col">
           <h4>Contact</h4>
