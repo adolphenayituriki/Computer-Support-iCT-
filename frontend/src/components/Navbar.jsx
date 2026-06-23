@@ -54,6 +54,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
               <li><a href="/" onClick={() => setOpen(false)}><span style={{ fontSize: '0.85rem' }}>&larr;</span> Back to Home</a></li>
               <li><a href="/dashboard" onClick={() => setOpen(false)} className={location.pathname === '/dashboard' ? 'active' : ''}>Dashboard</a></li>
               <li><button className="btn logout-btn" onClick={handleLogout}>Logout</button></li>
+              <li className="nav-user-name">{user?.name}</li>
             </>
           ) : user ? (
             <>
@@ -63,6 +64,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
               <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
               <li><a href="/dashboard" onClick={() => setOpen(false)}>Dashboard</a></li>
               <li><button className="btn logout-btn" onClick={handleLogout}>Logout</button></li>
+              <li className="nav-user-name">{user?.name}</li>
             </>
           ) : (
             <>

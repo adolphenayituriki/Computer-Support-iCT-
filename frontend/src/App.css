@@ -95,6 +95,16 @@ body {
   text-decoration: underline;
 }
 
+.nav-user-name {
+  font-size: 0.78rem;
+  color: #FFCE08;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.2rem 0;
+  list-style: none;
+  pointer-events: none;
+}
+
 /* -- Navbar -- */
 header {
   position: fixed;
