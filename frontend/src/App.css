@@ -2054,6 +2054,16 @@ header.dash-header .hamburger span {
   font-size: 0.7rem;
   color: #9ca3af;
 }
+.admin-chat-type-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 .admin-chat-item-info small {
   display: block;
   font-size: 0.72rem;

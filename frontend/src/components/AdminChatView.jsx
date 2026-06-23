@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../ToastContext';
-import { FaComments, FaPlus, FaTrash, FaReply, FaPaperPlane, FaUser } from 'react-icons/fa';
+import { FaComments, FaPlus, FaPaperPlane, FaTicketAlt, FaLightbulb } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -14,62 +14,124 @@ function api(url, opts = {}) {
 
 export default function AdminChatView() {
   const { showToast } = useToast();
-  const [conversations, setConversations] = useState([]);
+  const [items, setItems] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [activeConv, setActiveConv] = useState(null);
+  const [activeType, setActiveType] = useState(null);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [creating, setCreating] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const msgEndRef = useRef(null);
 
-  const fetchConvs = () => {
-    api('/api/admin/conversations').then((data) => {
-      if (!data.error) {
-        setConversations(data);
-        if (data.length > 0 && !activeId) setActiveId(data[0]._id);
+  const fetchAll = async () => {
+    setLoading(true);
+    const [direct, suggestions, tickets] = await Promise.all([
+      api('/api/admin/conversations'),
+      api('/api/admin/suggestions'),
+      api('/api/admin/tickets'),
+    ]);
+
+    const all = [];
+
+    if (!direct.error) {
+      for (const c of direct) {
+        all.push({
+          _id: c._id,
+          type: 'direct',
+          userId: c.userId,
+          userName: c.userName,
+          userEmail: c.userEmail,
+          title: 'Direct Message',
+          status: null,
+          messages: c.messages || [],
+          lastMsg: c.messages?.length > 0 ? c.messages[c.messages.length - 1] : null,
+          lastActivity: c.lastActivity || c.createdAt,
+        });
       }
-    });
+    }
+
+    if (!suggestions.error) {
+      for (const s of suggestions) {
+        if (s.messages && s.messages.length > 0) {
+          all.push({
+            _id: s._id,
+            type: 'suggestion',
+            userId: s.userId,
+            userName: s.userName,
+            userEmail: '',
+            title: s.title,
+            status: s.status,
+            messages: s.messages || [],
+            lastMsg: s.messages[s.messages.length - 1],
+            lastActivity: s.messages[s.messages.length - 1]?.createdAt || s.createdAt,
+          });
+        }
+      }
+    }
+
+    if (!tickets.error) {
+      for (const t of tickets) {
+        if (t.messages && t.messages.length > 0) {
+          all.push({
+            _id: t._id,
+            type: 'ticket',
+            userId: t.userId,
+            userName: t.userName,
+            userEmail: '',
+            title: t.title,
+            status: t.status,
+            messages: t.messages || [],
+            lastMsg: t.messages[t.messages.length - 1],
+            lastActivity: t.messages[t.messages.length - 1]?.createdAt || t.createdAt,
+          });
+        }
+      }
+    }
+
+    all.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+    setItems(all);
+    setLoading(false);
+
+    if (all.length > 0 && !activeId) {
+      setActiveId(all[0]._id);
+      setActiveType(all[0].type);
+      setActiveConv(all[0]);
+    }
   };
 
-  useEffect(() => { fetchConvs(); }, []);
+  useEffect(() => { fetchAll(); }, []);
 
   useEffect(() => {
-    if (activeId) {
-      api('/api/admin/conversations')
-        .then((convs) => {
-          const found = convs.find((c) => c._id === activeId);
-          if (found) setActiveConv(found);
-        });
+    if (activeId && activeType) {
+      const found = items.find((i) => i._id === activeId && i.type === activeType);
+      if (found) setActiveConv(found);
     } else {
       setActiveConv(null);
     }
-  }, [activeId]);
+  }, [activeId, activeType, items]);
 
   useEffect(() => {
     msgEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeConv?.messages]);
 
   const handleSend = async () => {
-    if (!text.trim() || !activeId) return;
+    if (!text.trim() || !activeId || !activeType) return;
     setSending(true);
-    const res = await api(`/api/admin/conversations/${activeId}/messages`, { method: 'POST', body: JSON.stringify({ text }) });
+
+    let endpoint = '';
+    if (activeType === 'direct') endpoint = `/api/admin/conversations/${activeId}/messages`;
+    else if (activeType === 'suggestion') endpoint = `/api/admin/suggestions/${activeId}/messages`;
+    else if (activeType === 'ticket') endpoint = `/api/admin/tickets/${activeId}/messages`;
+
+    const res = await api(endpoint, { method: 'POST', body: JSON.stringify({ text }) });
     setSending(false);
     if (res.error) return showToast(res.error, 'error');
     setText('');
-    setActiveConv(res);
-    fetchConvs();
-  };
-
-  const handleDelete = async (id) => {
-    setDeletingId(id);
-    await api(`/api/admin/conversations/${id}`, { method: 'DELETE' });
-    setDeletingId(null);
-    if (activeId === id) { setActiveId(null); setActiveConv(null); }
-    fetchConvs();
+    fetchAll();
   };
 
   const handleCreate = async () => {
@@ -81,7 +143,8 @@ export default function AdminChatView() {
     setShowNew(false);
     setSelectedUserId('');
     setActiveId(res._id);
-    fetchConvs();
+    setActiveType('direct');
+    fetchAll();
   };
 
   const openNew = () => {
@@ -91,15 +154,38 @@ export default function AdminChatView() {
     setShowNew(true);
   };
 
-  const activeConv2 = activeConv;
+  const handleSelect = (item) => {
+    setActiveId(item._id);
+    setActiveType(item.type);
+    setActiveConv(item);
+  };
+
+  const typeIcon = (type) => {
+    if (type === 'direct') return <FaComments style={{ color: '#3b82f6' }} />;
+    if (type === 'suggestion') return <FaLightbulb style={{ color: '#f59e0b' }} />;
+    return <FaTicketAlt style={{ color: '#10b981' }} />;
+  };
+
+  const typeLabel = (type) => {
+    if (type === 'direct') return 'Chat';
+    if (type === 'suggestion') return 'Suggestion';
+    return 'Ticket';
+  };
+
+  const statusColor = (s) => {
+    const m = {
+      pending: '#b45309', reviewed: '#1d4ed8', implemented: '#047857',
+      open: '#1d4ed8', 'in-progress': '#b45309', resolved: '#047857', closed: '#4b5563',
+    };
+    return m[s] || '#6b7280';
+  };
 
   return (
     <div className="admin-chat-wrap">
-      {/* New conversation modal */}
       {showNew && (
         <div className="modal-overlay" onClick={() => setShowNew(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <h3>Start Conversation</h3>
+            <h3>Start Direct Conversation</h3>
             <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} style={{ width: '100%', margin: '1rem 0', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}>
               <option value="">Select a user...</option>
               {users.map((u) => <option key={u.id || u._id} value={u.id || u._id}>{u.name} ({u.email})</option>)}
@@ -113,55 +199,61 @@ export default function AdminChatView() {
       )}
 
       <div className="admin-chat-layout">
-        {/* Conversation list */}
         <div className="admin-chat-sidebar">
           <div className="admin-chat-sidebar-header">
-            <h3><FaComments /> Conversations</h3>
+            <h3><FaComments /> All Conversations</h3>
           </div>
-          <button className="admin-chat-new-btn" onClick={openNew}><FaPlus /> New Chat</button>
+          <button className="admin-chat-new-btn" onClick={openNew}><FaPlus /> New Direct Chat</button>
           <div className="admin-chat-list">
-            {conversations.length === 0 ? (
-              <p style={{ padding: '1rem', color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center' }}>No conversations yet. Start a new chat with a user.</p>
+            {loading ? (
+              <p style={{ padding: '1rem', textAlign: 'center', color: '#9ca3af' }}>Loading...</p>
+            ) : items.length === 0 ? (
+              <p style={{ padding: '1rem', color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center' }}>
+                No conversations yet. Messages from suggestions and tickets will appear here automatically.
+              </p>
             ) : (
-              conversations.map((c) => (
+              items.map((item) => (
                 <div
-                  key={c._id}
-                  className={`admin-chat-item${activeId === c._id ? ' active' : ''}`}
-                  onClick={() => setActiveId(c._id)}
+                  key={`${item.type}-${item._id}`}
+                  className={`admin-chat-item${activeId === item._id && activeType === item.type ? ' active' : ''}`}
+                  onClick={() => handleSelect(item)}
                 >
-                  <div className="admin-chat-item-avatar"><FaUser /></div>
+                  <div className="admin-chat-item-avatar">{typeIcon(item.type)}</div>
                   <div className="admin-chat-item-info">
-                    <strong>{c.userName}</strong>
-                    <span>{c.userEmail}</span>
-                    {c.messages.length > 0 && <small>{c.messages[c.messages.length - 1].text.slice(0, 40)}...</small>}
+                    <strong>{item.userName}</strong>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
+                      <span className="admin-chat-type-badge" style={{ background: item.type === 'direct' ? '#dbeafe' : item.type === 'suggestion' ? '#fef3c7' : '#d1fae5', color: item.type === 'direct' ? '#1d4ed8' : item.type === 'suggestion' ? '#b45309' : '#047857' }}>{typeLabel(item.type)}</span>
+                      {item.status && <span style={{ fontSize: '0.65rem', color: statusColor(item.status), fontWeight: 600 }}>{item.status}</span>}
+                    </span>
+                    <small>{item.lastMsg ? item.lastMsg.text.slice(0, 45) : item.title.slice(0, 45)}</small>
                   </div>
-                  <button className="admin-chat-item-del" onClick={(e) => { e.stopPropagation(); handleDelete(c._id); }} disabled={deletingId === c._id}>
-                    <FaTrash />
-                  </button>
                 </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Chat area */}
         <div className="admin-chat-main">
-          {!activeId || !activeConv2 ? (
+          {!activeConv ? (
             <div className="admin-chat-empty">
               <FaComments size={48} style={{ color: '#d1d5db' }} />
-              <p>Select a conversation to start chatting</p>
+              <p>{loading ? 'Loading...' : 'Select a conversation to start chatting'}</p>
             </div>
           ) : (
             <>
               <div className="admin-chat-header">
-                <FaUser /> {activeConv2.userName}
-                <span style={{ fontSize: '0.78rem', color: '#9ca3af', fontWeight: 400 }}>{activeConv2.userEmail}</span>
+                {typeIcon(activeConv.type)}
+                {activeConv.userName}
+                <span style={{ fontSize: '0.78rem', color: '#9ca3af', fontWeight: 400, marginLeft: '0.3rem' }}>
+                  {activeConv.title}
+                  {activeConv.status && <> &middot; {activeConv.status}</>}
+                </span>
               </div>
               <div className="admin-chat-messages">
-                {activeConv2.messages.length === 0 ? (
+                {activeConv.messages.length === 0 ? (
                   <p style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem', fontSize: '0.85rem' }}>No messages yet. Send the first message.</p>
                 ) : (
-                  activeConv2.messages.map((m, i) => (
+                  activeConv.messages.map((m, i) => (
                     <div key={i} className={`chat-msg ${m.sender === 'admin' ? 'chat-msg-admin' : 'chat-msg-user'}`}>
                       <div className="chat-msg-sender">{m.senderName}</div>
                       <div className="chat-msg-text">{m.text}</div>
