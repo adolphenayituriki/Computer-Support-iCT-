@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply } from 'react-icons/fa';
+import UserChatView from './UserChatView';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -539,12 +540,17 @@ export default function Dashboard() {
         <button className={`dash-tab${tab === 'suggestions' ? ' active' : ''}`} onClick={() => setTab('suggestions')}>
           <FaLightbulb /> Suggestions
         </button>
+        <button className={`dash-tab${tab === 'chat' ? ' active' : ''}`} onClick={() => setTab('chat')}>
+          <FaComments /> Messages
+        </button>
       </div>
 
       {tab === 'tickets' ? (
         <TicketsView tickets={tickets} setTickets={setTickets} />
-      ) : (
+      ) : tab === 'suggestions' ? (
         <SuggestionsView />
+      ) : (
+        <UserChatView />
       )}
     </div>
   );

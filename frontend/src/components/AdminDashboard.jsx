@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import AdminChatView from './AdminChatView';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -787,6 +788,7 @@ export default function AdminDashboard() {
         <button className={`dash-tab${tab === 'suggestions' ? ' active' : ''}`} onClick={() => setTab('suggestions')}><FaLightbulb /> Suggestions</button>
         <button className={`dash-tab${tab === 'contacts' ? ' active' : ''}`} onClick={() => setTab('contacts')}><FaEnvelope /> Contacts</button>
         <button className={`dash-tab${tab === 'teams' ? ' active' : ''}`} onClick={() => setTab('teams')}><FaUserTie /> Applications</button>
+        <button className={`dash-tab${tab === 'chat' ? ' active' : ''}`} onClick={() => setTab('chat')}><FaComments /> Chat</button>
       </div>
 
       <div className="admin-panel">
@@ -795,6 +797,7 @@ export default function AdminDashboard() {
         {tab === 'suggestions' && <AdminSuggestions />}
         {tab === 'contacts' && <AdminContacts />}
         {tab === 'teams' && <AdminTeams />}
+        {tab === 'chat' && <AdminChatView />}
       </div>
     </div>
   );

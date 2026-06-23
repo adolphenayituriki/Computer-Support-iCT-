@@ -11,6 +11,7 @@ import Ticket from './models/Ticket.js';
 import Contact from './models/Contact.js';
 import Suggestion from './models/Suggestion.js';
 import TeamApp from './models/TeamApp.js';
+import Conversation from './models/Conversation.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
 
@@ -365,6 +366,7 @@ app.delete('/api/admin/users/:id', authenticate, adminOnly, async (req, res) => 
     await User.findByIdAndDelete(req.params.id);
     await Ticket.deleteMany({ userId: req.params.id });
     await Suggestion.deleteMany({ userId: req.params.id });
+    await Conversation.deleteMany({ userId: req.params.id });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
@@ -509,6 +511,77 @@ app.put('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res) =>
     const app = await TeamApp.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
     if (!app) return res.status(404).json({ error: 'Application not found.' });
     res.json(app);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+// ── Conversation (direct admin-user chat) ──
+app.get('/api/conversations', authenticate, async (req, res) => {
+  try {
+    const conv = await Conversation.findOne({ userId: req.user.id }).sort({ lastActivity: -1 });
+    res.json(conv);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/conversations/:id/messages', authenticate, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const conv = await Conversation.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!conv) return res.status(404).json({ error: 'Conversation not found.' });
+    conv.messages.push({ sender: 'user', senderName: req.user.name, text });
+    await conv.save();
+    res.status(201).json(conv);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.get('/api/admin/conversations', authenticate, adminOnly, async (_req, res) => {
+  try {
+    const convs = await Conversation.find().sort({ lastActivity: -1 });
+    res.json(convs);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/admin/conversations', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'userId is required.' });
+    const existing = await Conversation.findOne({ userId });
+    if (existing) return res.json(existing);
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const conv = await Conversation.create({ userId: user._id, userName: user.name, userEmail: user.email });
+    res.status(201).json(conv);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/admin/conversations/:id/messages', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const conv = await Conversation.findById(req.params.id);
+    if (!conv) return res.status(404).json({ error: 'Conversation not found.' });
+    conv.messages.push({ sender: 'admin', senderName: req.user.name, text });
+    await conv.save();
+    res.status(201).json(conv);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.delete('/api/admin/conversations/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    await Conversation.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
