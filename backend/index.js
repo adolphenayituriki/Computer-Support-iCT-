@@ -17,7 +17,7 @@ import swaggerSpec from './swagger.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'cshub_ict_secret_key_2026';
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI_CLOUD || process.env.MONGO_URI;
 
 app.use(cors());
 app.use(express.json());
