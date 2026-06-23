@@ -15,10 +15,13 @@ function TicketsView({ tickets, setTickets }) {
   const [editForm, setEditForm] = useState({});
   const [filter, setFilter] = useState('all');
   const [viewTicket, setViewTicket] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [savingId, setSavingId] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    setSubmitting(true);
     try {
       const res = await fetch(`${API_BASE}/api/tickets`, {
         method: 'POST',
@@ -35,10 +38,13 @@ function TicketsView({ tickets, setTickets }) {
       }
     } catch {
       setMessage('Could not reach the server.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleUpdate = async (id) => {
+    setSavingId(id);
     try {
       const res = await fetch(`${API_BASE}/api/tickets/${id}`, {
         method: 'PUT',
@@ -51,7 +57,9 @@ function TicketsView({ tickets, setTickets }) {
         setEditForm({});
         showToast('Ticket updated!');
       }
-    } catch {}
+    } catch {} finally {
+      setSavingId(null);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -186,7 +194,7 @@ function TicketsView({ tickets, setTickets }) {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               required
             />
-            <button type="submit" className="btn">Submit Request</button>
+            <button type="submit" className="btn" disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Request'}</button>
           </form>
           {message && <p className="form-feedback">{message}</p>}
         </div>
@@ -238,7 +246,7 @@ function TicketsView({ tickets, setTickets }) {
                       </select>
                       <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => handleUpdate(t.id)}><FaSave /> Save</button>
+                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === t.id} onClick={() => handleUpdate(t.id)}>{savingId === t.id ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
                       </div>
                     </div>
@@ -288,9 +296,12 @@ function SuggestionsView() {
       .catch(() => {});
   }, []);
 
+  const [suggesting, setSuggesting] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFeedback('');
+    setSuggesting(true);
     try {
       const res = await fetch(`${API_BASE}/api/suggestions`, {
         method: 'POST',
@@ -307,6 +318,8 @@ function SuggestionsView() {
       }
     } catch {
       showToast('Could not reach the server.', 'error');
+    } finally {
+      setSuggesting(false);
     }
   };
 
@@ -332,7 +345,7 @@ function SuggestionsView() {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             required
           />
-          <button type="submit" className="btn">Submit Suggestion</button>
+          <button type="submit" className="btn" disabled={suggesting}>{suggesting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Suggestion'}</button>
         </form>
         {feedback && <p className="form-feedback" style={{ marginTop: '0.8rem' }}>{feedback}</p>}
       </div>
@@ -371,15 +384,20 @@ function ProfileView() {
   const [pwd, setPwd] = useState({ current: '', newPwd: '', confirm: '' });
   const [pwdMsg, setPwdMsg] = useState({ text: '', type: '' });
   const [showPwd, setShowPwd] = useState({ current: false, newPwd: false, confirm: false });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPwd, setSavingPwd] = useState(false);
 
   const handleProfile = async (e) => {
     e.preventDefault();
     setProfileMsg({ text: '', type: '' });
+    setSavingProfile(true);
     try {
       await updateProfile(profile.name, profile.email);
       showToast('Profile updated successfully!');
     } catch (err) {
       setProfileMsg({ text: err.message, type: 'error' });
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -389,12 +407,15 @@ function ProfileView() {
     if (pwd.newPwd !== pwd.confirm) {
       return setPwdMsg({ text: 'New passwords do not match.', type: 'error' });
     }
+    setSavingPwd(true);
     try {
       await changePassword(pwd.current, pwd.newPwd);
       setPwd({ current: '', newPwd: '', confirm: '' });
       showToast('Password changed successfully!');
     } catch (err) {
       setPwdMsg({ text: err.message, type: 'error' });
+    } finally {
+      setSavingPwd(false);
     }
   };
 
@@ -427,7 +448,7 @@ function ProfileView() {
           {profileMsg.text && (
             <p className={`profile-msg ${profileMsg.type === 'error' ? 'profile-msg-error' : 'profile-msg-success'}`}>{profileMsg.text}</p>
           )}
-          <button type="submit" className="btn btn-sm">Save Changes</button>
+          <button type="submit" className="btn btn-sm" disabled={savingProfile}>{savingProfile ? <><span className="btn-spinner"></span> Saving...</> : 'Save Changes'}</button>
         </form>
       </div>
 
@@ -483,7 +504,7 @@ function ProfileView() {
           {pwdMsg.text && (
             <p className={`profile-msg ${pwdMsg.type === 'error' ? 'profile-msg-error' : 'profile-msg-success'}`}>{pwdMsg.text}</p>
           )}
-          <button type="submit" className="btn btn-sm">Update Password</button>
+          <button type="submit" className="btn btn-sm" disabled={savingPwd}>{savingPwd ? <><span className="btn-spinner"></span> Updating...</> : 'Update Password'}</button>
         </form>
       </div>
     </div>

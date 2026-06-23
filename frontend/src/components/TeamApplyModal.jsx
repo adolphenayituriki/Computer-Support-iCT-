@@ -191,7 +191,7 @@ export default function TeamApplyModal({ onClose }) {
         )}
 
         <button type="submit" className="btn" disabled={loading}>
-          {loading ? 'Submitting...' : 'Submit Application'}
+          {loading ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Application'}
         </button>
       </form>
 

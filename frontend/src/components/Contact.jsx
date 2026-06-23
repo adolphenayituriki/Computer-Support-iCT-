@@ -7,6 +7,7 @@ export default function Contact() {
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [feedback, setFeedback] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -20,7 +21,7 @@ export default function Contact() {
       setFeedback({ text: 'Please fill in all fields.', error: true });
       return;
     }
-
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
@@ -38,6 +39,8 @@ export default function Contact() {
       }
     } catch {
       setFeedback({ text: 'Could not reach the server. Try again later.', error: true });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +72,7 @@ export default function Contact() {
               value={form.message}
               onChange={handleChange}
             />
-            <button type="submit" className="btn">Send Message</button>
+            <button type="submit" className="btn" disabled={loading}>{loading ? <><span className="btn-spinner"></span> Sending...</> : 'Send Message'}</button>
           </form>
           {feedback && (
             <p className="form-feedback" style={{ color: feedback.error ? '#d32f2f' : '#2e7d32' }}>

@@ -11,10 +11,13 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
   const [newPwd, setNewPwd] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [loadingToken, setLoadingToken] = useState(false);
+  const [loadingReset, setLoadingReset] = useState(false);
 
   const requestToken = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' });
+    setLoadingToken(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
         method: 'POST',
@@ -31,6 +34,8 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
       }
     } catch {
       setMessage({ text: 'Could not reach the server.', type: 'error' });
+    } finally {
+      setLoadingToken(false);
     }
   };
 
@@ -40,6 +45,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
     if (newPwd.length < 6) {
       return setMessage({ text: 'Password must be at least 6 characters.', type: 'error' });
     }
+    setLoadingReset(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: 'POST',
@@ -55,6 +61,8 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
       }
     } catch {
       setMessage({ text: 'Could not reach the server.', type: 'error' });
+    } finally {
+      setLoadingReset(false);
     }
   };
 
@@ -79,7 +87,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
             required
           />
           {message.text && <p className={`auth-error ${message.type === 'success' ? 'auth-success' : ''}`}>{message.text}</p>}
-          <button type="submit" className="btn">Get Reset Code</button>
+          <button type="submit" className="btn" disabled={loadingToken}>{loadingToken ? <><span className="btn-spinner"></span> Sending...</> : 'Get Reset Code'}</button>
         </form>
       ) : (
         <form onSubmit={resetPassword}>
@@ -108,7 +116,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
             </div>
           </div>
           {message.text && <p className={`auth-error ${message.type === 'success' ? 'auth-success' : ''}`}>{message.text}</p>}
-          <button type="submit" className="btn">Reset Password</button>
+          <button type="submit" className="btn" disabled={loadingReset}>{loadingReset ? <><span className="btn-spinner"></span> Resetting...</> : 'Reset Password'}</button>
         </form>
       )}
 

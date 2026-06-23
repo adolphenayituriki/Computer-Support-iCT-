@@ -11,10 +11,12 @@ export default function LoginModal({ onClose, onSwitchToRegister, onForgotPasswo
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const data = await login(form.email, form.password);
       showToast(`Welcome back, ${data.user.name}!`);
@@ -22,6 +24,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onForgotPasswo
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
+      setLoading(false);
     }
   };
 
@@ -56,7 +59,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onForgotPasswo
           </div>
         </div>
         {error && <p className="auth-error">{error}</p>}
-        <button type="submit" className="btn">Sign In</button>
+        <button type="submit" className="btn" disabled={loading}>{loading ? <><span className="btn-spinner"></span> Signing In...</> : 'Sign In'}</button>
       </form>
       <p className="auth-footer">
         <button className="btn-link" onClick={onForgotPassword} style={{ fontSize: '0.8rem' }}>Forgot password?</button>

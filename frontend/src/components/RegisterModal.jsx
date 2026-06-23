@@ -11,6 +11,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [showPwd, setShowPwd] = useState({ password: false, confirm: false });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +24,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
       setError('Password must be at least 6 characters.');
       return;
     }
+    setLoading(true);
     try {
       const data = await register(form.name, form.email, form.password);
       showToast(`Welcome, ${data.user.name}! Account created successfully.`);
@@ -30,6 +32,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
+      setLoading(false);
     }
   };
 
@@ -85,7 +88,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
           </div>
         </div>
         {error && <p className="auth-error">{error}</p>}
-        <button type="submit" className="btn">Create Account</button>
+        <button type="submit" className="btn" disabled={loading}>{loading ? <><span className="btn-spinner"></span> Creating...</> : 'Create Account'}</button>
       </form>
       <p className="auth-footer">
         Already have an account?{' '}

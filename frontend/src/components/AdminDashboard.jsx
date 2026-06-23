@@ -40,6 +40,7 @@ function CreateTicketModal({ onClose, onCreated }) {
   const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ userId: '', title: '', description: '', category: 'general', status: 'open' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     api('/api/admin/users').then(setUsers).catch(() => {});
@@ -48,7 +49,9 @@ function CreateTicketModal({ onClose, onCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.description) return showToast('Title and description required.', 'error');
+    setLoading(true);
     const res = await api('/api/admin/tickets', { method: 'POST', body: JSON.stringify(form) });
+    setLoading(false);
     if (res.error) return showToast(res.error, 'error');
     showToast('Ticket created.');
     onCreated();
@@ -76,7 +79,7 @@ function CreateTicketModal({ onClose, onCreated }) {
             {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
           <textarea rows="3" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-          <button type="submit" className="btn" style={{ width: '100%', marginTop: '0.5rem' }}><FaPlus /> Create Ticket</button>
+          <button type="submit" className="btn" style={{ width: '100%', marginTop: '0.5rem' }} disabled={loading}>{loading ? <><span className="btn-spinner"></span> Creating...</> : <><FaPlus /> Create Ticket</>}</button>
         </form>
       </div>
     </div>
@@ -87,11 +90,14 @@ function CreateUserModal({ onClose, onCreated }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: '', email: '', password: '', isAdmin: false });
   const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.password) return showToast('All fields required.', 'error');
+    setLoading(true);
     const res = await api('/api/admin/users', { method: 'POST', body: JSON.stringify(form) });
+    setLoading(false);
     if (res.error) return showToast(res.error, 'error');
     showToast('User created.');
     onCreated();
@@ -118,7 +124,7 @@ function CreateUserModal({ onClose, onCreated }) {
             <input type="checkbox" checked={form.isAdmin} onChange={(e) => setForm({ ...form, isAdmin: e.target.checked })} />
             Admin privileges
           </label>
-          <button type="submit" className="btn" style={{ width: '100%' }}><FaPlus /> Create User</button>
+          <button type="submit" className="btn" style={{ width: '100%' }} disabled={loading}>{loading ? <><span className="btn-spinner"></span> Creating...</> : <><FaPlus /> Create User</>}</button>
         </form>
       </div>
     </div>
@@ -128,14 +134,17 @@ function CreateUserModal({ onClose, onCreated }) {
 function DetailModal({ item, type, onClose, onUpdated }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({ ...item });
+  const [saving, setSaving] = useState(false);
 
   const handleUpdate = async () => {
+    setSaving(true);
     const urlMap = {
       suggestion: `${API_BASE}/api/admin/suggestions/${item.id}`,
       contact: `${API_BASE}/api/admin/contacts/${item.id}`,
       team: `${API_BASE}/api/admin/team-apps/${item.id}`,
     };
     const res = await api(urlMap[type], { method: 'PUT', body: JSON.stringify(form) });
+    setSaving(false);
     if (res.error) return showToast(res.error, 'error');
     showToast('Updated.');
     onUpdated();
@@ -165,7 +174,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
             </select>
             <label style={{ fontSize: '0.8rem', color: '#6b7280' }}>Admin Response</label>
             <textarea rows="3" value={form.adminResponse || ''} onChange={(e) => setForm({ ...form, adminResponse: e.target.value })} placeholder="Write your response..." />
-            <button className="btn" style={{ width: '100%', marginTop: '0.5rem' }} onClick={handleUpdate}><FaSave /> Save</button>
+            <button className="btn" style={{ width: '100%', marginTop: '0.5rem' }} disabled={saving} onClick={handleUpdate}>{saving ? <><span className="btn-spinner"></span> Saving...</> : <><FaSave /> Save</>}</button>
           </>
         )}
         {type === 'contact' && (
@@ -177,7 +186,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
             <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} style={{ width: '100%', marginBottom: '0.7rem' }}>
               {statusOpts[type].map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-            <button className="btn" style={{ width: '100%' }} onClick={handleUpdate}><FaSave /> Save</button>
+            <button className="btn" style={{ width: '100%' }} disabled={saving} onClick={handleUpdate}>{saving ? <><span className="btn-spinner"></span> Saving...</> : <><FaSave /> Save</>}</button>
           </>
         )}
         {type === 'team' && (
@@ -196,7 +205,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
             <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} style={{ width: '100%', marginBottom: '0.7rem' }}>
               {statusOpts[type].map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-            <button className="btn" style={{ width: '100%' }} onClick={handleUpdate}><FaSave /> Save</button>
+            <button className="btn" style={{ width: '100%' }} disabled={saving} onClick={handleUpdate}>{saving ? <><span className="btn-spinner"></span> Saving...</> : <><FaSave /> Save</>}</button>
           </>
         )}
       </div>
@@ -212,6 +221,9 @@ function AdminTickets() {
   const [editForm, setEditForm] = useState({});
   const [viewTicket, setViewTicket] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [savingId, setSavingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = () => {
     api('/api/admin/tickets').then(setTickets).catch(() => {});
@@ -220,6 +232,7 @@ function AdminTickets() {
   useEffect(() => { fetchData(); }, []);
 
   const handleUpdate = async (id) => {
+    setSavingId(id);
     await fetch(`${API_BASE}/api/admin/tickets/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
@@ -228,21 +241,25 @@ function AdminTickets() {
     setTickets((prev) => prev.map((t) => (t._id === id || t.id === id ? { ...t, ...editForm } : t)));
     setEditingId(null);
     setEditForm({});
+    setSavingId(null);
     showToast('Ticket updated.');
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this ticket?')) return;
+    setDeletingId(id);
     await fetch(`${API_BASE}/api/admin/tickets/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token()}` },
     });
     setTickets((prev) => prev.filter((t) => t.id !== id && t._id !== id));
     if (viewTicket?.id === id || viewTicket?._id === id) setViewTicket(null);
+    setDeletingId(null);
     showToast('Ticket deleted.');
   };
 
   const handleStatus = async (id, status) => {
+    setUpdatingId(id);
     await fetch(`${API_BASE}/api/admin/tickets/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
@@ -250,6 +267,7 @@ function AdminTickets() {
     });
     setTickets((prev) => prev.map((t) => (t.id === id || t._id === id ? { ...t, status } : t)));
     if (viewTicket?.id === id || viewTicket?._id === id) setViewTicket((prev) => ({ ...prev, status }));
+    setUpdatingId(null);
     showToast(`Status changed to ${status}.`);
   };
 
@@ -276,10 +294,10 @@ function AdminTickets() {
             {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </p>
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-            <select value={viewTicket.status} onChange={(e) => handleStatus(tid(viewTicket), e.target.value)} style={{ padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.8rem' }}>
+            <select value={viewTicket.status} disabled={updatingId === tid(viewTicket)} onChange={(e) => handleStatus(tid(viewTicket), e.target.value)} style={{ padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.8rem' }}>
               {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-            <button className="btn btn-sm btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(tid(viewTicket)); }}><FaTrash /> Delete</button>
+            <button className="btn btn-sm btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} disabled={deletingId === tid(viewTicket)} onClick={() => { handleDelete(tid(viewTicket)); }}>{deletingId === tid(viewTicket) ? <><span className="btn-spinner"></span></> : <><FaTrash /> Delete</>}</button>
           </div>
         </div>
       </>
@@ -316,7 +334,7 @@ function AdminTickets() {
                 <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
                   <button className="ticket-action-btn" title="Edit" onClick={() => { setEditingId(tid(t)); setEditForm({ title: t.title, description: t.description, category: t.category, status: t.status }); }}><FaEdit /></button>
-                  <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
+                  <button className="ticket-action-btn" title="Delete" disabled={deletingId === tid(t)} onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}>{deletingId === tid(t) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
                 </div>
               </div>
               {editingId === tid(t) ? (
@@ -331,7 +349,7 @@ function AdminTickets() {
                   </select>
                   <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-sm" onClick={() => handleUpdate(tid(t))}><FaSave /> Save</button>
+                    <button className="btn btn-sm" disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
                     <button className="btn btn-sm btn-outline" onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
                   </div>
                 </div>
@@ -341,7 +359,7 @@ function AdminTickets() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="ticket-date">{new Date(t.createdAt).toLocaleDateString()}</span>
                     <div onClick={(e) => e.stopPropagation()}>
-                      <select value={t.status} onChange={(e) => handleStatus(tid(t), e.target.value)} style={{ padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.75rem' }}>
+                      <select value={t.status} disabled={updatingId === tid(t)} onChange={(e) => handleStatus(tid(t), e.target.value)} style={{ padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.75rem' }}>
                         {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
@@ -362,6 +380,8 @@ function AdminUsers() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [deletingId, setDeletingId] = useState(null);
+  const [savingId, setSavingId] = useState(null);
 
   const fetchData = () => {
     api('/api/admin/users').then(setUsers).catch(() => {});
@@ -371,16 +391,20 @@ function AdminUsers() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this user? All their data will be lost.')) return;
+    setDeletingId(id);
     await fetch(`${API_BASE}/api/admin/users/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token()}` },
     });
     setUsers((prev) => prev.filter((u) => u.id !== id && u._id !== id));
+    setDeletingId(null);
     showToast('User deleted.');
   };
 
   const handleUpdate = async (id) => {
+    setSavingId(id);
     const res = await api(`${API_BASE}/api/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
+    setSavingId(null);
     if (res.error) return showToast(res.error, 'error');
     setUsers((prev) => prev.map((u) => (u.id === id || u._id === id ? res : u)));
     setEditingId(null);
@@ -412,7 +436,7 @@ function AdminUsers() {
                     Admin
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-sm" onClick={() => handleUpdate(uid(u))}><FaSave /> Save</button>
+                    <button className="btn btn-sm" disabled={savingId === uid(u)} onClick={() => handleUpdate(uid(u))}>{savingId === uid(u) ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
                     <button className="btn btn-sm btn-outline" onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
                   </div>
                 </div>
@@ -427,7 +451,7 @@ function AdminUsers() {
                   <div className="admin-list-actions">
                     <button className="ticket-action-btn" title="Edit" onClick={() => { setEditingId(uid(u)); setEditForm({ name: u.name, email: u.email, isAdmin: u.isAdmin }); }}><FaEdit /></button>
                     {!u.isAdmin && (
-                      <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(uid(u))} style={{ color: '#ef4444' }}><FaTrash /></button>
+                      <button className="ticket-action-btn" title="Delete" disabled={deletingId === uid(u)} onClick={() => handleDelete(uid(u))} style={{ color: '#ef4444' }}>{deletingId === uid(u) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
                     )}
                   </div>
                 </>
@@ -444,6 +468,7 @@ function AdminSuggestions() {
   const { showToast } = useToast();
   const [items, setItems] = useState([]);
   const [detail, setDetail] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchData = () => {
     api('/api/admin/suggestions').then(setItems).catch(() => {});
@@ -453,8 +478,10 @@ function AdminSuggestions() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this suggestion?')) return;
+    setDeletingId(id);
     await fetch(`${API_BASE}/api/admin/suggestions/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     setItems((prev) => prev.filter((i) => i.id !== id && i._id !== id));
+    setDeletingId(null);
     showToast('Suggestion deleted.');
   };
 
@@ -480,7 +507,7 @@ function AdminSuggestions() {
               </div>
               <div className="admin-list-actions">
                 <button className="ticket-action-btn" title="View / Respond" onClick={() => setDetail(item)}><FaEye /></button>
-                <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(sid(item))} style={{ color: '#ef4444' }}><FaTrash /></button>
+                <button className="ticket-action-btn" title="Delete" disabled={deletingId === sid(item)} onClick={() => handleDelete(sid(item))} style={{ color: '#ef4444' }}>{deletingId === sid(item) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
               </div>
             </div>
           ))}
@@ -494,6 +521,7 @@ function AdminContacts() {
   const { showToast } = useToast();
   const [items, setItems] = useState([]);
   const [detail, setDetail] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchData = () => {
     api('/api/admin/contacts').then(setItems).catch(() => {});
@@ -503,8 +531,10 @@ function AdminContacts() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this message?')) return;
+    setDeletingId(id);
     await fetch(`${API_BASE}/api/admin/contacts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     setItems((prev) => prev.filter((i) => i.id !== id && i._id !== id));
+    setDeletingId(null);
     showToast('Message deleted.');
   };
 
@@ -530,7 +560,7 @@ function AdminContacts() {
               </div>
               <div className="admin-list-actions">
                 <button className="ticket-action-btn" title="View" onClick={() => setDetail(item)}><FaEye /></button>
-                <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(cid(item))} style={{ color: '#ef4444' }}><FaTrash /></button>
+                <button className="ticket-action-btn" title="Delete" disabled={deletingId === cid(item)} onClick={() => handleDelete(cid(item))} style={{ color: '#ef4444' }}>{deletingId === cid(item) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
               </div>
             </div>
           ))}
@@ -544,6 +574,7 @@ function AdminTeams() {
   const { showToast } = useToast();
   const [items, setItems] = useState([]);
   const [detail, setDetail] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchData = () => {
     api('/api/admin/team-apps').then(setItems).catch(() => {});
@@ -553,8 +584,10 @@ function AdminTeams() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this application?')) return;
+    setDeletingId(id);
     await fetch(`${API_BASE}/api/admin/team-apps/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     setItems((prev) => prev.filter((i) => i.id !== id && i._id !== id));
+    setDeletingId(null);
     showToast('Application deleted.');
   };
 
@@ -583,7 +616,7 @@ function AdminTeams() {
               </div>
               <div className="admin-list-actions">
                 <button className="ticket-action-btn" title="View Details" onClick={() => setDetail(item)}><FaEye /></button>
-                <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(item))} style={{ color: '#ef4444' }}><FaTrash /></button>
+                <button className="ticket-action-btn" title="Delete" disabled={deletingId === tid(item)} onClick={() => handleDelete(tid(item))} style={{ color: '#ef4444' }}>{deletingId === tid(item) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
               </div>
             </div>
           ))}
