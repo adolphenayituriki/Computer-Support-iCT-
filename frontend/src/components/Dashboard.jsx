@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaEyeSlash, FaUndo, FaLightbulb, FaUser, FaKey } from 'react-icons/fa';
@@ -494,8 +495,15 @@ function ProfileView() {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [tab, setTab] = useState('tickets');
+
+  useEffect(() => {
+    if (user?.isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, navigate]);
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
