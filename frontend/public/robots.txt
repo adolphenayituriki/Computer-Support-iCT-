@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://cshub.rw/sitemap.xml
+Sitemap: https://computer-support-ict.vercel.app/sitemap.xml
