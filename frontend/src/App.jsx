@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { ToastProvider } from './ToastContext';
+import { FaWhatsapp } from 'react-icons/fa';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
@@ -121,6 +122,10 @@ export default function App() {
             />
           </Routes>
           <Footer />
+
+          <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="whatsapp-float" title="Join our WhatsApp group">
+            <FaWhatsapp />
+          </a>
 
           <Modal open={showLogin} onClose={closeAll}>
             <LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} />

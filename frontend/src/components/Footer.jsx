@@ -1,3 +1,5 @@
+import { FaWhatsapp } from 'react-icons/fa';
+
 export default function Footer() {
   return (
     <footer className="site-footer">
@@ -6,6 +8,9 @@ export default function Footer() {
           <h4>CS hub (iCT)</h4>
           <img src="/final-logo.jpg" alt="CS hub (iCT)" className="footer-logo" />
           <p>Empowering students and teachers with digital skills and computer support.</p>
+          <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="footer-whatsapp">
+            <FaWhatsapp /> Join WhatsApp Group
+          </a>
         </div>
         <div className="footer-col">
           <h4>Quick Links</h4>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaClock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaClock, FaWhatsapp } from 'react-icons/fa';
 import { useToast } from '../ToastContext';
 
 export default function Contact() {
@@ -109,6 +109,14 @@ export default function Contact() {
             <div>
               <strong>Hours</strong>
               <p>Monday — Friday: 8:00 AM — 5:00 PM<br />Saturday: 9:00 AM — 1:00 PM</p>
+            </div>
+          </div>
+
+          <div className="contact-item">
+            <span className="contact-icon" style={{ color: '#25D366' }}><FaWhatsapp /></span>
+            <div>
+              <strong>WhatsApp Group</strong>
+              <p><a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" style={{ color: '#25D366', fontWeight: 600 }}>Join our community group</a></p>
             </div>
           </div>
         </div>
