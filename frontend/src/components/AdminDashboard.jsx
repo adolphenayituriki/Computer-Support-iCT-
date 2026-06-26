@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import AdminChatView from './AdminChatView';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -730,10 +730,146 @@ function AdminTeams() {
   );
 }
 
+function AdminNews() {
+  const { showToast } = useToast();
+  const [items, setItems] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ title: '', content: '', mediaType: 'text', mediaUrl: '', published: true });
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({ title: '', content: '', mediaType: 'text', mediaUrl: '', published: true });
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const fetchData = () => {
+    api('/api/admin/news').then(setItems).catch(() => {});
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!createForm.title.trim()) return showToast('Title is required.', 'error');
+    setSubmitting(true);
+    const res = await api('/api/admin/news', { method: 'POST', body: JSON.stringify(createForm) });
+    setSubmitting(false);
+    if (res.error) return showToast(res.error, 'error');
+    showToast('News created.');
+    setShowCreate(false);
+    setCreateForm({ title: '', content: '', mediaType: 'text', mediaUrl: '', published: true });
+    fetchData();
+  };
+
+  const handleUpdate = async (id) => {
+    setSubmitting(true);
+    const res = await api(`/api/admin/news/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
+    setSubmitting(false);
+    if (res.error) return showToast(res.error, 'error');
+    setItems((prev) => prev.map((i) => (i._id === id || i.id === id ? { ...i, ...editForm } : i)));
+    setEditingId(null);
+    showToast('News updated.');
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this news item?')) return;
+    setDeletingId(id);
+    await fetch(`${API_BASE}/api/admin/news/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+    setItems((prev) => prev.filter((i) => i._id !== id && i.id !== id));
+    setDeletingId(null);
+    showToast('News deleted.');
+  };
+
+  const nid = (i) => i._id || i.id;
+
+  return (
+    <>
+      {showCreate && (
+        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '550px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}><FaPlus /> Create News</h3>
+              <button className="ticket-action-btn" onClick={() => setShowCreate(false)}><FaTimes /></button>
+            </div>
+            <form onSubmit={handleCreate}>
+              <input placeholder="Title *" value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
+              <select value={createForm.mediaType} onChange={(e) => setCreateForm({ ...createForm, mediaType: e.target.value })} style={{ width: '100%', marginBottom: '0.7rem', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+                <option value="text">Text / Article</option>
+                <option value="image">Image</option>
+                <option value="video">Video (YouTube)</option>
+              </select>
+              {createForm.mediaType !== 'text' && (
+                <input placeholder={createForm.mediaType === 'image' ? 'Image URL' : 'YouTube Video URL'} value={createForm.mediaUrl} onChange={(e) => setCreateForm({ ...createForm, mediaUrl: e.target.value })} style={{ marginBottom: '0.7rem' }} />
+              )}
+              <textarea rows="5" placeholder="Content (optional — click to expand on site)" value={createForm.content} onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })} />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#4b5563', marginBottom: '0.7rem' }}>
+                <input type="checkbox" checked={createForm.published} onChange={(e) => setCreateForm({ ...createForm, published: e.target.checked })} />
+                Published
+              </label>
+              <button type="submit" className="btn" style={{ width: '100%' }} disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Creating...</> : <><FaPlus /> Create News</>}</button>
+            </form>
+          </div>
+        </div>
+      )}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3><FaNewspaper style={{ color: '#FFCE08' }} /> News ({items.length})</h3>
+        <button className="btn btn-sm" onClick={() => setShowCreate(true)}><FaPlus /> New Post</button>
+      </div>
+      {items.length === 0 ? (
+        <div className="empty-state"><FaNewspaper size={36} style={{ color: '#d1d5db' }} /><p>No news posted yet.</p></div>
+      ) : (
+        <div className="admin-list">
+          {items.map((item) => (
+            <div key={nid(item)} className="admin-list-item">
+              {editingId === nid(item) ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                  <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} placeholder="Title" />
+                  <select value={editForm.mediaType} onChange={(e) => setEditForm({ ...editForm, mediaType: e.target.value })} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+                    <option value="text">Text</option>
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                  </select>
+                  {(editForm.mediaType === 'image' || editForm.mediaType === 'video') && (
+                    <input value={editForm.mediaUrl} onChange={(e) => setEditForm({ ...editForm, mediaUrl: e.target.value })} placeholder={editForm.mediaType === 'image' ? 'Image URL' : 'YouTube URL'} />
+                  )}
+                  <textarea rows="3" value={editForm.content} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })} placeholder="Content" />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <input type="checkbox" checked={editForm.published} onChange={(e) => setEditForm({ ...editForm, published: e.target.checked })} />
+                    Published
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-sm" disabled={submitting} onClick={() => handleUpdate(nid(item))}>{submitting ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
+                    <button className="btn btn-sm btn-outline" onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="admin-list-main">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <strong>{item.title}</strong>
+                      {item.mediaType === 'image' && <span style={{ fontSize: '0.7rem', background: '#dbeafe', color: '#1d4ed8', padding: '0.1rem 0.4rem', borderRadius: '999px' }}><FaImage /> Photo</span>}
+                      {item.mediaType === 'video' && <span style={{ fontSize: '0.7rem', background: '#fee2e2', color: '#dc2626', padding: '0.1rem 0.4rem', borderRadius: '999px' }}><FaYoutube /> Video</span>}
+                      {!item.published && <span style={{ fontSize: '0.7rem', background: '#fef3c7', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '999px' }}>Draft</span>}
+                    </div>
+                    <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{item.content?.slice(0, 100) || 'No content'}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{new Date(item.createdAt).toLocaleDateString()} by {item.author}</span>
+                  </div>
+                  <div className="admin-list-actions">
+                    <button className="ticket-action-btn" title="Edit" onClick={() => { setEditingId(nid(item)); setEditForm({ title: item.title, content: item.content, mediaType: item.mediaType, mediaUrl: item.mediaUrl, published: item.published }); }}><FaEdit /></button>
+                    <button className="ticket-action-btn" title="Delete" disabled={deletingId === nid(item)} onClick={() => handleDelete(nid(item))} style={{ color: '#ef4444' }}>{deletingId === nid(item) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [tab, setTab] = useState('tickets');
-  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0 });
+  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0 });
 
   useEffect(() => {
     Promise.all([
@@ -742,8 +878,9 @@ export default function AdminDashboard() {
       api('/api/admin/suggestions'),
       api('/api/admin/contacts'),
       api('/api/admin/team-apps'),
-    ]).then(([users, tickets, suggestions, contacts, teams]) => {
-      setStats({ users: users.length, tickets: tickets.length, suggestions: suggestions.length, contacts: contacts.length, teams: teams.length });
+      api('/api/admin/news'),
+    ]).then(([users, tickets, suggestions, contacts, teams, news]) => {
+      setStats({ users: users.length, tickets: tickets.length, suggestions: suggestions.length, contacts: contacts.length, teams: teams.length, news: news.length });
     }).catch(() => {});
   }, []);
 
@@ -780,6 +917,10 @@ export default function AdminDashboard() {
           <FaUserTie className="dash-stat-icon" style={{ color: '#06b6d4' }} />
           <div><strong>{stats.teams}</strong><span>Applications</span></div>
         </div>
+        <div className="dash-stat-card">
+          <FaNewspaper className="dash-stat-icon" style={{ color: '#FFCE08' }} />
+          <div><strong>{stats.news}</strong><span>News</span></div>
+        </div>
       </div>
 
       <div className="dash-tabs">
@@ -789,6 +930,7 @@ export default function AdminDashboard() {
         <button className={`dash-tab${tab === 'contacts' ? ' active' : ''}`} onClick={() => setTab('contacts')}><FaEnvelope /> Contacts</button>
         <button className={`dash-tab${tab === 'teams' ? ' active' : ''}`} onClick={() => setTab('teams')}><FaUserTie /> Applications</button>
         <button className={`dash-tab${tab === 'chat' ? ' active' : ''}`} onClick={() => setTab('chat')}><FaComments /> Chat</button>
+        <button className={`dash-tab${tab === 'news' ? ' active' : ''}`} onClick={() => setTab('news')}><FaNewspaper /> News</button>
       </div>
 
       <div className="admin-panel">
@@ -798,6 +940,7 @@ export default function AdminDashboard() {
         {tab === 'contacts' && <AdminContacts />}
         {tab === 'teams' && <AdminTeams />}
         {tab === 'chat' && <AdminChatView />}
+        {tab === 'news' && <AdminNews />}
       </div>
     </div>
   );

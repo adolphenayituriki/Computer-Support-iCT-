@@ -12,6 +12,7 @@ import Contact from './models/Contact.js';
 import Suggestion from './models/Suggestion.js';
 import TeamApp from './models/TeamApp.js';
 import Conversation from './models/Conversation.js';
+import News from './models/News.js';
 import { sendResetEmail } from './mailer.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger.js';
@@ -539,6 +540,104 @@ app.put('/api/admin/team-apps/:id', authenticate, adminOnly, async (req, res) =>
     const app = await TeamApp.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
     if (!app) return res.status(404).json({ error: 'Application not found.' });
     res.json(app);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+// ── News / Announcements ──
+app.get('/api/news', async (_req, res) => {
+  try {
+    const all = await News.find({ published: true }).sort({ createdAt: -1 });
+    res.json(all);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.get('/api/news/:id', async (req, res) => {
+  try {
+    const item = await News.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: 'News not found.' });
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.get('/api/admin/news', authenticate, adminOnly, async (_req, res) => {
+  try {
+    const all = await News.find().sort({ createdAt: -1 });
+    res.json(all);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/admin/news', authenticate, adminOnly, async (req, res) => {
+  try {
+    const { title, content, mediaType, mediaUrl, published } = req.body;
+    if (!title) return res.status(400).json({ error: 'Title is required.' });
+    const item = await News.create({
+      title,
+      content: content || '',
+      mediaType: mediaType || 'text',
+      mediaUrl: mediaUrl || '',
+      author: req.user.name,
+      published: published !== undefined ? published : true,
+    });
+    res.status(201).json(item);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.put('/api/admin/news/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    const item = await News.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    if (!item) return res.status(404).json({ error: 'News not found.' });
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.delete('/api/admin/news/:id', authenticate, adminOnly, async (req, res) => {
+  try {
+    await News.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/news/:id/like', authenticate, async (req, res) => {
+  try {
+    const item = await News.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: 'News not found.' });
+    const userId = req.user.id;
+    const idx = item.likes.findIndex((id) => id.toString() === userId);
+    if (idx === -1) {
+      item.likes.push(userId);
+    } else {
+      item.likes.splice(idx, 1);
+    }
+    await item.save();
+    res.json({ likes: item.likes, likesCount: item.likes.length, liked: idx === -1 });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
+app.post('/api/news/:id/comment', authenticate, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) return res.status(400).json({ error: 'Comment text is required.' });
+    const item = await News.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: 'News not found.' });
+    item.comments.push({ userId: req.user.id, userName: req.user.name, text: text.trim() });
+    await item.save();
+    res.status(201).json({ comments: item.comments });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }

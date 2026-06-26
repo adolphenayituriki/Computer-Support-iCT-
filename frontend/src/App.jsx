@@ -13,6 +13,8 @@ import FAQ from './components/FAQ';
 import CTA from './components/CTA';
 import About from './components/About';
 import Contact from './components/Contact';
+import News from './components/News';
+import NewsPreview from './components/NewsPreview';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
@@ -50,6 +52,7 @@ function HomePage({ onRegisterClick, onTeamClick }) {
       <Testimonials />
       <FAQ />
       <CTA onRegisterClick={onRegisterClick} onTeamClick={onTeamClick} />
+      <NewsPreview />
       <About />
       <Contact />
     </main>
@@ -104,6 +107,7 @@ export default function App() {
           <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />
           <Routes>
             <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
+            <Route path="/news" element={<News />} />
             <Route
               path="/dashboard"
               element={

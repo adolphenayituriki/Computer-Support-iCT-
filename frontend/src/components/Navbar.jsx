@@ -101,6 +101,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             <>
               <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>Home</a></li>
               <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>Services</a></li>
+              <li><a href="/news" onClick={() => setOpen(false)}>News</a></li>
               <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About Us</a></li>
               <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
               <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
@@ -121,6 +122,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
           ) : (
             <>
               <li><a href="/#home" onClick={() => setOpen(false)}>Home</a></li>
+              <li><a href="/news" onClick={() => setOpen(false)}>News</a></li>
               <li><a href="/#about" onClick={() => setOpen(false)}>About Us</a></li>
               <li><a href="/#contact" onClick={() => setOpen(false)}>Contact</a></li>
               <li><button className="nav-avatar nav-avatar-guest" onClick={() => { setOpen(false); onLoginClick(); }}><FaUser /></button></li>
