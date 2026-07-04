@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import AdminChatView from './AdminChatView';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaEye as FaPreview } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -1029,6 +1031,99 @@ function AdminTestimonials() {
   );
 }
 
+function MarkdownEditor({ value, onChange }) {
+  const [showPreview, setShowPreview] = useState(false);
+  const textareaRef = useRef(null);
+
+  const insert = (before, after) => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const sel = value.substring(start, end);
+    const next = value.substring(0, start) + before + sel + after + value.substring(end);
+    onChange(next);
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(start + before.length, start + before.length + sel.length);
+    });
+  };
+
+  const insertBlock = (prefix) => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+    const line = value.substring(lineStart, value.indexOf('\n', start) === -1 ? value.length : value.indexOf('\n', start));
+    const next = value.substring(0, lineStart) + prefix + line + value.substring(lineStart + line.length);
+    onChange(next);
+  };
+
+  const buttons = [
+    { icon: <FaBold />, title: 'Bold', action: () => insert('**', '**') },
+    { icon: <FaItalic />, title: 'Italic', action: () => insert('*', '*') },
+    { icon: <FaHeading />, title: 'Heading', action: () => insertBlock('## ') },
+    { icon: <FaListUl />, title: 'Bullet list', action: () => insertBlock('- ') },
+    { icon: <FaListOl />, title: 'Numbered list', action: () => insertBlock('1. ') },
+    { icon: <FaPalette />, title: 'Color', action: () => {
+      const color = prompt('Enter color name or hex (e.g. red, #FFCE08):');
+      if (color) insert(`<span style="color:${color}">`, '</span>');
+    }},
+    { icon: <FaFont />, title: 'Font size', action: () => {
+      const size = prompt('Enter font size (e.g. 18px, 1.2rem):');
+      if (size) insert(`<span style="font-size:${size}">`, '</span>');
+    }},
+    { icon: <FaPreview />, title: 'Preview', action: () => setShowPreview(!showPreview) },
+  ];
+
+  return (
+    <div style={{ marginBottom: '0.7rem' }}>
+      <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
+        {buttons.map((btn, i) => (
+          <button
+            key={i}
+            type="button"
+            title={btn.title}
+            onClick={btn.action}
+            style={{
+              background: btn.title === 'Preview' && showPreview ? '#FFCE08' : '#f1f5f9',
+              border: '1px solid #e2e8f0', borderRadius: '6px',
+              padding: '0.35rem 0.55rem', cursor: 'pointer', fontSize: '0.8rem',
+              color: '#334155', display: 'flex', alignItems: 'center', gap: '0.2rem',
+              fontFamily: 'inherit', transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+            onMouseLeave={(e) => e.currentTarget.style.background = btn.title === 'Preview' && showPreview ? '#FFCE08' : '#f1f5f9'}
+          >
+            {btn.icon} {btn.title === 'Preview' && (showPreview ? 'Editor' : 'Preview')}
+          </button>
+        ))}
+      </div>
+      {showPreview ? (
+        <div
+          className="course-content"
+          style={{
+            background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '10px',
+            padding: '1rem', minHeight: '120px', fontSize: '0.9rem',
+            overflowY: 'auto', maxHeight: '300px',
+          }}
+        >
+          {value ? <ReactMarkdown rehypePlugins={[rehypeRaw]}>{value}</ReactMarkdown> : <span style={{ color: '#9ca3af' }}>Preview will appear here...</span>}
+        </div>
+      ) : (
+        <textarea
+          ref={textareaRef}
+          rows="6"
+          placeholder="Full course content (markdown or HTML)"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.88rem' }}
+        />
+      )}
+    </div>
+  );
+}
+
 function AdminCourses() {
   const { showToast } = useToast();
   const [items, setItems] = useState([]);
@@ -1105,7 +1200,7 @@ function AdminCourses() {
               </div>
               <input placeholder="Estimated time (e.g. '5 min read')" value={createForm.estimatedTime} onChange={(e) => setCreateForm({ ...createForm, estimatedTime: e.target.value })} />
               <input placeholder="Tags (comma-separated)" value={createForm.tags} onChange={(e) => setCreateForm({ ...createForm, tags: e.target.value })} />
-              <textarea rows="6" placeholder="Full course content (markdown or plain text)" value={createForm.content} onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })} />
+              <MarkdownEditor value={createForm.content} onChange={(v) => setCreateForm({ ...createForm, content: v })} />
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#4b5563', marginBottom: '0.7rem' }}>
                 <input type="checkbox" checked={createForm.published} onChange={(e) => setCreateForm({ ...createForm, published: e.target.checked })} />
                 Published
@@ -1139,7 +1234,7 @@ function AdminCourses() {
                   </div>
                   <input value={editForm.estimatedTime} onChange={(e) => setEditForm({ ...editForm, estimatedTime: e.target.value })} placeholder="Estimated time" />
                   <input value={editForm.tags} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })} placeholder="Tags (comma-separated)" />
-                  <textarea rows="4" value={editForm.content} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })} placeholder="Content" />
+                  <MarkdownEditor value={editForm.content} onChange={(v) => setEditForm({ ...editForm, content: v })} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
                     <input type="checkbox" checked={editForm.published} onChange={(e) => setEditForm({ ...editForm, published: e.target.checked })} />
                     Published
