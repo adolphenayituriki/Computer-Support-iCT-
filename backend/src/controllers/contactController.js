@@ -1,11 +1,13 @@
 import Contact from '../models/Contact.js';
+import { sendContactAutoReply, sendAdminNotification } from '../services/mailer.js';
 
 export async function submitContact(req, res) {
   try {
     const { name, email, message } = req.body;
     if (!name || !email || !message) return res.status(400).json({ error: 'All fields are required.' });
     await Contact.create({ name, email, message });
-    console.log(`New contact from ${name} (${email}): ${message.slice(0, 50)}...`);
+    sendContactAutoReply(email, name).catch((e) => console.log('Email error:', e.message));
+    sendAdminNotification('New Contact Message', `From: ${name} (${email})\n\n${message}`).catch(() => {});
     res.status(201).json({ success: true, message: `Thanks, ${name}! We'll get back to you at ${email} shortly.` });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });

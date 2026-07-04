@@ -1,10 +1,12 @@
 import Ticket from '../models/Ticket.js';
+import { sendTicketConfirmation } from '../services/mailer.js';
 
 export async function createTicket(req, res) {
   try {
     const { title, description, category } = req.body;
     if (!title || !description) return res.status(400).json({ error: 'Title and description are required.' });
     const ticket = await Ticket.create({ userId: req.user.id, userName: req.user.name, title, description, category: category || 'general' });
+    sendTicketConfirmation(req.user.email, req.user.name, ticket).catch((e) => console.log('Email error:', e.message));
     res.status(201).json(ticket);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });

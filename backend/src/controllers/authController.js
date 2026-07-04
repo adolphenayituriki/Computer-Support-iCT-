@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { sendResetEmail } from '../services/mailer.js';
+import TeamApp from '../models/TeamApp.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cshub_ict_secret_key_2026';
 
@@ -131,6 +132,17 @@ export async function resetPassword(req, res) {
     user.resetTokenExpires = undefined;
     await user.save();
     res.json({ success: true, message: 'Password reset successfully. You can now sign in.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function getTeamStatus(req, res) {
+  try {
+    const app = await TeamApp.findOne({ userId: req.user.id, status: 'approved' });
+    const Beneficiary = (await import('../models/Beneficiary.js')).default;
+    const beneficiaries = app ? await Beneficiary.find({ assignedTo: app._id }).sort({ createdAt: -1 }) : [];
+    res.json({ isTeamMember: !!app, application: app || null, beneficiaries });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }

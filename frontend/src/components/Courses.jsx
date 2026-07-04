@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaBookOpen, FaClock, FaSignal, FaArrowLeft, FaTimes, FaTag, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
 const CATEGORY_ICONS = {
   hardware: '💻', software: '🖥️', network: '🌐', virus: '🛡️', training: '📚', general: '📖',
@@ -80,8 +81,8 @@ export default function Courses() {
               </div>
             )}
             {selected.content ? (
-              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', lineHeight: 1.8, color: '#334155', fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
-                {selected.content}
+              <div className="course-content" style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', fontSize: '0.95rem' }}>
+                <ReactMarkdown>{selected.content.replace(/For the testimonials[\s\S]*$/i, '')}</ReactMarkdown>
               </div>
             ) : (
               <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>Full content coming soon.</p>

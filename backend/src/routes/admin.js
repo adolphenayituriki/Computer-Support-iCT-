@@ -62,4 +62,10 @@ router.get('/beneficiaries', beneficiaryCtrl.getAllBeneficiaries);
 router.put('/beneficiaries/:id', beneficiaryCtrl.updateBeneficiary);
 router.delete('/beneficiaries/:id', beneficiaryCtrl.deleteBeneficiary);
 
+// Testimonials
+import * as testimonialCtrl from '../controllers/testimonialController.js';
+router.get('/testimonials', testimonialCtrl.getAllTestimonials);
+router.put('/testimonials/:id/approve', testimonialCtrl.approveTestimonial);
+router.delete('/testimonials/:id', testimonialCtrl.deleteTestimonial);
+
 export default router;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -509,17 +509,66 @@ function SuggestionsView() {
   );
 }
 
+function TeamView({ teamData }) {
+  const { app, beneficiaries } = teamData;
+  return (
+    <div className="team-dash">
+      <div className="team-dash-card">
+        <h3><FaUserTie style={{ color: '#06b6d4' }} /> My Team Profile</h3>
+        <div className="team-dash-info">
+          <p><FaUserTie /> <strong>{app.name}</strong></p>
+          <p><FaEnvelope /> {app.email}</p>
+          {app.phone && <p><FaPhone /> {app.phone}</p>}
+          {app.location && <p><FaMapMarkerAlt /> {app.location}</p>}
+          {app.skills?.length > 0 && <p className="team-dash-skills">{app.skills.map((s) => <span key={s}>{s}</span>)}</p>}
+        </div>
+      </div>
+
+      <div className="team-dash-card">
+        <h3><FaHandshake style={{ color: '#8b5cf6' }} /> My Beneficiaries ({beneficiaries.length})</h3>
+        {beneficiaries.length === 0 ? (
+          <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
+        ) : (
+          <div className="team-dash-list">
+            {beneficiaries.map((b) => (
+              <div key={b._id || b.id} className="team-dash-item">
+                <div className="team-dash-item-main">
+                  <strong>{b.name}</strong>
+                  <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{b.issue?.slice(0, 120)}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
+                </div>
+                <span className={`ticket-status ${b.status === 'resolved' || b.status === 'closed' ? 'status-resolved' : b.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{b.status}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [tab, setTab] = useState('tickets');
+  const [teamData, setTeamData] = useState(null);
+  const [teamLoading, setTeamLoading] = useState(true);
 
   useEffect(() => {
     if (user?.isAdmin) {
       navigate('/admin', { replace: true });
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem('cshub_token');
+    fetch(`${API_BASE}/api/auth/team-status`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => { setTeamData(data); setTeamLoading(false); })
+      .catch(() => setTeamLoading(false));
+  }, [user]);
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
@@ -543,12 +592,21 @@ export default function Dashboard() {
         <button className={`dash-tab${tab === 'chat' ? ' active' : ''}`} onClick={() => setTab('chat')}>
           <FaComments /> Messages
         </button>
+        {teamData?.isTeamMember && (
+          <button className={`dash-tab${tab === 'team' ? ' active' : ''}`} onClick={() => setTab('team')}>
+            <FaUserTie /> My Team
+          </button>
+        )}
       </div>
 
       {tab === 'tickets' ? (
         <TicketsView tickets={tickets} setTickets={setTickets} />
       ) : tab === 'suggestions' ? (
         <SuggestionsView />
+      ) : tab === 'chat' ? (
+        <UserChatView />
+      ) : tab === 'team' && teamData?.isTeamMember ? (
+        <TeamView teamData={teamData} />
       ) : (
         <UserChatView />
       )}

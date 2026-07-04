@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import AdminChatView from './AdminChatView';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -955,6 +955,80 @@ function AdminNews() {
   );
 }
 
+function AdminTestimonials() {
+  const { showToast } = useToast();
+  const [items, setItems] = useState([]);
+  const [submittingId, setSubmittingId] = useState(null);
+
+  const fetchData = () => {
+    api('/api/admin/testimonials').then(setItems).catch(() => {});
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const handleApprove = async (id) => {
+    setSubmittingId(id);
+    const res = await api(`/api/admin/testimonials/${id}/approve`, { method: 'PUT' });
+    setSubmittingId(null);
+    if (res.error) return showToast(res.error, 'error');
+    setItems((prev) => prev.map((i) => (i._id === id || i.id === id ? { ...i, approved: true } : i)));
+    showToast('Testimonial approved.');
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this testimonial?')) return;
+    setSubmittingId(id);
+    await fetch(`${API_BASE}/api/admin/testimonials/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+    setItems((prev) => prev.filter((i) => i._id !== id && i.id !== id));
+    setSubmittingId(null);
+    showToast('Testimonial deleted.');
+  };
+
+  const nid = (i) => i._id || i.id;
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3><FaStar style={{ color: '#FFCE08' }} /> Testimonials ({items.length})</h3>
+      </div>
+      {items.length === 0 ? (
+        <div className="empty-state"><FaStar size={36} style={{ color: '#d1d5db' }} /><p>No testimonials yet.</p></div>
+      ) : (
+        <div className="admin-list">
+          {items.map((item) => (
+            <div key={nid(item)} className="admin-list-item">
+              <div className="admin-list-main">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <strong>{item.name}</strong>
+                  {item.role && <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>&mdash; {item.role}</span>}
+                  {item.approved ? (
+                    <span style={{ fontSize: '0.7rem', background: '#d1fae5', color: '#047857', padding: '0.1rem 0.4rem', borderRadius: '999px' }}><FaCheck /> Approved</span>
+                  ) : (
+                    <span style={{ fontSize: '0.7rem', background: '#fef3c7', color: '#b45309', padding: '0.1rem 0.4rem', borderRadius: '999px' }}>Pending</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.15rem', marginTop: '0.25rem' }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <FaStar key={s} size={11} style={{ color: s <= item.rating ? '#FFCE08' : '#d1d5db' }} />
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>&ldquo;{item.content?.slice(0, 200)}&rdquo;</span>
+                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{new Date(item.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div className="admin-list-actions">
+                {!item.approved && (
+                  <button className="ticket-action-btn" title="Approve" disabled={submittingId === nid(item)} onClick={() => handleApprove(nid(item))} style={{ color: '#047857' }}>{submittingId === nid(item) ? <span className="btn-spinner"></span> : <FaCheckCircle />}</button>
+                )}
+                <button className="ticket-action-btn" title="Delete" disabled={submittingId === nid(item)} onClick={() => handleDelete(nid(item))} style={{ color: '#ef4444' }}>{submittingId === nid(item) ? <span className="btn-spinner"></span> : <FaTrash />}</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 function AdminCourses() {
   const { showToast } = useToast();
   const [items, setItems] = useState([]);
@@ -1197,7 +1271,7 @@ function AdminBeneficiaries() {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [tab, setTab] = useState('tickets');
-  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0 });
+  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
 
   useEffect(() => {
     const h = (e) => setTab(e.detail.tab);
@@ -1217,10 +1291,11 @@ export default function AdminDashboard() {
       ['news', '/api/admin/news'],
       ['courses', '/api/admin/courses'],
       ['beneficiaries', '/api/admin/beneficiaries'],
+      ['testimonials', '/api/admin/testimonials'],
     ];
     Promise.allSettled(endpoints.map(([_, url]) => api(url)))
       .then((results) => {
-        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0 };
+        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 };
         results.forEach((r, i) => {
           if (r.status === 'fulfilled' && Array.isArray(r.value)) s[endpoints[i][0]] = r.value.length;
         });
@@ -1242,7 +1317,7 @@ export default function AdminDashboard() {
         <div className="dash-avatar">{initials}</div>
         <div>
           <h2>Admin Dashboard</h2>
-          <p>Manage tickets, users, suggestions, contacts, team applications, beneficiaries, news, courses, and chat.</p>
+          <p>Manage tickets, users, suggestions, contacts, team applications, beneficiaries, news, courses, testimonials, and chat.</p>
         </div>
       </div>
 
@@ -1279,6 +1354,10 @@ export default function AdminDashboard() {
           <FaBookOpen className="dash-stat-icon" style={{ color: '#06b6d4' }} />
           <div><strong>{stats.courses}</strong><span>Courses</span></div>
         </div>
+        <div className="dash-stat-card">
+          <FaStar className="dash-stat-icon" style={{ color: '#FFCE08' }} />
+          <div><strong>{stats.testimonials}</strong><span>Testimonials</span></div>
+        </div>
       </div>
 
       <div className="dash-chart-section">
@@ -1293,6 +1372,7 @@ export default function AdminDashboard() {
             { label: 'Beneficiaries', count: stats.beneficiaries, color: '#ec4899' },
             { label: 'News', count: stats.news, color: '#f97316' },
             { label: 'Courses', count: stats.courses, color: '#14b8a6' },
+            { label: 'Testimonials', count: stats.testimonials, color: '#FFCE08' },
           ].map((item) => {
             const max = Math.max(...Object.values(stats), 1);
             const pct = (item.count / max) * 100;
@@ -1338,6 +1418,7 @@ export default function AdminDashboard() {
         <button className={`dash-tab${tab === 'news' ? ' active' : ''}`} onClick={() => setTab('news')}><FaNewspaper /> News</button>
         <button className={`dash-tab${tab === 'courses' ? ' active' : ''}`} onClick={() => setTab('courses')}><FaBookOpen /> Courses</button>
         <button className={`dash-tab${tab === 'beneficiaries' ? ' active' : ''}`} onClick={() => setTab('beneficiaries')}><FaUserTie /> Beneficiaries</button>
+        <button className={`dash-tab${tab === 'testimonials' ? ' active' : ''}`} onClick={() => setTab('testimonials')}><FaStar /> Testimonials</button>
       </div>
 
       <div className="admin-panel">
@@ -1350,6 +1431,7 @@ export default function AdminDashboard() {
         {tab === 'beneficiaries' && <AdminBeneficiaries />}
         {tab === 'news' && <AdminNews />}
         {tab === 'courses' && <AdminCourses />}
+        {tab === 'testimonials' && <AdminTestimonials />}
       </div>
     </div>
   );

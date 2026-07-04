@@ -7,6 +7,7 @@ import TeamApp from '../models/TeamApp.js';
 import News from '../models/News.js';
 import Conversation from '../models/Conversation.js';
 import Course from '../models/Course.js';
+import { sendTicketReplyNotification, sendTeamStatusUpdate, sendAdminNotification } from '../services/mailer.js';
 // ── Users ──
 
 export async function getUsers(_req, res) {
@@ -77,6 +78,8 @@ export async function addTicketMessageAdmin(req, res) {
     if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
     ticket.messages.push({ sender: 'admin', senderName: req.user.name, text });
     await ticket.save();
+    const user = await User.findById(ticket.userId);
+    if (user) sendTicketReplyNotification(user.email, user.name, ticket, text).catch((e) => console.log('Email error:', e.message));
     res.status(201).json(ticket);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
@@ -201,8 +204,17 @@ export async function getAllTeamApps(_req, res) {
 
 export async function updateTeamAppAdmin(req, res) {
   try {
+    const prev = await TeamApp.findById(req.params.id);
     const app = await TeamApp.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
     if (!app) return res.status(404).json({ error: 'Application not found.' });
+    if (req.body.status && req.body.status !== prev.status) {
+      sendTeamStatusUpdate(app.email, app.name, app.status, app).catch((e) => console.log('Email error:', e.message));
+      if (app.status === 'approved') {
+        await User.findOneAndUpdate({ email: app.email }, { isTeamMember: true });
+      } else if (prev.status === 'approved') {
+        await User.findOneAndUpdate({ email: app.email }, { isTeamMember: false });
+      }
+    }
     res.json(app);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });

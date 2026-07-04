@@ -8,6 +8,7 @@ import newsRoutes from './news.js';
 import conversationRoutes from './conversations.js';
 import courseRoutes from './courses.js';
 import beneficiaryRoutes from './beneficiaries.js';
+import testimonialRoutes from './testimonials.js';
 import adminRoutes from './admin.js';
 
 const router = Router();
@@ -21,6 +22,7 @@ router.use('/news', newsRoutes);
 router.use('/conversations', conversationRoutes);
 router.use('/courses', courseRoutes);
 router.use('/beneficiaries', beneficiaryRoutes);
+router.use('/testimonials', testimonialRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;
