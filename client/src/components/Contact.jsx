@@ -96,7 +96,7 @@ export default function Contact() {
             <span className="contact-icon"><FaEnvelope /></span>
             <div>
               <strong>Email</strong>
-              <p>support@cshub.rw</p>
+              <p>cshub.rw@gmail.com</p>
             </div>
           </div>
 

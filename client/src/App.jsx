@@ -8,12 +8,12 @@ import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
 import Services from './components/Services';
 import WhyUs from './components/WhyUs';
-import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import CTA from './components/CTA';
 import About from './components/About';
 import Contact from './components/Contact';
 import News from './components/News';
+import Courses from './components/Courses';
 import NewsPreview from './components/NewsPreview';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
@@ -49,11 +49,10 @@ function HomePage({ onRegisterClick, onTeamClick }) {
       <HowItWorks />
       <Services />
       <WhyUs />
-      <Testimonials />
+      <About />
       <FAQ />
       <CTA onRegisterClick={onRegisterClick} onTeamClick={onTeamClick} />
       <NewsPreview />
-      <About />
       <Contact />
     </main>
   );
@@ -64,7 +63,6 @@ export default function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
-
   const openLogin = () => {
     setShowRegister(false);
     setShowTeam(false);
@@ -108,6 +106,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
             <Route path="/news" element={<News />} />
+            <Route path="/courses" element={<Courses />} />
             <Route
               path="/dashboard"
               element={

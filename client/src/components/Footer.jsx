@@ -28,7 +28,7 @@ export default function Footer() {
         <div className="footer-col">
           <h4>Contact</h4>
           <p><FaMapMarkerAlt className="footer-contact-icon" /> Anywhere in Rwanda</p>
-          <p><FaEnvelope className="footer-contact-icon" /> support@cshub.rw</p>
+          <p><FaEnvelope className="footer-contact-icon" /> cshub.rw@gmail.com</p>
           <p><FaPhoneAlt className="footer-contact-icon" /> +250 78050 5948</p>
         </div>
       </div>

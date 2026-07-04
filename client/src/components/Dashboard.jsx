@@ -529,7 +529,7 @@ export default function Dashboard() {
         <div className="dash-avatar">{initials}</div>
         <div>
           <h2>Welcome, {user?.name}</h2>
-          <p>Submit and manage your support requests and share suggestions.</p>
+          <p>Get computer support, ICT training, and digital skills — we are here for all Rwandans, anywhere in the country.</p>
         </div>
       </div>
 

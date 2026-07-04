@@ -1574,75 +1574,6 @@ header.dash-header .hamburger span {
   line-height: 1.6;
 }
 
-/* -- Testimonials -- */
-
-.testimonials {
-  padding: 5rem 2rem;
-  text-align: center;
-}
-
-.testimonial-grid {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.testi-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 2rem;
-  flex: 1 1 300px;
-  max-width: 340px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid #f1f5f9;
-  text-align: left;
-}
-
-.testi-stars {
-  color: #f59e0b;
-  font-size: 0.95rem;
-  margin-bottom: 0.8rem;
-}
-
-.testi-card blockquote {
-  color: #4b5563;
-  font-size: 0.95rem;
-  font-style: italic;
-  margin-bottom: 1.2rem;
-  line-height: 1.6;
-}
-
-.testi-author {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.testi-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #fef9c3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: #a16207;
-  font-size: 0.85rem;
-}
-
-.testi-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #1e1b4b;
-}
-
-.testi-role {
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-
 /* -- FAQ -- */
 
 .faq {
@@ -3637,29 +3568,6 @@ header.dash-header .hamburger span {
     font-size: 1.2rem;
   }
 
-  /* ─── Testimonials (horizontal swipe) ─── */
-
-  .testimonial-grid {
-    display: flex;
-    gap: 0.8rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding: 0.5rem 0 1rem;
-    scrollbar-width: none;
-  }
-
-  .testimonial-grid::-webkit-scrollbar {
-    display: none;
-  }
-
-  .testi-card {
-    flex: 0 0 80%;
-    max-width: 80%;
-    scroll-snap-align: start;
-    padding: 1.5rem;
-    border-radius: 16px;
-  }
 
   /* ─── FAQ ─── */
 

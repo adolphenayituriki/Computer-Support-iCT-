@@ -1,0 +1,24 @@
+import Conversation from '../models/Conversation.js';
+
+export async function getMyConversation(req, res) {
+  try {
+    const conv = await Conversation.findOne({ userId: req.user.id }).sort({ lastActivity: -1 });
+    res.json(conv);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function addUserMessage(req, res) {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Message text is required.' });
+    const conv = await Conversation.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!conv) return res.status(404).json({ error: 'Conversation not found.' });
+    conv.messages.push({ sender: 'user', senderName: req.user.name, text });
+    await conv.save();
+    res.status(201).json(conv);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}

@@ -62,7 +62,7 @@ export default function UserChatView() {
                 <p style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem', fontSize: '0.85rem' }}>No messages yet. Say hello!</p>
               ) : (
                 conv.messages.map((m, i) => (
-                  <div key={i} className={`chat-msg ${m.sender === 'user' ? 'chat-msg-user' : 'chat-msg-admin'}`}>
+                  <div key={i} className={`chat-msg ${m.sender === 'user' ? 'chat-msg-admin' : 'chat-msg-user'}`}>
                     <div className="chat-msg-sender">{m.senderName}</div>
                     <div className="chat-msg-text">{m.text}</div>
                     <div className="chat-msg-time">{new Date(m.createdAt).toLocaleString()}</div>

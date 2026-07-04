@@ -42,7 +42,7 @@ const services = [
 export default function Services() {
   return (
     <section id="services" className="services section-reveal">
-      <h2 className="section-title">What We Offer</h2>
+        <h2 className="section-title">Our Services</h2>
       <p className="section-sub">Everything you need to keep your computer running smoothly</p>
       <div className="cards">
         {services.map((s) => (

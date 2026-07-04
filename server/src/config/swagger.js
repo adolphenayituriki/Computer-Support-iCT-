@@ -4,7 +4,7 @@ const spec = {
     title: 'CS hub (iCT) API',
     version: '1.0.0',
     description: 'REST API for the Computer Support platform — manage users, tickets, suggestions, contacts, and team applications.',
-    contact: { email: 'support@cshub.rw' },
+    contact: { email: 'cshub.rw@gmail.com' },
   },
   servers: [
     { url: 'http://localhost:3001', description: 'Development' },

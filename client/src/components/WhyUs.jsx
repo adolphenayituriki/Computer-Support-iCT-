@@ -3,8 +3,8 @@ import { FaUniversity, FaChalkboardTeacher, FaRocket, FaBolt } from 'react-icons
 const reasons = [
   {
     icon: <FaUniversity />,
-    title: 'Born at UR Huye Campus',
-    desc: 'This initiative started at UR Huye Campus but now serves students anywhere in Rwanda.',
+    title: 'Nationwide Support',
+    desc: 'We serve every corner of Rwanda — all universities, schools, colleges, entrepreneurs, employees, and anyone in need of computer support and ICT skills.',
   },
   {
     icon: <FaChalkboardTeacher />,

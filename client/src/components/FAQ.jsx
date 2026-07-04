@@ -7,7 +7,7 @@ const faqs = [
   },
   {
     q: 'Who can use this service?',
-    a: 'Anyone — students, teachers, staff, and members of the UR Huye community who need computer support or want to build their digital skills.',
+    a: 'Anyone in Rwanda — university students, secondary school learners (day school & boarding), teachers, entrepreneurs, employees, and every individual who needs computer support or wants to build essential digital and ICT skills for today\'s world.',
   },
   {
     q: 'How long does a typical repair take?',
