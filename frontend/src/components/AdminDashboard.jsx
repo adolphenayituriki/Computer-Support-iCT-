@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import AdminChatView from './AdminChatView';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaEye as FaPreview } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
@@ -1035,12 +1035,24 @@ const COLORS = ['#FFCE08', '#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#f97316'
 const FONT_SIZES = ['14px', '16px', '18px', '20px', '24px', '32px'];
 
 function MarkdownEditor({ value, onChange }) {
-  const [showPreview, setShowPreview] = useState(false);
+  const [mode, setMode] = useState('edit');
   const [showColors, setShowColors] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
   const textareaRef = useRef(null);
+  const editorRef = useRef(null);
 
-  const insert = (before, after) => {
+  useEffect(() => {
+    const closeDropdowns = (e) => {
+      if (editorRef.current && !editorRef.current.contains(e.target)) {
+        setShowColors(false);
+        setShowSizes(false);
+      }
+    };
+    document.addEventListener('mousedown', closeDropdowns);
+    return () => document.removeEventListener('mousedown', closeDropdowns);
+  }, []);
+
+  const insert = (before, after = '') => {
     const ta = textareaRef.current;
     if (!ta) return;
     const start = ta.selectionStart;
@@ -1059,88 +1071,79 @@ function MarkdownEditor({ value, onChange }) {
     if (!ta) return;
     const start = ta.selectionStart;
     const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-    const line = value.substring(lineStart, value.indexOf('\n', start) === -1 ? value.length : value.indexOf('\n', start));
-    const next = value.substring(0, lineStart) + prefix + line + value.substring(lineStart + line.length);
+    const lineEnd = value.indexOf('\n', start) === -1 ? value.length : value.indexOf('\n', start);
+    const line = value.substring(lineStart, lineEnd);
+    const next = value.substring(0, lineStart) + prefix + line + value.substring(lineEnd);
     onChange(next);
   };
 
-  const btnStyle = (active) => ({
-    background: active ? '#FFCE08' : '#f1f5f9',
-    border: '1px solid #e2e8f0', borderRadius: '6px',
-    padding: '0.35rem 0.55rem', cursor: 'pointer', fontSize: '0.8rem',
-    color: '#334155', display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-    fontFamily: 'inherit', transition: 'background 0.15s', lineHeight: 1,
-  });
-
-  const toolsRow = (
-    <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-      <button type="button" title="Bold" style={btnStyle()} onClick={() => insert('**', '**')} onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}><FaBold /></button>
-      <button type="button" title="Italic" style={btnStyle()} onClick={() => insert('*', '*')} onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}><FaItalic /></button>
-      <button type="button" title="Heading" style={btnStyle()} onClick={() => insertBlock('## ')} onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}><FaHeading /></button>
-      <button type="button" title="Bullet list" style={btnStyle()} onClick={() => insertBlock('- ')} onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}><FaListUl /></button>
-      <button type="button" title="Numbered list" style={btnStyle()} onClick={() => insertBlock('1. ')} onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}><FaListOl /></button>
-      <span style={{ width: '1px', background: '#d1d5db', margin: '0 0.15rem' }} />
-      <div style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column' }}>
-        <button type="button" title="Text color" style={btnStyle(showColors)} onClick={() => { setShowColors(!showColors); setShowSizes(false); }} onMouseEnter={(e) => !showColors && (e.currentTarget.style.background = '#e2e8f0')} onMouseLeave={(e) => !showColors && (e.currentTarget.style.background = '#f1f5f9')}><FaPalette /></button>
-        {showColors && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.4rem', display: 'flex', gap: '0.2rem', flexWrap: 'wrap', width: '162px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 10 }}>
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                title={c}
-                style={{ width: '28px', height: '28px', borderRadius: '6px', background: c, border: c === '#fff' ? '1px solid #d1d5db' : 'none', cursor: 'pointer' }}
-                onClick={() => { insert(`<span style="color:${c}">`, '</span>'); setShowColors(false); }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-      <div style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column' }}>
-        <button type="button" title="Font size" style={btnStyle(showSizes)} onClick={() => { setShowSizes(!showSizes); setShowColors(false); }} onMouseEnter={(e) => !showSizes && (e.currentTarget.style.background = '#e2e8f0')} onMouseLeave={(e) => !showSizes && (e.currentTarget.style.background = '#f1f5f9')}><FaFont /></button>
-        {showSizes && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.25rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 10, minWidth: '90px' }}>
-            {FONT_SIZES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                style={{ display: 'block', width: '100%', padding: '0.3rem 0.6rem', border: 'none', background: 'none', cursor: 'pointer', fontSize: s, textAlign: 'left', borderRadius: '4px', fontFamily: 'inherit' }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                onClick={() => { insert(`<span style="font-size:${s}">`, '</span>'); setShowSizes(false); }}
-              >Aa</button>
-            ))}
-          </div>
-        )}
-      </div>
-      <span style={{ width: '1px', background: '#d1d5db', margin: '0 0.15rem' }} />
-      <button type="button" title={showPreview ? 'Edit' : 'Preview'} style={btnStyle(showPreview)} onClick={() => setShowPreview(!showPreview)} onMouseEnter={(e) => !showPreview && (e.currentTarget.style.background = '#e2e8f0')} onMouseLeave={(e) => !showPreview && (e.currentTarget.style.background = '#f1f5f9')}><FaPreview /> {showPreview ? 'Edit' : 'Preview'}</button>
-    </div>
-  );
   return (
-    <div style={{ marginBottom: '0.7rem' }}>
-      <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
-        {toolsRow}
+    <div className="md-editor" ref={editorRef}>
+      <div className="md-toolbar">
+        <div className="md-toolbar-group">
+          <button type="button" className="md-btn" title="Bold" onClick={() => insert('**', '**')}><FaBold /></button>
+          <button type="button" className="md-btn" title="Italic" onClick={() => insert('*', '*')}><FaItalic /></button>
+          <button type="button" className="md-btn" title="Heading" onClick={() => insertBlock('## ')}><FaHeading /></button>
+          <button type="button" className="md-btn" title="Bullet list" onClick={() => insertBlock('- ')}><FaListUl /></button>
+          <button type="button" className="md-btn" title="Numbered list" onClick={() => insertBlock('1. ')}><FaListOl /></button>
+          <button type="button" className="md-btn" title="Link" onClick={() => insert('[', '](url)')}><FaLink /></button>
+          <button type="button" className="md-btn" title="Code block" onClick={() => insert('```\n', '\n```')}><FaCode /></button>
+        </div>
+        <span className="md-separator" />
+        <div className="md-toolbar-group">
+          <div className="md-dropdown-wrap">
+            <button type="button" className={`md-btn${showColors ? ' active' : ''}`} title="Text color" onClick={() => { setShowColors(!showColors); setShowSizes(false); }}><FaPalette /></button>
+            {showColors && (
+              <div className="md-dropdown">
+                <div className="md-color-grid">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className="md-color-swatch"
+                      title={c}
+                      style={{ background: c }}
+                      onClick={() => { insert(`<span style="color:${c}">`, '</span>'); setShowColors(false); }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="md-dropdown-wrap">
+            <button type="button" className={`md-btn${showSizes ? ' active' : ''}`} title="Font size" onClick={() => { setShowSizes(!showSizes); setShowColors(false); }}><FaFont /></button>
+            {showSizes && (
+              <div className="md-dropdown md-size-list">
+                {FONT_SIZES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="md-size-option"
+                    style={{ fontSize: s }}
+                    onClick={() => { insert(`<span style="font-size:${s}">`, '</span>'); setShowSizes(false); }}
+                  >Aa</button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="md-tabs">
+          <button type="button" className={`md-tab${mode === 'edit' ? ' active' : ''}`} onClick={() => setMode('edit')}>Write</button>
+          <button type="button" className={`md-tab${mode === 'preview' ? ' active' : ''}`} onClick={() => setMode('preview')}>Preview</button>
+        </div>
       </div>
-      {showPreview ? (
-        <div
-          className="course-content"
-          style={{
-            background: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '10px',
-            padding: '1rem', minHeight: '120px', fontSize: '0.9rem',
-            overflowY: 'auto', maxHeight: '300px',
-          }}
-        >
-          {value ? <ReactMarkdown rehypePlugins={[rehypeRaw]}>{value}</ReactMarkdown> : <span style={{ color: '#9ca3af' }}>Preview will appear here...</span>}
+      {mode === 'preview' ? (
+        <div className="md-preview course-content">
+          {value ? <ReactMarkdown rehypePlugins={[rehypeRaw]}>{value}</ReactMarkdown> : <span className="md-preview-empty">Your preview will appear here as you write...</span>}
         </div>
       ) : (
         <textarea
           ref={textareaRef}
+          className="md-textarea"
           rows="6"
-          placeholder="Full course content (markdown or HTML)"
+          placeholder="Write your course content here — markdown and HTML are both supported."
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.88rem' }}
         />
       )}
     </div>

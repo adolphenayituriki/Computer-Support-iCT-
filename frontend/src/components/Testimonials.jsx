@@ -3,11 +3,11 @@ import { FaStar, FaQuoteLeft, FaUser, FaTimes, FaCamera } from 'react-icons/fa';
 
 function StarRating({ value, onChange }) {
   return (
-    <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.7rem' }}>
+    <div className={`star-rating${onChange ? ' star-rating-interactive' : ''}`}>
       {[1, 2, 3, 4, 5].map((star) => (
         <FaStar
           key={star}
-          size={22}
+          size={onChange ? 22 : 14}
           style={{ cursor: onChange ? 'pointer' : 'default', color: star <= value ? '#FFCE08' : '#d1d5db' }}
           onClick={() => onChange?.(star)}
         />
@@ -40,49 +40,47 @@ function SubmitTestimonialModal({ open, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+      <div className="modal-content modal-auth" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ margin: 0 }}>{done ? 'Thank You!' : 'Share Your Testimonial'}</h3>
-          <button className="ticket-action-btn" onClick={onClose}><FaTimes /></button>
+          <h2 style={{ margin: 0, fontSize: '1.2rem' }}>{done ? 'Thank You!' : 'Share Your Testimonial'}</h2>
+          <button type="button" className="ticket-action-btn" onClick={onClose} aria-label="Close"><FaTimes /></button>
         </div>
         {done ? (
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
             <FaQuoteLeft size={36} style={{ color: '#FFCE08', marginBottom: '1rem' }} />
             <p style={{ color: '#334155', fontSize: '1.05rem', marginBottom: '0.5rem' }}>Your testimonial has been submitted!</p>
-            <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>It will be visible on the site after admin approval.</p>
-            <button className="btn" onClick={onClose} style={{ marginTop: '1rem' }}>Close</button>
+            <p className="auth-sub">It will be visible on the site after admin approval.</p>
+            <button type="button" className="btn" onClick={onClose} style={{ marginTop: '1rem' }}>Close</button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: 'flex', gap: '0.7rem', marginBottom: '0.7rem' }}>
+          <form onSubmit={handleSubmit} className="modal-auth">
+            <div className="form-row">
               <input
                 placeholder="Your name *"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
-                style={{ flex: 1 }}
               />
               <input
                 placeholder="Role (optional)"
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
-                style={{ flex: 1 }}
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.7rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <input
                 placeholder="Avatar URL (optional)"
                 value={form.avatar}
                 onChange={(e) => setForm({ ...form, avatar: e.target.value })}
                 style={{ flex: 1 }}
               />
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}><FaCamera /> or use avatar</span>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}><FaCamera /> optional</span>
             </div>
-            <label style={{ fontSize: '0.85rem', color: '#4b5563', display: 'block', marginBottom: '0.3rem' }}>Rating</label>
+            <label style={{ fontSize: '0.85rem', color: '#4b5563', display: 'block', textAlign: 'left' }}>Rating</label>
             <StarRating value={form.rating} onChange={(r) => setForm({ ...form, rating: r })} />
             <textarea
               rows="4"
-              placeholder="Your testimonial *"
+              placeholder="Tell us about your experience..."
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
               required
@@ -110,51 +108,42 @@ export default function Testimonials() {
 
   return (
     <>
-      <section id="testimonials" className="testimonials section-reveal" style={{ background: '#f8fafc' }}>
+      <section id="testimonials" className="testimonials section-reveal section-alt">
         <div className="container">
           <h2 className="section-title">What People Say</h2>
-          <p className="section-sub">Real testimonials from our community</p>
+          <p className="section-sub">Real stories from people we&apos;ve helped along the way</p>
           {testimonials.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-              <FaQuoteLeft size={32} style={{ marginBottom: '0.5rem', color: '#d1d5db' }} />
+            <div className="testimonials-empty">
+              <FaQuoteLeft size={32} style={{ marginBottom: '0.75rem', color: '#d1d5db' }} />
               <p>No testimonials yet. Be the first to share your experience!</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <div className="testimonial-grid">
               {testimonials.map((t) => (
-                <div
-                  key={t._id}
-                  style={{
-                    background: 'white', borderRadius: '12px', padding: '1.5rem',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9',
-                    position: 'relative',
-                  }}
-                >
-                  <FaQuoteLeft size={18} style={{ color: '#FFCE08', opacity: 0.3, position: 'absolute', top: '1rem', right: '1rem' }} />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <article key={t._id} className="testimonial-card">
+                  <FaQuoteLeft size={18} className="testimonial-quote-icon" />
+                  <div className="testimonial-author">
                     {t.avatar ? (
-                      <img src={t.avatar} alt={t.name} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <img src={t.avatar} alt={t.name} className="testimonial-avatar" />
                     ) : (
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#FFCE08', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '1.2rem', fontWeight: 700 }}>
+                      <div className="testimonial-avatar-fallback">
                         {t.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <strong style={{ color: '#1e293b', display: 'block', fontSize: '0.95rem' }}>{t.name}</strong>
-                      {t.role && <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>{t.role}</span>}
+                      <strong className="testimonial-name">{t.name}</strong>
+                      {t.role && <span className="testimonial-role">{t.role}</span>}
                     </div>
                   </div>
                   <StarRating value={t.rating} />
-                  <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
-                    &ldquo;{t.content}&rdquo;
-                  </p>
-                </div>
+                  <p className="testimonial-text">&ldquo;{t.content}&rdquo;</p>
+                </article>
               ))}
             </div>
           )}
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <button className="btn" onClick={() => setShowSubmit(true)}>
-              <FaUser style={{ marginRight: '0.5rem' }} /> Add Your Testimonial
+          <div className="testimonials-cta">
+            <button type="button" className="btn" onClick={() => setShowSubmit(true)}>
+              <FaUser style={{ marginRight: '0.5rem' }} /> Share Your Story
             </button>
           </div>
         </div>
