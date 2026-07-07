@@ -3059,8 +3059,6 @@ header.dash-header .hamburger span {
 
 /* -- Responsive / Mobile App Enhancements -- */
 @media (max-width: 768px) {
-  header, header.scrolled { background: #fff; }
-
   /* ─── Overlay ─── */
   .nav-overlay {
     display: block;
@@ -3074,7 +3072,7 @@ header.dash-header .hamburger span {
   }
 
   /* ─── Navigation (app-drawer) ─── */
-  .nav-links {
+  header .nav-links {
     position: fixed;
     top: 0;
     right: -100%;
@@ -3093,14 +3091,14 @@ header.dash-header .hamburger span {
     overflow-y: auto;
     border-left: 1px solid rgba(255, 255, 255, 0.06);
   }
-  .nav-links.active { right: 0; }
+  header .nav-links.active { right: 0; }
 
   .hamburger { display: flex; }
 
-  .nav-links li { width: 100%; list-style: none; }
+  header .nav-links li { width: 100%; list-style: none; }
 
-  .nav-links a,
-  .nav-links .btn-link {
+  header .nav-links a,
+  header .nav-links .btn-link {
     color: #e2e8f0 !important;
     font-size: 1rem;
     padding: 0.7rem 1rem;
@@ -3109,12 +3107,12 @@ header.dash-header .hamburger span {
     display: block;
     font-weight: 500;
   }
-  .nav-links a:active,
-  .nav-links .btn-link:active {
+  header .nav-links a:active,
+  header .nav-links .btn-link:active {
     background: rgba(255, 206, 8, 0.12) !important;
     color: #FFCE08 !important;
   }
-  .nav-links a.active {
+  header .nav-links a.active {
     background: rgba(255, 206, 8, 0.15);
     color: #FFCE08 !important;
   }
