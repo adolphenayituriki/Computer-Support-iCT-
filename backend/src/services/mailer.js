@@ -119,6 +119,21 @@ export async function sendContactAutoReply(toEmail, name) {
   });
 }
 
+export async function sendTeamApplicationReceived(toEmail, name) {
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
+    to: toEmail,
+    subject: 'Application Received — CS Hub (iCT)',
+    html: baseHtml(`
+      <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Thank You, ${name}!</h2>
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">We have received your team application and will review it shortly.</p>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin: 0;">
+        You will receive an email once your application is reviewed. Track your status in your <a href="https://computer-support-ict.vercel.app/dashboard" style="color: #38bdf8;">dashboard</a>.
+      </p>
+    `),
+  });
+}
+
 export async function sendAdminNotification(subject, body) {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
