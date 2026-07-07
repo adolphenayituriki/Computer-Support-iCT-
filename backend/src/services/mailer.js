@@ -1,13 +1,8 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.ADMIN_EMAIL,
-    pass: process.env.ADMIN_PASSWORD,
-  },
-  tls: { rejectUnauthorized: false },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const FROM = { email: process.env.ADMIN_EMAIL, name: 'CS Hub (iCT)' };
 
 function baseHtml(content) {
   return `
@@ -27,9 +22,8 @@ function baseHtml(content) {
 }
 
 export async function sendResetEmail(toEmail, token) {
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
-    to: toEmail,
+  await sgMail.send({
+    to: toEmail, from: FROM,
     subject: 'Password Reset Code — CS Hub (iCT)',
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Reset Password</h2>
@@ -47,9 +41,8 @@ export async function sendResetEmail(toEmail, token) {
 }
 
 export async function sendTicketConfirmation(toEmail, name, ticket) {
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
-    to: toEmail,
+  await sgMail.send({
+    to: toEmail, from: FROM,
     subject: `Ticket Confirmed — ${ticket.title}`,
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Support Ticket Confirmed</h2>
@@ -67,9 +60,8 @@ export async function sendTicketConfirmation(toEmail, name, ticket) {
 }
 
 export async function sendTicketReplyNotification(toEmail, name, ticket, replyText) {
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
-    to: toEmail,
+  await sgMail.send({
+    to: toEmail, from: FROM,
     subject: `New Reply — ${ticket.title}`,
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">New Reply on Your Ticket</h2>
@@ -86,9 +78,8 @@ export async function sendTicketReplyNotification(toEmail, name, ticket, replyTe
 
 export async function sendTeamStatusUpdate(toEmail, name, status, app) {
   const isApproved = status === 'approved';
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
-    to: toEmail,
+  await sgMail.send({
+    to: toEmail, from: FROM,
     subject: `Application ${isApproved ? 'Approved' : 'Updated'} — CS Hub (iCT)`,
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Application ${isApproved ? 'Approved' : 'Updated'}</h2>
@@ -105,9 +96,8 @@ export async function sendTeamStatusUpdate(toEmail, name, status, app) {
 }
 
 export async function sendContactAutoReply(toEmail, name) {
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
-    to: toEmail,
+  await sgMail.send({
+    to: toEmail, from: FROM,
     subject: 'We received your message — CS Hub (iCT)',
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Thank You, ${name}!</h2>
@@ -120,9 +110,8 @@ export async function sendContactAutoReply(toEmail, name) {
 }
 
 export async function sendTeamApplicationReceived(toEmail, name) {
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.ADMIN_EMAIL}>`,
-    to: toEmail,
+  await sgMail.send({
+    to: toEmail, from: FROM,
     subject: 'Application Received — CS Hub (iCT)',
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Thank You, ${name}!</h2>
@@ -137,9 +126,8 @@ export async function sendTeamApplicationReceived(toEmail, name) {
 export async function sendAdminNotification(subject, body) {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
-  await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${adminEmail}>`,
-    to: adminEmail,
+  await sgMail.send({
+    to: adminEmail, from: FROM,
     subject: `[Admin] ${subject}`,
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Admin Notification</h2>
