@@ -3059,6 +3059,8 @@ header.dash-header .hamburger span {
 
 /* -- Responsive / Mobile App Enhancements -- */
 @media (max-width: 768px) {
+  header, header.scrolled { background: #fff; }
+
   /* ─── Overlay ─── */
   .nav-overlay {
     display: block;
