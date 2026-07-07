@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { ToastProvider } from './ToastContext';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -65,85 +65,41 @@ export default function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
-  const openLogin = () => {
-    setShowRegister(false);
-    setShowTeam(false);
-    setShowForgot(false);
-    setShowLogin(true);
-  };
+  const openLogin = () => { setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowLogin(true); };
+  const openRegister = () => { setShowLogin(false); setShowTeam(false); setShowForgot(false); setShowRegister(true); };
+  const openTeam = () => { setShowLogin(false); setShowRegister(false); setShowForgot(false); setShowTeam(true); };
+  const openForgot = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(true); };
+  const closeAll = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(false); };
 
-  const openRegister = () => {
-    setShowLogin(false);
-    setShowTeam(false);
-    setShowForgot(false);
-    setShowRegister(true);
-  };
+  function AppLayout() {
+    const location = useLocation();
+    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/admin';
 
-  const openTeam = () => {
-    setShowLogin(false);
-    setShowRegister(false);
-    setShowForgot(false);
-    setShowTeam(true);
-  };
-
-  const openForgot = () => {
-    setShowLogin(false);
-    setShowRegister(false);
-    setShowTeam(false);
-    setShowForgot(true);
-  };
-
-  const closeAll = () => {
-    setShowLogin(false);
-    setShowRegister(false);
-    setShowTeam(false);
-    setShowForgot(false);
-  };
+    return (
+      <>
+        <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />
+        <Routes>
+          <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+        </Routes>
+        {!isDashboard && <Footer />}
+        <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="whatsapp-float" title="Join our WhatsApp group"><FaWhatsapp /></a>
+        <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} /></Modal>
+        <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
+        <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>
+        <Modal open={showForgot} onClose={closeAll}><ForgotPasswordModal onClose={closeAll} onBackToLogin={openLogin} /></Modal>
+      </>
+    );
+  }
 
   return (
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />
-          <Routes>
-            <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute adminOnly>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-          <Footer />
-
-          <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="whatsapp-float" title="Join our WhatsApp group">
-            <FaWhatsapp />
-          </a>
-
-          <Modal open={showLogin} onClose={closeAll}>
-            <LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} />
-          </Modal>
-          <Modal open={showRegister} onClose={closeAll}>
-            <RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} />
-          </Modal>
-          <Modal open={showTeam} onClose={closeAll} wide>
-            <TeamApplyModal onClose={closeAll} />
-          </Modal>
-          <Modal open={showForgot} onClose={closeAll}>
-            <ForgotPasswordModal onClose={closeAll} onBackToLogin={openLogin} />
-          </Modal>
+          <AppLayout />
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

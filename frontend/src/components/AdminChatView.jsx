@@ -103,7 +103,16 @@ export default function AdminChatView() {
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+    const h = (e) => {
+      setActiveId(e.detail.id);
+      setActiveType(e.detail.type || 'direct');
+      fetchAll();
+    };
+    window.addEventListener('opencode-select-conversation', h);
+    return () => window.removeEventListener('opencode-select-conversation', h);
+  }, []);
 
   useEffect(() => {
     if (activeId && activeType) {
@@ -140,11 +149,24 @@ export default function AdminChatView() {
     const res = await api('/api/admin/conversations', { method: 'POST', body: JSON.stringify({ userId: selectedUserId }) });
     setCreating(false);
     if (res.error) return showToast(res.error, 'error');
+    const conv = {
+      _id: res._id,
+      type: 'direct',
+      userId: res.userId,
+      userName: res.userName,
+      userEmail: res.userEmail,
+      title: 'Direct Message',
+      status: null,
+      messages: res.messages || [],
+      lastMsg: null,
+      lastActivity: res.lastActivity || res.createdAt,
+    };
+    setItems((prev) => [conv, ...prev]);
+    setActiveId(conv._id);
+    setActiveType('direct');
+    setActiveConv(conv);
     setShowNew(false);
     setSelectedUserId('');
-    setActiveId(res._id);
-    setActiveType('direct');
-    fetchAll();
   };
 
   const openNew = () => {

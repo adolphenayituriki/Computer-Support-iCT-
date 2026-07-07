@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -554,6 +554,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState('tickets');
   const [teamData, setTeamData] = useState(null);
   const [teamLoading, setTeamLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -572,44 +573,57 @@ export default function Dashboard() {
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
+  const sidebarTabs = [
+    { key: 'tickets', icon: <FaTicketAlt />, label: 'Support Tickets' },
+    { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
+    { key: 'chat', icon: <FaComments />, label: 'Messages' },
+  ];
+
+  if (teamData?.isTeamMember) {
+    sidebarTabs.push({ key: 'team', icon: <FaUserTie />, label: 'My Team' });
+  }
+
   return (
     <div className="dashboard">
-      <div className="dash-welcome">
-        <div className="dash-avatar">{initials}</div>
-        <div>
-          <h2>Welcome, {user?.name}</h2>
-          <p>Get computer support, ICT training, and digital skills — we are here for all Rwandans, anywhere in the country.</p>
+      <div className="dash-layout">
+        {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+        <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <FaBars />
+        </button>
+        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`}>
+          <div className="dash-sidebar-header">
+            <div className="dash-sidebar-avatar">{initials}</div>
+            <div className="dash-sidebar-name">{user?.name}</div>
+            <div className="dash-sidebar-role">User Dashboard</div>
+          </div>
+          <div className="dash-sidebar-nav">
+            {sidebarTabs.map((t) => (
+              <button
+                key={t.key}
+                className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
+                onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+              >
+                <span className="dash-sidebar-tab-icon">{t.icon}</span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="dash-main">
+          {tab === 'tickets' ? (
+            <TicketsView tickets={tickets} setTickets={setTickets} />
+          ) : tab === 'suggestions' ? (
+            <SuggestionsView />
+          ) : tab === 'chat' ? (
+            <UserChatView />
+          ) : tab === 'team' && teamData?.isTeamMember ? (
+            <TeamView teamData={teamData} />
+          ) : (
+            <UserChatView />
+          )}
         </div>
       </div>
-
-      <div className="dash-tabs">
-        <button className={`dash-tab${tab === 'tickets' ? ' active' : ''}`} onClick={() => setTab('tickets')}>
-          <FaTicketAlt /> Support Tickets
-        </button>
-        <button className={`dash-tab${tab === 'suggestions' ? ' active' : ''}`} onClick={() => setTab('suggestions')}>
-          <FaLightbulb /> Suggestions
-        </button>
-        <button className={`dash-tab${tab === 'chat' ? ' active' : ''}`} onClick={() => setTab('chat')}>
-          <FaComments /> Messages
-        </button>
-        {teamData?.isTeamMember && (
-          <button className={`dash-tab${tab === 'team' ? ' active' : ''}`} onClick={() => setTab('team')}>
-            <FaUserTie /> My Team
-          </button>
-        )}
-      </div>
-
-      {tab === 'tickets' ? (
-        <TicketsView tickets={tickets} setTickets={setTickets} />
-      ) : tab === 'suggestions' ? (
-        <SuggestionsView />
-      ) : tab === 'chat' ? (
-        <UserChatView />
-      ) : tab === 'team' && teamData?.isTeamMember ? (
-        <TeamView teamData={teamData} />
-      ) : (
-        <UserChatView />
-      )}
     </div>
   );
 }

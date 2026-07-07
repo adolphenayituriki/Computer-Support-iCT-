@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import AdminChatView from './AdminChatView';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
@@ -12,6 +12,7 @@ const TICKET_STATUSES = ['open', 'in-progress', 'resolved', 'closed'];
 const SUGGESTION_STATUSES = ['pending', 'reviewed', 'implemented'];
 const CONTACT_STATUSES = ['new', 'read', 'responded'];
 const TEAM_STATUSES = ['pending', 'approved', 'rejected'];
+const sortByDate = (arr) => [...arr].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
 function api(url, opts = {}) {
   return fetch(`${API_BASE}${url}`, {
@@ -145,12 +146,14 @@ function DetailModal({ item, type, onClose, onUpdated }) {
 
   useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [currentItem?.messages]);
 
+  const itemId = item._id || item.id;
+
   const handleUpdate = async () => {
     setSaving(true);
     const urlMap = {
-      suggestion: `${API_BASE}/api/admin/suggestions/${item.id}`,
-      contact: `${API_BASE}/api/admin/contacts/${item.id}`,
-      team: `${API_BASE}/api/admin/team-apps/${item.id}`,
+      suggestion: `/api/admin/suggestions/${itemId}`,
+      contact: `/api/admin/contacts/${itemId}`,
+      team: `/api/admin/team-apps/${itemId}`,
     };
     const res = await api(urlMap[type], { method: 'PUT', body: JSON.stringify(form) });
     setSaving(false);
@@ -163,7 +166,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
   const handleSendReply = async () => {
     if (!replyText.trim()) return;
     setSendingReply(true);
-    const res = await fetch(`${API_BASE}/api/admin/${type === 'suggestion' ? 'suggestions' : 'tickets'}/${item.id}/messages`, {
+    const res = await fetch(`${API_BASE}/api/admin/${type === 'suggestion' ? 'suggestions' : 'tickets'}/${itemId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
       body: JSON.stringify({ text: replyText }),
@@ -279,6 +282,7 @@ function AdminTickets() {
   const [updatingId, setUpdatingId] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
     api('/api/admin/tickets').then(setTickets).catch(() => {});
@@ -428,7 +432,9 @@ function AdminTickets() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : filtered.length === 0 ? (
         <div className="empty-state"><FaTicketAlt size={36} style={{ color: '#d1d5db' }} /><p>No tickets found.</p></div>
       ) : (
         <div className="ticket-list">
@@ -489,9 +495,11 @@ function AdminUsers() {
   const [editForm, setEditForm] = useState({});
   const [deletingId, setDeletingId] = useState(null);
   const [savingId, setSavingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/users').then(setUsers).catch(() => {});
+    setLoading(true);
+    api('/api/admin/users').then((d) => { setUsers(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -528,7 +536,9 @@ function AdminUsers() {
         <h3 style={{ margin: 0 }}>Users ({users.length})</h3>
         <button className="btn btn-sm" onClick={() => setShowCreate(true)}><FaPlus /> New User</button>
       </div>
-      {users.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : users.length === 0 ? (
         <div className="empty-state"><FaUsers size={36} style={{ color: '#d1d5db' }} /><p>No users.</p></div>
       ) : (
         <div className="admin-list">
@@ -576,9 +586,11 @@ function AdminSuggestions() {
   const [items, setItems] = useState([]);
   const [detail, setDetail] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/suggestions').then(setItems).catch(() => {});
+    setLoading(true);
+    api('/api/admin/suggestions').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -598,7 +610,9 @@ function AdminSuggestions() {
     <>
       {detail && <DetailModal item={detail} type="suggestion" onClose={() => setDetail(null)} onUpdated={fetchData} />}
       <h3><FaLightbulb style={{ color: '#FFCE08' }} /> Suggestions ({items.length})</h3>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaLightbulb size={36} style={{ color: '#d1d5db' }} /><p>No suggestions.</p></div>
       ) : (
         <div className="admin-list">
@@ -629,9 +643,11 @@ function AdminContacts() {
   const [items, setItems] = useState([]);
   const [detail, setDetail] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/contacts').then(setItems).catch(() => {});
+    setLoading(true);
+    api('/api/admin/contacts').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -651,7 +667,9 @@ function AdminContacts() {
     <>
       {detail && <DetailModal item={detail} type="contact" onClose={() => setDetail(null)} onUpdated={fetchData} />}
       <h3><FaEnvelope style={{ color: '#60a5fa' }} /> Contact Messages ({items.length})</h3>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaEnvelope size={36} style={{ color: '#d1d5db' }} /><p>No messages.</p></div>
       ) : (
         <div className="admin-list">
@@ -687,13 +705,15 @@ function AdminTeams() {
   const [assignId, setAssignId] = useState(null);
   const [beneficiaries, setBeneficiaries] = useState([]);
   const [showAssign, setShowAssign] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/team-apps').then(setItems).catch(() => {});
+    setLoading(true);
+    api('/api/admin/team-apps').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   const fetchBeneficiaries = () => {
-    api('/api/admin/beneficiaries').then(setBeneficiaries).catch(() => {});
+    api('/api/admin/beneficiaries').then((d) => setBeneficiaries(sortByDate(d))).catch(() => {});
   };
 
   useEffect(() => { fetchData(); fetchBeneficiaries(); }, []);
@@ -773,7 +793,9 @@ function AdminTeams() {
       )}
       {detail && <DetailModal item={detail} type="team" onClose={() => setDetail(null)} onUpdated={fetchData} />}
       <h3><FaUserTie style={{ color: '#16a34a' }} /> Team Applications ({items.length})</h3>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaUserTie size={36} style={{ color: '#d1d5db' }} /><p>No applications.</p></div>
       ) : (
         <div className="admin-list">
@@ -830,9 +852,11 @@ function AdminNews() {
   const [createForm, setCreateForm] = useState({ title: '', content: '', mediaType: 'text', mediaUrl: '', published: true });
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/news').then(setItems).catch(() => {});
+    setLoading(true);
+    api('/api/admin/news').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -904,7 +928,9 @@ function AdminNews() {
         <h3><FaNewspaper style={{ color: '#FFCE08' }} /> News ({items.length})</h3>
         <button className="btn btn-sm" onClick={() => setShowCreate(true)}><FaPlus /> New Post</button>
       </div>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaNewspaper size={36} style={{ color: '#d1d5db' }} /><p>No news posted yet.</p></div>
       ) : (
         <div className="admin-list">
@@ -961,9 +987,11 @@ function AdminTestimonials() {
   const { showToast } = useToast();
   const [items, setItems] = useState([]);
   const [submittingId, setSubmittingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/testimonials').then(setItems).catch(() => {});
+    setLoading(true);
+    api('/api/admin/testimonials').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -993,7 +1021,9 @@ function AdminTestimonials() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h3><FaStar style={{ color: '#FFCE08' }} /> Testimonials ({items.length})</h3>
       </div>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaStar size={36} style={{ color: '#d1d5db' }} /><p>No testimonials yet.</p></div>
       ) : (
         <div className="admin-list">
@@ -1159,9 +1189,11 @@ function AdminCourses() {
   const [createForm, setCreateForm] = useState({ title: '', description: '', content: '', category: 'general', difficulty: 'beginner', estimatedTime: '', published: true, tags: '' });
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/courses').then(setItems).catch(() => {});
+    setLoading(true);
+    api('/api/admin/courses').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -1240,7 +1272,9 @@ function AdminCourses() {
         <h3><FaBookOpen style={{ color: '#06b6d4' }} /> Courses ({items.length})</h3>
         <button className="btn btn-sm" onClick={() => setShowCreate(true)}><FaPlus /> New Course</button>
       </div>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaBookOpen size={36} style={{ color: '#d1d5db' }} /><p>No courses created yet.</p></div>
       ) : (
         <div className="admin-list">
@@ -1302,10 +1336,12 @@ function AdminBeneficiaries() {
   const [editForm, setEditForm] = useState({ status: 'open', assignedTo: '', notes: '' });
   const [deletingId, setDeletingId] = useState(null);
   const [savingId, setSavingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    api('/api/admin/beneficiaries').then(setItems).catch(() => {});
-    api('/api/admin/team-apps').then((all) => setTeams(all.filter((t) => t.status === 'approved'))).catch(() => {});
+    setLoading(true);
+    api('/api/admin/beneficiaries').then((d) => { setItems(sortByDate(d)); setLoading(false); }).catch(() => setLoading(false));
+    api('/api/admin/team-apps').then((all) => setTeams(sortByDate(all).filter((t) => t.status === 'approved'))).catch(() => {});
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -1339,7 +1375,9 @@ function AdminBeneficiaries() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h3><FaUserTie style={{ color: '#8b5cf6' }} /> Beneficiaries ({items.length})</h3>
       </div>
-      {items.length === 0 ? (
+      {loading ? (
+        <Loading />
+      ) : items.length === 0 ? (
         <div className="empty-state"><FaUserTie size={36} style={{ color: '#d1d5db' }} /><p>No beneficiaries yet.</p></div>
       ) : (
         <div className="admin-list">
@@ -1389,59 +1427,9 @@ function AdminBeneficiaries() {
   );
 }
 
-export default function AdminDashboard() {
-  const { user } = useAuth();
-  const [tab, setTab] = useState('tickets');
-  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
-
-  useEffect(() => {
-    const h = (e) => setTab(e.detail.tab);
-    window.addEventListener('opencode-navigate-tab', h);
-    return () => window.removeEventListener('opencode-navigate-tab', h);
-  }, []);
-
-  const [ticketChart, setTicketChart] = useState({ open: 0, inProgress: 0, resolved: 0, closed: 0 });
-
-  useEffect(() => {
-    const endpoints = [
-      ['users', '/api/admin/users'],
-      ['tickets', '/api/admin/tickets'],
-      ['suggestions', '/api/admin/suggestions'],
-      ['contacts', '/api/admin/contacts'],
-      ['teams', '/api/admin/team-apps'],
-      ['news', '/api/admin/news'],
-      ['courses', '/api/admin/courses'],
-      ['beneficiaries', '/api/admin/beneficiaries'],
-      ['testimonials', '/api/admin/testimonials'],
-    ];
-    Promise.allSettled(endpoints.map(([_, url]) => api(url)))
-      .then((results) => {
-        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 };
-        results.forEach((r, i) => {
-          if (r.status === 'fulfilled' && Array.isArray(r.value)) s[endpoints[i][0]] = r.value.length;
-        });
-        setStats(s);
-        const ticketsArr = results[1].status === 'fulfilled' && Array.isArray(results[1].value) ? results[1].value : [];
-        setTicketChart({
-          open: ticketsArr.filter((t) => t.status === 'open' || t.status === 'in-progress').length,
-          resolved: ticketsArr.filter((t) => t.status === 'resolved').length,
-          closed: ticketsArr.filter((t) => t.status === 'closed').length,
-        });
-      });
-  }, []);
-
-  const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'A';
-
+function AnalyticsView({ stats, ticketChart }) {
   return (
-    <div className="dashboard admin-dashboard">
-      <div className="dash-welcome">
-        <div className="dash-avatar">{initials}</div>
-        <div>
-          <h2>Admin Dashboard</h2>
-          <p>Manage tickets, users, suggestions, contacts, team applications, beneficiaries, news, courses, testimonials, and chat.</p>
-        </div>
-      </div>
-
+    <>
       <div className="dash-stats">
         <div className="dash-stat-card">
           <FaTicketAlt className="dash-stat-icon" />
@@ -1528,31 +1516,132 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+    </>
+  );
+}
 
-      <div className="dash-tabs">
-        <button className={`dash-tab${tab === 'tickets' ? ' active' : ''}`} onClick={() => setTab('tickets')}><FaTicketAlt /> Tickets</button>
-        <button className={`dash-tab${tab === 'users' ? ' active' : ''}`} onClick={() => setTab('users')}><FaUsers /> Users</button>
-        <button className={`dash-tab${tab === 'suggestions' ? ' active' : ''}`} onClick={() => setTab('suggestions')}><FaLightbulb /> Suggestions</button>
-        <button className={`dash-tab${tab === 'contacts' ? ' active' : ''}`} onClick={() => setTab('contacts')}><FaEnvelope /> Contacts</button>
-        <button className={`dash-tab${tab === 'teams' ? ' active' : ''}`} onClick={() => setTab('teams')}><FaUserTie /> Applications</button>
-        <button className={`dash-tab${tab === 'chat' ? ' active' : ''}`} onClick={() => setTab('chat')}><FaComments /> Chat</button>
-        <button className={`dash-tab${tab === 'news' ? ' active' : ''}`} onClick={() => setTab('news')}><FaNewspaper /> News</button>
-        <button className={`dash-tab${tab === 'courses' ? ' active' : ''}`} onClick={() => setTab('courses')}><FaBookOpen /> Courses</button>
-        <button className={`dash-tab${tab === 'beneficiaries' ? ' active' : ''}`} onClick={() => setTab('beneficiaries')}><FaUserTie /> Beneficiaries</button>
-        <button className={`dash-tab${tab === 'testimonials' ? ' active' : ''}`} onClick={() => setTab('testimonials')}><FaStar /> Testimonials</button>
-      </div>
+function Loading() {
+  return (
+    <div className="loading-spinner">
+      <div className="loading-spinner-circle" />
+      <span>Loading...</span>
+    </div>
+  );
+}
 
-      <div className="admin-panel">
-        {tab === 'tickets' && <AdminTickets />}
-        {tab === 'users' && <AdminUsers />}
-        {tab === 'suggestions' && <AdminSuggestions />}
-        {tab === 'contacts' && <AdminContacts />}
-        {tab === 'teams' && <AdminTeams />}
-        {tab === 'chat' && <AdminChatView />}
-        {tab === 'beneficiaries' && <AdminBeneficiaries />}
-        {tab === 'news' && <AdminNews />}
-        {tab === 'courses' && <AdminCourses />}
-        {tab === 'testimonials' && <AdminTestimonials />}
+export default function AdminDashboard() {
+  const { user } = useAuth();
+  const [tab, setTab] = useState('analytics');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const h = (e) => setTab(e.detail.tab);
+    window.addEventListener('opencode-navigate-tab', h);
+    return () => window.removeEventListener('opencode-navigate-tab', h);
+  }, []);
+
+  const [ticketChart, setTicketChart] = useState({ open: 0, inProgress: 0, resolved: 0, closed: 0 });
+
+  useEffect(() => {
+    const endpoints = [
+      ['users', '/api/admin/users'],
+      ['tickets', '/api/admin/tickets'],
+      ['suggestions', '/api/admin/suggestions'],
+      ['contacts', '/api/admin/contacts'],
+      ['teams', '/api/admin/team-apps'],
+      ['news', '/api/admin/news'],
+      ['courses', '/api/admin/courses'],
+      ['beneficiaries', '/api/admin/beneficiaries'],
+      ['testimonials', '/api/admin/testimonials'],
+    ];
+    Promise.allSettled(endpoints.map(([_, url]) => api(url)))
+      .then((results) => {
+        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 };
+        results.forEach((r, i) => {
+          if (r.status === 'fulfilled' && Array.isArray(r.value)) s[endpoints[i][0]] = r.value.length;
+        });
+        setStats(s);
+        const ticketsArr = results[1].status === 'fulfilled' && Array.isArray(results[1].value) ? results[1].value : [];
+        setTicketChart({
+          open: ticketsArr.filter((t) => t.status === 'open' || t.status === 'in-progress').length,
+          resolved: ticketsArr.filter((t) => t.status === 'resolved').length,
+          closed: ticketsArr.filter((t) => t.status === 'closed').length,
+        });
+        setStatsLoading(false);
+      });
+  }, []);
+
+  const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'A';
+
+  const sidebarTabs = [
+    { key: 'analytics', icon: <FaChartBar />, label: 'Analytics' },
+    { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
+    { key: 'users', icon: <FaUsers />, label: 'Users' },
+    { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
+    { key: 'contacts', icon: <FaEnvelope />, label: 'Contacts' },
+    { key: 'teams', icon: <FaUserTie />, label: 'Applications' },
+    { key: 'chat', icon: <FaComments />, label: 'Chat' },
+    { key: 'news', icon: <FaNewspaper />, label: 'News' },
+    { key: 'courses', icon: <FaBookOpen />, label: 'Courses' },
+    { key: 'beneficiaries', icon: <FaUserTie />, label: 'Beneficiaries' },
+    { key: 'testimonials', icon: <FaStar />, label: 'Testimonials' },
+  ];
+
+  const renderContent = () => {
+    if (tab === 'analytics') {
+      return statsLoading ? (
+        <>
+          <Loading />
+        </>
+      ) : (
+        <AnalyticsView stats={stats} ticketChart={ticketChart} />
+      );
+    }
+    if (tab === 'tickets') return <AdminTickets />;
+    if (tab === 'users') return <AdminUsers />;
+    if (tab === 'suggestions') return <AdminSuggestions />;
+    if (tab === 'contacts') return <AdminContacts />;
+    if (tab === 'teams') return <AdminTeams />;
+    if (tab === 'chat') return <AdminChatView />;
+    if (tab === 'beneficiaries') return <AdminBeneficiaries />;
+    if (tab === 'news') return <AdminNews />;
+    if (tab === 'courses') return <AdminCourses />;
+    if (tab === 'testimonials') return <AdminTestimonials />;
+    return null;
+  };
+
+  return (
+    <div className="dashboard admin-dashboard">
+      <div className="dash-layout">
+        {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+        <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <FaBars />
+        </button>
+        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`}>
+          <div className="dash-sidebar-header">
+            <div className="dash-sidebar-avatar">{initials}</div>
+            <div className="dash-sidebar-name">{user?.name}</div>
+            <div className="dash-sidebar-role">Admin Dashboard</div>
+          </div>
+          <div className="dash-sidebar-nav">
+            {sidebarTabs.map((t) => (
+              <button
+                key={t.key}
+                className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
+                onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+              >
+                <span className="dash-sidebar-tab-icon">{t.icon}</span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="dash-main">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
