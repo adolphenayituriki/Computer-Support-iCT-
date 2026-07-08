@@ -679,6 +679,19 @@ export default function Dashboard() {
       .catch(() => setTeamLoading(false));
   }, [user]);
 
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    }
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
+
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   const sidebarTabs = [
@@ -697,10 +710,10 @@ export default function Dashboard() {
     <div className="dashboard">
       <div className="dash-layout">
         {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`}>
-          <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <FaBars /> <span>Menu</span>
-          </button>
+        <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle menu">
+          <FaBars />
+        </button>
+        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`} role="navigation" aria-label="Dashboard navigation">
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
             <div className="dash-sidebar-name">{user?.name}</div>
