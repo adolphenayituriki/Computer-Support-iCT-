@@ -1950,7 +1950,7 @@ header.dash-header .hamburger span {
 @media (max-width: 900px) {
   .dashboard {
     margin-left: 0;
-    padding: 6rem 1rem 4rem;
+    padding: 5.5rem 1rem 4rem;
     padding-left: 68px;
   }
 
@@ -1961,19 +1961,54 @@ header.dash-header .hamburger span {
     bottom: 0;
     width: 56px;
     border-radius: 0;
-    padding: 5.5rem 0 1.5rem;
-    z-index: 50;
+    padding: 0 0 1.5rem;
+    z-index: 100;
     overflow-y: auto;
     transform: none;
+    transition: width 0.25s ease;
+  }
+
+  .dash-sidebar.open {
+    width: 240px;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
   }
 
   .dash-sidebar-header {
     display: none;
   }
 
+  .dash-sidebar.open .dash-sidebar-header {
+    display: block;
+    padding: 0.3rem 0.5rem 0.6rem;
+  }
+
+  .dash-sidebar-toggle {
+    display: flex;
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: 44px;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.8);
+    box-shadow: none;
+    margin-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .dash-sidebar-toggle:hover {
+    background: rgba(255,255,255,0.08);
+  }
+
   .dash-sidebar-nav {
     gap: 0.1rem;
     align-items: center;
+  }
+
+  .dash-sidebar.open .dash-sidebar-nav {
+    align-items: stretch;
+    padding: 0 0.4rem;
   }
 
   .dash-sidebar-tab {
@@ -1986,6 +2021,17 @@ header.dash-header .hamburger span {
     width: 48px;
     margin: 0 auto;
     border-radius: 10px;
+  }
+
+  .dash-sidebar.open .dash-sidebar-tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.82rem;
+    margin: 0;
   }
 
   .dash-sidebar-tab-icon {
@@ -2002,9 +2048,18 @@ header.dash-header .hamburger span {
     max-width: 48px;
   }
 
-  .dash-sidebar-toggle,
+  .dash-sidebar.open .dash-sidebar-tab span:last-child {
+    font-size: 0.82rem;
+    max-width: none;
+  }
+
   .dash-sidebar-overlay {
-    display: none !important;
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+    animation: fadeIn 0.2s;
   }
 
   .dash-main {
