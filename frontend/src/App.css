@@ -2050,16 +2050,17 @@ header.dash-header .hamburger span {
     display: flex;
     overflow-x: auto;
     gap: 0.35rem;
-    margin-bottom: 1rem;
-    padding: 0.35rem 0.25rem;
+    margin-bottom: 0;
+    padding: 0.5rem 0.75rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 99;
     background: #0f172a;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
   }
 
@@ -2101,6 +2102,7 @@ header.dash-header .hamburger span {
 
   .dash-main {
     max-width: 100%;
+    padding-top: 3.2rem;
   }
 }
 
