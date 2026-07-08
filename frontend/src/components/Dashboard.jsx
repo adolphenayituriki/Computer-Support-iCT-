@@ -510,7 +510,7 @@ function SuggestionsView() {
 }
 
 function TeamView({ teamData, setTeamData }) {
-  const { app, beneficiaries } = teamData;
+  const { application: app, beneficiaries } = teamData;
   const [subTab, setSubTab] = useState('overview');
   const [teamTickets, setTeamTickets] = useState([]);
   const [ticketsLoading, setTicketsLoading] = useState(false);
