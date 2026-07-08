@@ -2046,12 +2046,69 @@ header.dash-header .hamburger span {
     display: none !important;
   }
 
+  .dash-top-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    padding: 0.35rem 0.25rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #0f172a;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+
+  .dash-top-tabs::-webkit-scrollbar { display: none; }
+
+  .dash-top-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+
+  .dash-top-tab.active {
+    background: #FFCE08;
+    color: #1e1b4b;
+  }
+
+  .dash-top-tab:active {
+    background: rgba(255,206,8,0.15);
+    color: #FFCE08;
+  }
+
+  .dash-top-tab-icon {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+  }
+
   .dash-main {
     max-width: 100%;
   }
 }
 
 .dash-menu-btn {
+  display: none;
+}
+
+.dash-top-tabs {
   display: none;
 }
 

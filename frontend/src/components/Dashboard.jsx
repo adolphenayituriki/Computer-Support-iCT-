@@ -732,6 +732,18 @@ export default function Dashboard() {
         </div>
 
         <div className="dash-main">
+          <div className="dash-top-tabs">
+            {sidebarTabs.map((t) => (
+              <button
+                key={t.key}
+                className={`dash-top-tab${tab === t.key ? ' active' : ''}`}
+                onClick={() => setTab(t.key)}
+              >
+                <span className="dash-top-tab-icon">{t.icon}</span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
           {teamData?.application && !teamData.isTeamMember && (
             <div className="dash-card" style={{ marginBottom: '1rem', padding: '1rem 1.2rem', borderLeft: `4px solid ${teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b'}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
