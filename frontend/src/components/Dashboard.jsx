@@ -4,7 +4,8 @@ import { useAuth } from '../AuthContext';
 import { useSidebar } from '../SidebarContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList } from 'react-icons/fa';
+import SettingsModal from './SettingsModal';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList, FaCog } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -410,42 +411,44 @@ function SuggestionsView() {
     const msgs = viewSug.messages || [];
     return (
       <div className="dashboard-grid">
-        <div className="dash-card request-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="sug-detail-card">
+          <div className="sug-detail-top">
             <button className="btn btn-outline btn-sm" onClick={() => setViewSug(null)}><FaTimes /> Back</button>
-            <h3 style={{ margin: 0 }}>{viewSug.title}</h3>
+            <h3>{viewSug.title}</h3>
           </div>
-          <p style={{ lineHeight: '1.7', color: '#334155', marginBottom: '1rem' }}>{viewSug.description}</p>
-          <p style={{ fontSize: '0.82rem', color: '#9ca3af', marginBottom: '1.5rem' }}>
+          <p className="sug-detail-desc">{viewSug.description}</p>
+          <p className="sug-detail-date">
             {new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </p>
 
-          <h4 style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
-          <div className="msg-thread">
-            {msgs.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
-            ) : (
-              msgs.map((m, i) => (
-                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
-                  <div className="msg-header">
-                    <strong>{m.senderName}</strong>
-                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+          <div className="sug-detail-conv">
+            <h4><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
+            <div className="msg-thread">
+              {msgs.length === 0 ? (
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+              ) : (
+                msgs.map((m, i) => (
+                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                    <div className="msg-header">
+                      <strong>{m.senderName}</strong>
+                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p>{m.text}</p>
                   </div>
-                  <p>{m.text}</p>
-                </div>
-              ))
-            )}
-            <div ref={sugMsgEndRef} />
-          </div>
-          <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-            <input
-              type="text"
-              placeholder="Type your reply..."
-              value={sugReplyText}
-              onChange={(e) => setSugReplyText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }}
-            />
-            <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+                ))
+              )}
+              <div ref={sugMsgEndRef} />
+            </div>
+            <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
+              <input
+                type="text"
+                placeholder="Type your reply..."
+                value={sugReplyText}
+                onChange={(e) => setSugReplyText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }}
+              />
+              <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+            </div>
           </div>
         </div>
       </div>
@@ -454,11 +457,14 @@ function SuggestionsView() {
 
   return (
     <div className="dashboard-grid">
-      <div className="dash-card request-card">
-        <h3><FaLightbulb style={{ marginRight: '0.5rem', color: '#FFCE08' }} /> Suggest a Service</h3>
-        <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '1rem' }}>
-          Tell us what support or service you want us to add. We review every suggestion.
-        </p>
+      <div className="sug-form-card">
+        <div className="sug-form-header">
+          <FaLightbulb className="sug-form-icon" />
+          <div>
+            <h3>Suggest a Service</h3>
+            <p>Tell us what support or service you want us to add. We review every suggestion.</p>
+          </div>
+        </div>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -468,7 +474,7 @@ function SuggestionsView() {
             required
           />
           <textarea
-            rows="4"
+            rows="3"
             placeholder="Describe your idea in detail..."
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -479,28 +485,32 @@ function SuggestionsView() {
         {feedback && <p className="form-feedback" style={{ marginTop: '0.8rem' }}>{feedback}</p>}
       </div>
 
-      <div className="dash-card tickets-card">
-        <h3>My Suggestions ({suggestions.length})</h3>
+      <div className="sug-list-card">
+        <h3>My Suggestions <span className="sug-count">{suggestions.length}</span></h3>
         {suggestions.length === 0 ? (
           <div className="empty-state">
-            <FaLightbulb size={40} style={{ color: '#d1d5db' }} />
+            <FaLightbulb size={36} style={{ color: 'rgba(255,255,255,0.12)' }} />
             <p>No suggestions yet.</p>
             <span>Share your ideas to help us improve.</span>
           </div>
         ) : (
-          <div className="ticket-list">
+          <div className="sug-list">
             {suggestions.map((s) => (
-              <div key={s.id} className="ticket-item" style={{ borderLeftColor: '#60a5fa', cursor: 'pointer' }} onClick={() => setViewSug(s)}>
-                <h4 style={{ color: '#1e1b4b', fontSize: '0.95rem', marginBottom: '0.25rem' }}>{s.title}</h4>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', lineHeight: '1.5' }}>{s.description}</p>
-                <span className="ticket-date">
-                  {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                </span>
-                {(s.messages || []).length > 0 && (
-                  <span style={{ fontSize: '0.75rem', color: '#60a5fa', marginLeft: '0.5rem' }}>
-                    <FaReply style={{ transform: 'scaleX(-1)', marginRight: '0.2rem' }} />{s.messages.length}
+              <div key={s.id} className="sug-item" onClick={() => setViewSug(s)}>
+                <div className="sug-item-top">
+                  <h4>{s.title}</h4>
+                  {(s.messages || []).length > 0 && (
+                    <span className="sug-reply-count">
+                      <FaReply style={{ transform: 'scaleX(-1)' }} /> {s.messages.length}
+                    </span>
+                  )}
+                </div>
+                <p>{s.description}</p>
+                <div className="sug-item-meta">
+                  <span className="sug-date">
+                    {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
-                )}
+                </div>
               </div>
             ))}
           </div>
