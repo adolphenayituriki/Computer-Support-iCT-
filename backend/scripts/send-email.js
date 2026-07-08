@@ -1,17 +1,6 @@
-import nodemailer from 'nodemailer';
 import 'dotenv/config';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BREVO_LOGIN,
-    pass: process.env.BREVO_SMTP_KEY,
-  },
-  tls: { rejectUnauthorized: false },
-});
-
+const BREVO_API = 'https://api.brevo.com/v3/smtp/email';
 const toEmail = process.argv[2];
 const msg = process.argv[3];
 
@@ -38,13 +27,25 @@ const html = `
 `;
 
 try {
-  const info = await transporter.sendMail({
-    from: `"CS Hub (iCT)" <${process.env.BREVO_FROM_EMAIL}>`,
-    to: toEmail,
-    subject: 'Re-apply to CS Hub (iCT) Team',
-    html,
+  const res = await fetch(BREVO_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: { name: 'CS Hub (iCT)', email: process.env.BREVO_FROM_EMAIL },
+      to: [{ email: toEmail }],
+      subject: 'Re-apply to CS Hub (iCT) Team',
+      htmlContent: html,
+    }),
   });
-  console.log('Sent!', info.messageId);
+  if (res.ok) {
+    console.log('Sent!');
+  } else {
+    const err = await res.text();
+    console.error('Error:', err);
+  }
 } catch (err) {
   console.error('Failed:', err.message);
 }
