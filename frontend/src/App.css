@@ -1956,12 +1956,12 @@ header.dash-header .hamburger span {
   .dash-sidebar {
     position: fixed;
     left: 0;
-    top: 0;
+    top: 80px;
     bottom: 0;
     width: 80vw;
     max-width: 300px;
     border-radius: 0;
-    padding: 5rem 0.8rem 1.5rem;
+    padding: 1.2rem 0.8rem 1.5rem;
     z-index: 100;
     overflow-y: auto;
     background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
@@ -2033,41 +2033,53 @@ header.dash-header .hamburger span {
     text-overflow: ellipsis;
   }
 
-  .dash-sidebar-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: 0.5rem;
-    left: 0.5rem;
-    z-index: 102;
-    width: 40px;
-    height: 40px;
-    background: #1e1b4b;
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 2px 12px rgba(30,27,75,0.2);
-    transition: background 0.2s, transform 0.2s;
-  }
-
-  .dash-sidebar-toggle:hover {
-    background: #312e81;
-    transform: scale(1.05);
-  }
-
   .dash-sidebar-overlay {
     position: fixed;
     inset: 0;
+    top: 80px;
     background: rgba(0,0,0,0.5);
     z-index: 99;
     animation: fadeIn 0.2s;
   }
 
+  .dash-sidebar-toggle {
+    display: none !important;
+  }
+
   .dash-main {
     max-width: 100%;
+  }
+}
+
+.dash-menu-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .dash-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: #FFCE08;
+    border: none;
+    border-radius: 10px;
+    color: #1e1b4b;
+    font-size: 1.05rem;
+    cursor: pointer;
+    margin-left: 0.4rem;
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .dash-menu-btn:hover {
+    background: #e6b900;
+    transform: scale(1.05);
+  }
+
+  .dash-menu-btn:active {
+    transform: scale(0.95);
   }
 }
 

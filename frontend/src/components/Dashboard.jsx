@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useSidebar } from '../SidebarContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
 import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList } from 'react-icons/fa';
@@ -662,7 +663,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState('tickets');
   const [teamData, setTeamData] = useState(null);
   const [teamLoading, setTeamLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -710,9 +711,6 @@ export default function Dashboard() {
     <div className="dashboard">
       <div className="dash-layout">
         {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-        <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle menu">
-          <FaBars />
-        </button>
         <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`} role="navigation" aria-label="Dashboard navigation">
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>

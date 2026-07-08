@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { FaUser } from 'react-icons/fa';
+import { useSidebar } from '../SidebarContext';
+import { FaUser, FaBars } from 'react-icons/fa';
 
 import SettingsModal from './SettingsModal';
 
@@ -66,6 +67,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   };
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
 
   return (
     <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
@@ -135,6 +137,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
           <span></span>
           <span></span>
           <span></span>
+        </button>
+        <button className="dash-menu-btn" aria-label="Toggle dashboard menu" onClick={() => setSidebarOpen((v) => !v)}>
+          <FaBars />
         </button>
         {open && <div className="nav-overlay" onClick={() => setOpen(false)} />}
       </nav>

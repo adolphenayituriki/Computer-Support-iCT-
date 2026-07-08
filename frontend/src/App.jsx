@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
+import { SidebarProvider } from './SidebarContext';
 import { ToastProvider } from './ToastContext';
 import { FaWhatsapp } from 'react-icons/fa';
 import Navbar from './components/Navbar';
@@ -100,9 +101,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <AppLayout />
-        </ToastProvider>
+        <SidebarProvider>
+          <ToastProvider>
+            <AppLayout />
+          </ToastProvider>
+        </SidebarProvider>
       </AuthProvider>
     </BrowserRouter>
   );
