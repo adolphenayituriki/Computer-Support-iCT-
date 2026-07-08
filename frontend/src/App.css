@@ -1984,6 +1984,9 @@ header.dash-header .hamburger span {
 
   .dash-sidebar-toggle {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
     position: relative;
     top: auto;
     left: auto;
@@ -1995,10 +1998,29 @@ header.dash-header .hamburger span {
     box-shadow: none;
     margin-bottom: 0.3rem;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
   }
 
   .dash-sidebar-toggle:hover {
     background: rgba(255,255,255,0.08);
+  }
+
+  .dash-sidebar-toggle span:last-child {
+    display: none;
+  }
+
+  .dash-sidebar.open .dash-sidebar-toggle {
+    justify-content: flex-start;
+    padding-left: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .dash-sidebar.open .dash-sidebar-toggle span:last-child {
+    display: inline;
   }
 
   .dash-sidebar-nav {
