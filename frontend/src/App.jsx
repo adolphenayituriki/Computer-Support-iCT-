@@ -25,6 +25,7 @@ import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 import TeamApplyModal from './components/TeamApplyModal';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
+import SetupAccount from './components/SetupAccount';
 
 function HomePage({ onRegisterClick, onTeamClick }) {
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function App() {
 
   function AppLayout() {
     const location = useLocation();
-    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/admin';
+    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/admin' || location.pathname === '/setup-account';
 
     return (
       <>
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/setup-account" element={<SetupAccount />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
         </Routes>

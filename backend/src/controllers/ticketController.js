@@ -69,3 +69,12 @@ export async function addTicketMessage(req, res) {
     res.status(500).json({ error: 'Server error.' });
   }
 }
+
+export async function getAllTicketsForTeam(_req, res) {
+  try {
+    const all = await Ticket.find().sort({ createdAt: -1 });
+    res.json(all);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}

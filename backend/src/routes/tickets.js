@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, teamMemberOnly } from '../middleware/auth.js';
 import * as ticketCtrl from '../controllers/ticketController.js';
 
 const router = Router();
 
+router.get('/all', authenticate, teamMemberOnly, ticketCtrl.getAllTicketsForTeam);
 router.post('/', authenticate, ticketCtrl.createTicket);
 router.get('/', authenticate, ticketCtrl.getMyTickets);
 router.get('/:id', authenticate, ticketCtrl.getTicket);

@@ -12,6 +12,7 @@ router.put('/password', authenticate, authCtrl.changePassword);
 router.post('/forgot-password', authCtrl.forgotPassword);
 router.post('/resend-code', authCtrl.resendCode);
 router.post('/reset-password', authCtrl.resetPassword);
+router.post('/setup-account', authCtrl.setupAccount);
 router.get('/team-status', authenticate, authCtrl.getTeamStatus);
 
 export default router;

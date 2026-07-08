@@ -142,6 +142,27 @@ export async function sendTeamApplicationReceived(toEmail, name) {
   });
 }
 
+export async function sendAccountSetupEmail(toEmail, token) {
+  const link = `https://computer-support-ict.vercel.app/setup-account?email=${encodeURIComponent(toEmail)}&token=${token}`;
+  await send({
+    to: toEmail,
+    subject: 'Set Up Your Account — CS Hub (iCT)',
+    html: baseHtml(`
+      <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Your Team Application Was Approved!</h2>
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
+        Hi <strong style="color:#f8fafc;">${toEmail}</strong>, please set up your account to access your dashboard and team features.
+      </p>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${link}" style="display: inline-block; background: #ffce08; color: #1e1b4b; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem;">Set Up Account</a>
+      </div>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin: 0;">
+        Or paste this link in your browser:<br>
+        <span style="color: #38bdf8; word-break: break-all;">${link}</span>
+      </p>
+    `),
+  });
+}
+
 export async function sendAdminNotification(subject, body) {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;

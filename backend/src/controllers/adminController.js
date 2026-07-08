@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import Ticket from '../models/Ticket.js';
@@ -7,7 +8,7 @@ import TeamApp from '../models/TeamApp.js';
 import News from '../models/News.js';
 import Conversation from '../models/Conversation.js';
 import Course from '../models/Course.js';
-import { sendTicketReplyNotification, sendTeamStatusUpdate, sendAdminNotification } from '../services/mailer.js';
+import { sendTicketReplyNotification, sendTeamStatusUpdate, sendAdminNotification, sendAccountSetupEmail } from '../services/mailer.js';
 // ── Users ──
 
 export async function getUsers(_req, res) {
@@ -214,10 +215,23 @@ export async function updateTeamAppAdmin(req, res) {
         `${app.name} (${app.email}) — ${app.status}\n\n${app.message || ''}`
       ).catch((e) => console.log('Admin email error:', e.message));
       if (app.status === 'approved') {
-        const user = await User.findOne({ email: app.email });
+        let user = await User.findOne({ email: app.email });
         if (user) {
           await User.findByIdAndUpdate(user._id, { isTeamMember: true });
           await TeamApp.findByIdAndUpdate(app._id, { userId: user._id });
+        } else {
+          const setupToken = crypto.randomBytes(32).toString('hex');
+          const hashed = await bcrypt.hash(setupToken, 10);
+          user = await User.create({
+            name: app.name,
+            email: app.email,
+            password: hashed,
+            isTeamMember: true,
+            setupToken,
+            setupTokenExpires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+          });
+          await TeamApp.findByIdAndUpdate(app._id, { userId: user._id });
+          sendAccountSetupEmail(app.email, setupToken).catch((e) => console.log('Setup email error:', e.message));
         }
       } else if (prev.status === 'approved') {
         await User.findOneAndUpdate({ email: app.email }, { isTeamMember: false });

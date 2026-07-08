@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -509,40 +509,148 @@ function SuggestionsView() {
   );
 }
 
-function TeamView({ teamData }) {
+function TeamView({ teamData, setTeamData }) {
   const { app, beneficiaries } = teamData;
+  const [subTab, setSubTab] = useState('overview');
+  const [teamTickets, setTeamTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+
+  useEffect(() => {
+    if (subTab === 'tickets') {
+      setTicketsLoading(true);
+      fetch(`${API_BASE}/api/tickets/all`, { headers: { Authorization: `Bearer ${token()}` } })
+        .then((r) => r.json())
+        .then((data) => { setTeamTickets(data); setTicketsLoading(false); })
+        .catch(() => setTicketsLoading(false));
+    }
+  }, [subTab]);
+
+  function updateBeneficiaryStatus(id, status) {
+    fetch(`${API_BASE}/api/beneficiaries/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ status }),
+    }).then(() => {
+      setTeamData((prev) => ({
+        ...prev,
+        beneficiaries: prev.beneficiaries.map((b) => (b._id === id || b.id === id ? { ...b, status } : b)),
+      }));
+    }).catch((e) => console.log(e));
+  }
+
+  const subTabs = [
+    { key: 'overview', icon: <FaTachometerAlt />, label: 'Overview' },
+    { key: 'beneficiaries', icon: <FaHandshake />, label: `Beneficiaries (${beneficiaries.length})` },
+    { key: 'tickets', icon: <FaTicketAlt />, label: 'All Tickets' },
+  ];
+
   return (
     <div className="team-dash">
-      <div className="team-dash-card">
-        <h3><FaUserTie style={{ color: '#06b6d4' }} /> My Team Profile</h3>
-        <div className="team-dash-info">
-          <p><FaUserTie /> <strong>{app.name}</strong></p>
-          <p><FaEnvelope /> {app.email}</p>
-          {app.phone && <p><FaPhone /> {app.phone}</p>}
-          {app.location && <p><FaMapMarkerAlt /> {app.location}</p>}
-          {app.skills?.length > 0 && <p className="team-dash-skills">{app.skills.map((s) => <span key={s}>{s}</span>)}</p>}
-        </div>
+      <div className="team-dash-sub-nav">
+        {subTabs.map((st) => (
+          <button key={st.key} className={`team-sub-tab${subTab === st.key ? ' active' : ''}`} onClick={() => setSubTab(st.key)}>
+            {st.icon} {st.label}
+          </button>
+        ))}
       </div>
 
-      <div className="team-dash-card">
-        <h3><FaHandshake style={{ color: '#8b5cf6' }} /> My Beneficiaries ({beneficiaries.length})</h3>
-        {beneficiaries.length === 0 ? (
-          <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
-        ) : (
-          <div className="team-dash-list">
-            {beneficiaries.map((b) => (
-              <div key={b._id || b.id} className="team-dash-item">
-                <div className="team-dash-item-main">
-                  <strong>{b.name}</strong>
-                  <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{b.issue?.slice(0, 120)}</span>
-                  <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
-                </div>
-                <span className={`ticket-status ${b.status === 'resolved' || b.status === 'closed' ? 'status-resolved' : b.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{b.status}</span>
-              </div>
-            ))}
+      {subTab === 'overview' && (
+        <div className="team-overview-grid">
+          <div className="team-dash-card">
+            <h3><FaUserTie style={{ color: '#06b6d4' }} /> My Profile</h3>
+            <div className="team-dash-info">
+              <p><strong>{app.name}</strong></p>
+              <p><FaEnvelope /> {app.email}</p>
+              {app.phone && <p><FaPhone /> {app.phone}</p>}
+              {app.location && <p><FaMapMarkerAlt /> {app.location}</p>}
+              {app.involvement && <p>Role: <strong>{app.involvement}</strong></p>}
+              {app.applicantType && <p>Type: <strong>{app.applicantType}</strong></p>}
+              {app.skills?.length > 0 && <p className="team-dash-skills">{app.skills.map((s) => <span key={s}>{s}</span>)}</p>}
+            </div>
           </div>
-        )}
-      </div>
+
+          <div className="team-stats-grid">
+            <div className="team-stat-card">
+              <FaHandshake size={24} color="#8b5cf6" />
+              <span className="team-stat-num">{beneficiaries.length}</span>
+              <span className="team-stat-label">Beneficiaries</span>
+            </div>
+            <div className="team-stat-card">
+              <FaCheckCircle size={24} color="#10b981" />
+              <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'resolved' || b.status === 'closed').length}</span>
+              <span className="team-stat-label">Resolved</span>
+            </div>
+            <div className="team-stat-card">
+              <FaClock size={24} color="#f59e0b" />
+              <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'in-progress').length}</span>
+              <span className="team-stat-label">In Progress</span>
+            </div>
+            <div className="team-stat-card">
+              <FaExclamationCircle size={24} color="#ef4444" />
+              <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'open').length}</span>
+              <span className="team-stat-label">Open</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {subTab === 'beneficiaries' && (
+        <div className="team-dash-card">
+          <h3><FaHandshake style={{ color: '#8b5cf6' }} /> Assigned Beneficiaries ({beneficiaries.length})</h3>
+          {beneficiaries.length === 0 ? (
+            <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
+          ) : (
+            <div className="team-dash-list">
+              {beneficiaries.map((b) => (
+                <div key={b._id || b.id} className="team-dash-item">
+                  <div className="team-dash-item-main">
+                    <strong>{b.name}</strong>
+                    <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{b.issue?.slice(0, 120)}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
+                  </div>
+                  <div className="team-dash-item-actions">
+                    <select
+                      value={b.status}
+                      onChange={(e) => updateBeneficiaryStatus(b._id || b.id, e.target.value)}
+                      className="beneficiary-status-select"
+                    >
+                      <option value="open">Open</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                    <span className={`ticket-status ${b.status === 'resolved' || b.status === 'closed' ? 'status-resolved' : b.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{b.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {subTab === 'tickets' && (
+        <div className="team-dash-card">
+          <h3><FaTicketAlt style={{ color: '#f59e0b' }} /> All Support Tickets</h3>
+          {ticketsLoading ? (
+            <p style={{ textAlign: 'center', color: '#6b7280', padding: '2rem' }}>Loading tickets...</p>
+          ) : teamTickets.length === 0 ? (
+            <div className="empty-state"><FaTicketAlt size={32} style={{ color: '#d1d5db' }} /><p>No tickets in the system.</p></div>
+          ) : (
+            <div className="team-dash-list">
+              {teamTickets.map((t) => (
+                <div key={t._id} className="team-dash-item">
+                  <div className="team-dash-item-main">
+                    <strong>{t.title}</strong>
+                    <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{t.description?.slice(0, 100)}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>by {t.userName} • {t.category}</span>
+                  </div>
+                  <span className={`ticket-status ${t.status === 'resolved' || t.status === 'closed' ? 'status-resolved' : t.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{t.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -580,8 +688,10 @@ export default function Dashboard() {
   ];
 
   if (teamData?.isTeamMember) {
-    sidebarTabs.push({ key: 'team', icon: <FaUserTie />, label: 'My Team' });
+    sidebarTabs.push({ key: 'team', icon: <FaUserTie />, label: 'Team Dashboard' });
   }
+
+  const sidebarRole = teamData?.isTeamMember ? 'Team Member' : 'User Dashboard';
 
   return (
     <div className="dashboard">
@@ -594,7 +704,7 @@ export default function Dashboard() {
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
             <div className="dash-sidebar-name">{user?.name}</div>
-            <div className="dash-sidebar-role">User Dashboard</div>
+            <div className="dash-sidebar-role">{sidebarRole}</div>
           </div>
           <div className="dash-sidebar-nav">
             {sidebarTabs.map((t) => (
@@ -631,7 +741,7 @@ export default function Dashboard() {
           ) : tab === 'chat' ? (
             <UserChatView />
           ) : tab === 'team' && teamData?.isTeamMember ? (
-            <TeamView teamData={teamData} />
+            <TeamView teamData={teamData} setTeamData={setTeamData} />
           ) : (
             <UserChatView />
           )}

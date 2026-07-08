@@ -37,3 +37,10 @@ export function adminOnly(req, res, next) {
   }
   next();
 }
+
+export function teamMemberOnly(req, res, next) {
+  if (!req.user || !req.user.isTeamMember) {
+    return res.status(403).json({ error: 'Team member access required.' });
+  }
+  next();
+}

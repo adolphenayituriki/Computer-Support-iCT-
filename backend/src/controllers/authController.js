@@ -143,6 +143,31 @@ export async function resetPassword(req, res) {
   }
 }
 
+export async function setupAccount(req, res) {
+  try {
+    const { email, name, password, token } = req.body;
+    if (!email || !name || !password || !token) {
+      return res.status(400).json({ error: 'Email, name, password, and token are required.' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+    const user = await User.findOne({ email, setupToken: token, setupTokenExpires: { $gt: Date.now() } });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid or expired setup link. Contact support.' });
+    }
+    user.name = name;
+    user.password = await bcrypt.hash(password, 10);
+    user.setupToken = undefined;
+    user.setupTokenExpires = undefined;
+    await user.save();
+    const jwtToken = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token: jwtToken, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
 export async function getTeamStatus(req, res) {
   try {
     const user = await User.findById(req.user.id);

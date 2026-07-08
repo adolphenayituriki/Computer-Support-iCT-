@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
   isTeamMember: { type: Boolean, default: false },
   resetToken: { type: String },
   resetTokenExpires: { type: Number },
+  setupToken: { type: String },
+  setupTokenExpires: { type: Number },
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);
