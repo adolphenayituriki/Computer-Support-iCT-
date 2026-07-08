@@ -1950,25 +1950,28 @@ header.dash-header .hamburger span {
 @media (max-width: 900px) {
   .dashboard {
     margin-left: 0;
-    padding: 6rem 1rem 4rem;
+    padding: 5.5rem 1rem 4rem;
+    padding-left: 68px;
   }
 
   .dash-sidebar {
     position: fixed;
-    top: 0;
     left: 0;
+    top: 0;
     bottom: 0;
-    width: 260px;
+    width: 56px;
     border-radius: 0;
-    padding: 5rem 0.8rem 1.5rem;
-    transform: translateX(-100%);
-    z-index: 100;
+    padding: 0.3rem 0 1rem;
+    z-index: 50;
     overflow-y: auto;
-    transition: transform 0.3s ease;
+    background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+    transition: width 0.25s ease;
   }
 
   .dash-sidebar.open {
-    transform: translateX(0);
+    width: 240px;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2);
   }
 
   .dash-sidebar-header {
@@ -1976,47 +1979,97 @@ header.dash-header .hamburger span {
   }
 
   .dash-sidebar-nav {
-    gap: 0.15rem;
+    gap: 0.1rem;
+    align-items: center;
+    padding: 0 0.25rem;
+  }
+
+  .dash-sidebar.open .dash-sidebar-nav {
+    align-items: stretch;
+    padding: 0 0.5rem;
   }
 
   .dash-sidebar-tab {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.45rem 0;
+    font-size: 0.55rem;
+    width: 48px;
+    margin: 0 auto;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .dash-sidebar.open .dash-sidebar-tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.82rem;
+    width: 100%;
+    margin: 0;
+  }
+
+  .dash-sidebar-tab .dash-sidebar-tab-icon {
+    font-size: 1.05rem;
+    width: auto;
+  }
+
+  .dash-sidebar-tab span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 44px;
+    white-space: nowrap;
+    line-height: 1.1;
+  }
+
+  .dash-sidebar.open .dash-sidebar-tab span:last-child {
+    max-width: none;
   }
 
   .dash-sidebar-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 102;
-    width: 60px;
-    height: 44px;
-    background: #1e1b4b;
-    color: #fff;
+    gap: 0.3rem;
+    width: 100%;
+    height: 40px;
+    background: none;
     border: none;
-    border-radius: 0 0 12px 0;
-    font-size: 1.1rem;
+    color: rgba(255,255,255,0.8);
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(30, 27, 75, 0.2);
-    transition: background 0.2s;
     font-family: inherit;
     font-weight: 600;
+    font-size: 0.7rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 0.3rem;
+    transition: background 0.2s;
   }
 
   .dash-sidebar-toggle:hover {
-    background: #312e81;
+    background: rgba(255,255,255,0.08);
   }
 
   .dash-sidebar-toggle span {
-    font-size: 0.62rem;
+    display: none;
+  }
+
+  .dash-sidebar.open .dash-sidebar-toggle {
+    justify-content: flex-start;
+    padding-left: 0.7rem;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .dash-sidebar.open .dash-sidebar-toggle span {
+    display: inline;
   }
 
   .dash-sidebar-overlay {
-    display: block;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
