@@ -1,9 +1,17 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BREVO_LOGIN,
+    pass: process.env.BREVO_SMTP_KEY,
+  },
+  tls: { rejectUnauthorized: false },
+});
 
-const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-const fromName = 'CS Hub (iCT)';
+const fromEmail = process.env.BREVO_FROM_EMAIL || process.env.ADMIN_EMAIL;
 
 function baseHtml(content) {
   return `
@@ -22,17 +30,9 @@ function baseHtml(content) {
   `;
 }
 
-function send({ to, subject, html }) {
-  return resend.emails.send({
-    from: `${fromName} <${fromEmail}>`,
-    to,
-    subject,
-    html,
-  });
-}
-
 export async function sendResetEmail(toEmail, token) {
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: toEmail,
     subject: 'Password Reset Code — CS Hub (iCT)',
     html: baseHtml(`
@@ -51,7 +51,8 @@ export async function sendResetEmail(toEmail, token) {
 }
 
 export async function sendTicketConfirmation(toEmail, name, ticket) {
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: toEmail,
     subject: `Ticket Confirmed — ${ticket.title}`,
     html: baseHtml(`
@@ -70,7 +71,8 @@ export async function sendTicketConfirmation(toEmail, name, ticket) {
 }
 
 export async function sendTicketReplyNotification(toEmail, name, ticket, replyText) {
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: toEmail,
     subject: `New Reply — ${ticket.title}`,
     html: baseHtml(`
@@ -88,7 +90,8 @@ export async function sendTicketReplyNotification(toEmail, name, ticket, replyTe
 
 export async function sendTeamStatusUpdate(toEmail, name, status, app) {
   const isApproved = status === 'approved';
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: toEmail,
     subject: `Application ${isApproved ? 'Approved' : 'Updated'} — CS Hub (iCT)`,
     html: baseHtml(`
@@ -106,7 +109,8 @@ export async function sendTeamStatusUpdate(toEmail, name, status, app) {
 }
 
 export async function sendContactAutoReply(toEmail, name) {
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: toEmail,
     subject: 'We received your message — CS Hub (iCT)',
     html: baseHtml(`
@@ -120,7 +124,8 @@ export async function sendContactAutoReply(toEmail, name) {
 }
 
 export async function sendTeamApplicationReceived(toEmail, name) {
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: toEmail,
     subject: 'Application Received — CS Hub (iCT)',
     html: baseHtml(`
@@ -136,7 +141,8 @@ export async function sendTeamApplicationReceived(toEmail, name) {
 export async function sendAdminNotification(subject, body) {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
-  await send({
+  await transporter.sendMail({
+    from: `"CS Hub (iCT)" <${fromEmail}>`,
     to: adminEmail,
     subject: `[Admin] ${subject}`,
     html: baseHtml(`
