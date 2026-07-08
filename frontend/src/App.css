@@ -3428,7 +3428,14 @@ header.dash-header .hamburger span {
 
   /* ─── Header / Nav spacing ─── */
   header { padding: 0.4rem 0; }
-  nav { padding: 0.4rem 1rem; }
+  nav { padding: 0.4rem 1rem; justify-content: flex-end; position: relative; }
+
+  .logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
 
   /* ─── Hero (app-style splash) ─── */
   .hero {
