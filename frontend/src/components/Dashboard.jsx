@@ -611,6 +611,19 @@ export default function Dashboard() {
         </div>
 
         <div className="dash-main">
+          {teamData?.application && !teamData.isTeamMember && (
+            <div className="dash-card" style={{ marginBottom: '1rem', padding: '1rem 1.2rem', borderLeft: `4px solid ${teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b'}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                <FaUserTie style={{ fontSize: '1.2rem', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }} />
+                <div>
+                  <strong style={{ fontSize: '0.95rem' }}>Team Application — <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
+                  <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: '2px 0 0' }}>
+                    {teamData.application.status === 'pending' ? 'Your application is being reviewed. We\'ll notify you by email once a decision is made.' : 'Your application was not approved at this time. You may reapply in the future.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           {tab === 'tickets' ? (
             <TicketsView tickets={tickets} setTickets={setTickets} />
           ) : tab === 'suggestions' ? (

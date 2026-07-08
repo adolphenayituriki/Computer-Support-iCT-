@@ -209,8 +209,16 @@ export async function updateTeamAppAdmin(req, res) {
     if (!app) return res.status(404).json({ error: 'Application not found.' });
     if (req.body.status && req.body.status !== prev.status) {
       sendTeamStatusUpdate(app.email, app.name, app.status, app).catch((e) => console.log('Email error:', e.message));
+      sendAdminNotification(
+        `Team Application ${app.status}`,
+        `${app.name} (${app.email}) — ${app.status}\n\n${app.message || ''}`
+      ).catch((e) => console.log('Admin email error:', e.message));
       if (app.status === 'approved') {
-        await User.findOneAndUpdate({ email: app.email }, { isTeamMember: true });
+        const user = await User.findOne({ email: app.email });
+        if (user) {
+          await User.findByIdAndUpdate(user._id, { isTeamMember: true });
+          await TeamApp.findByIdAndUpdate(app._id, { userId: user._id });
+        }
       } else if (prev.status === 'approved') {
         await User.findOneAndUpdate({ email: app.email }, { isTeamMember: false });
       }

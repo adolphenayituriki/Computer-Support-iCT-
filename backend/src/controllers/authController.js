@@ -16,8 +16,8 @@ export async function register(req, res) {
     if (existing) return res.status(409).json({ error: 'Email already registered.' });
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashed });
-    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: false }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: false } });
+    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false }, JWT_SECRET, { expiresIn: '7d' });
+    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -33,15 +33,21 @@ export async function login(req, res) {
     if (!user) return res.status(401).json({ error: 'Invalid credentials.' });
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Invalid credentials.' });
-    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
+    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
 }
 
-export function getMe(req, res) {
-  res.json({ user: req.user });
+export async function getMe(req, res) {
+  try {
+    const user = await User.findById(req.user.id).select('-password -resetToken -resetTokenExpires');
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json({ user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
 }
 
 export async function updateProfile(req, res) {
@@ -52,8 +58,8 @@ export async function updateProfile(req, res) {
     if (emailTaken) return res.status(409).json({ error: 'Email already in use.' });
     const user = await User.findByIdAndUpdate(req.user.id, { name, email }, { new: true });
     if (!user) return res.status(404).json({ error: 'User not found.' });
-    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
+    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -139,10 +145,20 @@ export async function resetPassword(req, res) {
 
 export async function getTeamStatus(req, res) {
   try {
-    const app = await TeamApp.findOne({ userId: req.user.id, status: 'approved' });
+    const user = await User.findById(req.user.id);
+    let app = await TeamApp.findOne({ userId: req.user.id, status: 'approved' });
+    if (!app) {
+      app = await TeamApp.findOne({ email: req.user.email, status: 'approved' });
+      if (app && user) {
+        await TeamApp.findByIdAndUpdate(app._id, { userId: user._id });
+      }
+    }
+    const allApps = await TeamApp.find({ $or: [{ userId: req.user.id }, { email: req.user.email }] }).sort({ createdAt: -1 });
+    const latestApp = allApps.length > 0 ? allApps[0] : null;
     const Beneficiary = (await import('../models/Beneficiary.js')).default;
     const beneficiaries = app ? await Beneficiary.find({ assignedTo: app._id }).sort({ createdAt: -1 }) : [];
-    res.json({ isTeamMember: !!app, application: app || null, beneficiaries });
+    const isTeamMember = !!app || user?.isTeamMember || false;
+    res.json({ isTeamMember, application: latestApp, beneficiaries });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
