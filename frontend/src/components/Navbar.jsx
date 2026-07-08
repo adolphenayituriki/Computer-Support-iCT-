@@ -72,6 +72,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   return (
     <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
       <nav>
+        <button className="dash-menu-btn" aria-label="Toggle dashboard menu" onClick={() => setSidebarOpen((v) => !v)}>
+          <FaBars />
+        </button>
         <a href="/" className="logo">
           <img src="/final-logo.jpg" alt="CS hub (iCT)" className="logo-img" />
           <span className="logo-text">
@@ -137,9 +140,6 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
           <span></span>
           <span></span>
           <span></span>
-        </button>
-        <button className="dash-menu-btn" aria-label="Toggle dashboard menu" onClick={() => setSidebarOpen((v) => !v)}>
-          <FaBars />
         </button>
         {open && <div className="nav-overlay" onClick={() => setOpen(false)} />}
       </nav>
