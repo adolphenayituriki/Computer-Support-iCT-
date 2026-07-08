@@ -25,6 +25,15 @@ function TicketsView({ tickets, setTickets }) {
   const msgEndRef = useRef(null);
   useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewTicket?.messages]);
 
+  useEffect(() => {
+    if (viewTicket) {
+      fetch(`${API_BASE}/api/tickets/${viewTicket.id || viewTicket._id}`, { headers: { Authorization: `Bearer ${token()}` } })
+        .then((r) => r.json())
+        .then((data) => { if (!data.error) setViewTicket(data); })
+        .catch(() => {});
+    }
+  }, [viewTicket?.id || viewTicket?._id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -132,50 +141,37 @@ function TicketsView({ tickets, setTickets }) {
     setSendingReply(false);
   };
 
-  if (viewTicket) {
-    const msgs = viewTicket.messages || [];
-    return (
-      <>
-        <div className="dash-welcome" style={{ marginTop: '1.5rem' }}>
-          <button className="btn btn-outline" onClick={() => setViewTicket(null)} style={{ marginRight: '1rem', padding: '0.4rem 1rem', fontSize: '0.85rem' }}>
-            <FaTimes /> Back
-          </button>
-          <div>
-            <h2 style={{ fontSize: '1.2rem' }}>{viewTicket.title}</h2>
-            <span className={`ticket-status status-${viewTicket.status}`}>
-              {viewTicket.status.toUpperCase()}
-            </span>
-            <span className="ticket-category" style={{ marginLeft: '0.5rem' }}>{viewTicket.category}</span>
+  const modalContent = viewTicket ? (
+    <div className="dash-modal-overlay" onClick={() => setViewTicket(null)}>
+      <div className="dash-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="dash-modal-close" onClick={() => setViewTicket(null)}><FaTimes /></button>
+        <div className="dash-modal-header">
+          <h2>{viewTicket.title}</h2>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
+            <span className={`ticket-status status-${viewTicket.status}`}>{viewTicket.status.toUpperCase()}</span>
+            <span className="ticket-category">{viewTicket.category}</span>
           </div>
         </div>
-        <div className="dash-card" style={{ marginTop: '1rem' }}>
-          <p style={{ fontSize: '1rem', lineHeight: '1.7', color: '#334155', marginBottom: '1.5rem' }}>{viewTicket.description}</p>
-          <p style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
-            Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-          </p>
-          <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+        <div className="dash-modal-body">
+          <p className="dash-modal-desc">{viewTicket.description}</p>
+          <p className="dash-modal-date">Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1rem' }}>
             {viewTicket.status === 'open' && (
-              <button className="btn" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem' }} onClick={() => handleStatus(viewTicket.id, 'closed')}>
-                <FaCheckCircle style={{ marginRight: '0.4rem' }} /> Mark Resolved
-              </button>
+              <button className="btn btn-sm" onClick={() => handleStatus(viewTicket.id, 'closed')}><FaCheckCircle style={{ marginRight: '0.3rem' }} /> Mark Resolved</button>
             )}
             {viewTicket.status === 'closed' && (
-              <button className="btn btn-outline" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem' }} onClick={() => handleStatus(viewTicket.id, 'open')}>
-                <FaUndo style={{ marginRight: '0.4rem' }} /> Reopen
-              </button>
+              <button className="btn btn-outline btn-sm" onClick={() => handleStatus(viewTicket.id, 'open')}><FaUndo style={{ marginRight: '0.3rem' }} /> Reopen</button>
             )}
-            <button className="btn btn-outline" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(viewTicket.id); }}>
-              <FaTrash style={{ marginRight: '0.4rem' }} /> Delete
-            </button>
+            <button className="btn btn-outline btn-sm" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(viewTicket.id); }}><FaTrash style={{ marginRight: '0.3rem' }} /> Delete</button>
           </div>
         </div>
-        <div className="dash-card" style={{ marginTop: '1rem' }}>
-          <h4 style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
+        <div className="dash-modal-conv">
+          <h4><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({viewTicket.messages?.length || 0})</h4>
           <div className="msg-thread">
-            {msgs.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: '#9ca3af', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+            {(!viewTicket.messages || viewTicket.messages.length === 0) ? (
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
             ) : (
-              msgs.map((m, i) => (
+              viewTicket.messages.map((m, i) => (
                 <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
                   <div className="msg-header">
                     <strong>{m.senderName}</strong>
@@ -188,19 +184,13 @@ function TicketsView({ tickets, setTickets }) {
             <div ref={msgEndRef} />
           </div>
           <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-            <input
-              type="text"
-              placeholder="Type your reply..."
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }}
-            />
+            <input type="text" placeholder="Type your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
             <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
           </div>
         </div>
-      </>
-    );
-  }
+      </div>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -337,6 +327,7 @@ function TicketsView({ tickets, setTickets }) {
           )}
         </div>
       </div>
+      {modalContent}
     </>
   );
 }
@@ -351,6 +342,15 @@ function SuggestionsView() {
   const [sugSendingReply, setSugSendingReply] = useState(false);
   const sugMsgEndRef = useRef(null);
   useEffect(() => { sugMsgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewSug?.messages]);
+
+  useEffect(() => {
+    if (viewSug) {
+      fetch(`${API_BASE}/api/suggestions/${viewSug.id || viewSug._id}`, { headers: { Authorization: `Bearer ${token()}` } })
+        .then((r) => r.json())
+        .then((data) => { if (!data.error) setViewSug(data); })
+        .catch(() => {});
+    }
+  }, [viewSug?.id || viewSug?._id]);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/suggestions`, { headers: { Authorization: `Bearer ${token()}` } })
@@ -407,53 +407,43 @@ function SuggestionsView() {
     }
   };
 
-  if (viewSug) {
-    const msgs = viewSug.messages || [];
-    return (
-      <div className="dashboard-grid">
-        <div className="sug-detail-card">
-          <div className="sug-detail-top">
-            <button className="btn btn-outline btn-sm" onClick={() => setViewSug(null)}><FaTimes /> Back</button>
-            <h3>{viewSug.title}</h3>
-          </div>
-          <p className="sug-detail-desc">{viewSug.description}</p>
-          <p className="sug-detail-date">
-            {new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-          </p>
-
-          <div className="sug-detail-conv">
-            <h4><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({msgs.length})</h4>
-            <div className="msg-thread">
-              {msgs.length === 0 ? (
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
-              ) : (
-                msgs.map((m, i) => (
-                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
-                    <div className="msg-header">
-                      <strong>{m.senderName}</strong>
-                      <span>{new Date(m.createdAt).toLocaleString()}</span>
-                    </div>
-                    <p>{m.text}</p>
+  const sugModalContent = viewSug ? (
+    <div className="dash-modal-overlay" onClick={() => setViewSug(null)}>
+      <div className="dash-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="dash-modal-close" onClick={() => setViewSug(null)}><FaTimes /></button>
+        <div className="dash-modal-header">
+          <h2>{viewSug.title}</h2>
+        </div>
+        <div className="dash-modal-body">
+          <p className="dash-modal-desc">{viewSug.description}</p>
+          <p className="dash-modal-date">{new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+        </div>
+        <div className="dash-modal-conv">
+          <h4><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({viewSug.messages?.length || 0})</h4>
+          <div className="msg-thread">
+            {(!viewSug.messages || viewSug.messages.length === 0) ? (
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+            ) : (
+              viewSug.messages.map((m, i) => (
+                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                  <div className="msg-header">
+                    <strong>{m.senderName}</strong>
+                    <span>{new Date(m.createdAt).toLocaleString()}</span>
                   </div>
-                ))
-              )}
-              <div ref={sugMsgEndRef} />
-            </div>
-            <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-              <input
-                type="text"
-                placeholder="Type your reply..."
-                value={sugReplyText}
-                onChange={(e) => setSugReplyText(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }}
-              />
-              <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
-            </div>
+                  <p>{m.text}</p>
+                </div>
+              ))
+            )}
+            <div ref={sugMsgEndRef} />
+          </div>
+          <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
+            <input type="text" placeholder="Type your reply..." value={sugReplyText} onChange={(e) => setSugReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }} />
+            <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  ) : null;
 
   return (
     <div className="dashboard-grid">
@@ -516,6 +506,7 @@ function SuggestionsView() {
           </div>
         )}
       </div>
+      {sugModalContent}
     </div>
   );
 }
