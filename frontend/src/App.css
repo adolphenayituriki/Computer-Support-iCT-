@@ -1947,11 +1947,11 @@ header.dash-header .hamburger span {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .dashboard {
-    margin-left: 0;
-    padding: 5.5rem 1rem 4rem;
-    padding-left: 68px;
+    margin: 0;
+    margin-left: 64px;
+    padding: 5.5rem 0.75rem 4rem;
   }
 
   .dash-sidebar {
@@ -1959,9 +1959,9 @@ header.dash-header .hamburger span {
     left: 0;
     top: 0;
     bottom: 0;
-    width: 56px;
+    width: 64px;
     border-radius: 0;
-    padding: 0.3rem 0 1rem;
+    padding: 0.5rem 0 1.5rem;
     z-index: 50;
     overflow-y: auto;
     background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
@@ -1969,19 +1969,40 @@ header.dash-header .hamburger span {
   }
 
   .dash-sidebar.open {
-    width: 240px;
+    width: 220px;
     z-index: 100;
     box-shadow: 4px 0 24px rgba(0,0,0,0.2);
   }
 
   .dash-sidebar-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.4rem 0 0.6rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 0.3rem;
+  }
+
+  .dash-sidebar-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.7rem;
+    margin: 0;
+  }
+
+  .dash-sidebar-name,
+  .dash-sidebar-role {
     display: none;
   }
 
+  .dash-sidebar.open .dash-sidebar-name,
+  .dash-sidebar.open .dash-sidebar-role {
+    display: block;
+  }
+
   .dash-sidebar-nav {
-    gap: 0.1rem;
+    gap: 0.2rem;
     align-items: center;
-    padding: 0 0.25rem;
   }
 
   .dash-sidebar.open .dash-sidebar-nav {
@@ -1994,10 +2015,9 @@ header.dash-header .hamburger span {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.1rem;
-    padding: 0.45rem 0;
-    font-size: 0.55rem;
-    width: 48px;
+    gap: 0;
+    padding: 0.55rem 0;
+    width: 52px;
     margin: 0 auto;
     border-radius: 10px;
     text-align: center;
@@ -2009,44 +2029,40 @@ header.dash-header .hamburger span {
     text-align: left;
     gap: 0.5rem;
     padding: 0.5rem 0.7rem;
-    font-size: 0.82rem;
     width: 100%;
     margin: 0;
   }
 
-  .dash-sidebar-tab .dash-sidebar-tab-icon {
-    font-size: 1.05rem;
+  .dash-sidebar-tab-icon {
+    font-size: 1.15rem;
     width: auto;
   }
 
   .dash-sidebar-tab span:last-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 44px;
-    white-space: nowrap;
-    line-height: 1.1;
+    display: none;
   }
 
   .dash-sidebar.open .dash-sidebar-tab span:last-child {
-    max-width: none;
+    display: block;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .dash-sidebar-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
     width: 100%;
-    height: 40px;
+    height: 38px;
     background: none;
     border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     color: rgba(255,255,255,0.8);
     cursor: pointer;
     font-family: inherit;
-    font-weight: 600;
-    font-size: 0.7rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.2rem;
     transition: background 0.2s;
   }
 
@@ -2061,12 +2077,14 @@ header.dash-header .hamburger span {
   .dash-sidebar.open .dash-sidebar-toggle {
     justify-content: flex-start;
     padding-left: 0.7rem;
-    font-size: 0.85rem;
     gap: 0.5rem;
   }
 
   .dash-sidebar.open .dash-sidebar-toggle span {
     display: inline;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
   }
 
   .dash-sidebar-overlay {
