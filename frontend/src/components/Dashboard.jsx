@@ -697,10 +697,10 @@ export default function Dashboard() {
     <div className="dashboard">
       <div className="dash-layout">
         {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-        <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <FaBars /> <span>Menu</span>
-        </button>
         <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`}>
+          <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <FaBars /> <span>Menu</span>
+          </button>
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
             <div className="dash-sidebar-name">{user?.name}</div>
