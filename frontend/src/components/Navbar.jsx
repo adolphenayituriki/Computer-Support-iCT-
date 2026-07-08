@@ -73,7 +73,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
       <nav>
         <button className="dash-menu-btn" aria-label="Toggle dashboard menu" onClick={() => setSidebarOpen((v) => !v)}>
-          <FaBars />
+          <FaBars /> Menu
         </button>
         <a href="/" className="logo">
           <img src="/final-logo.jpg" alt="CS hub (iCT)" className="logo-img" />
