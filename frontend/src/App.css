@@ -1950,8 +1950,7 @@ header.dash-header .hamburger span {
 @media (max-width: 900px) {
   .dashboard {
     margin-left: 0;
-    padding: 5.5rem 1rem 4rem;
-    padding-left: 68px;
+    padding: 6rem 1rem 4rem;
   }
 
   .dash-sidebar {
@@ -1959,120 +1958,61 @@ header.dash-header .hamburger span {
     top: 0;
     left: 0;
     bottom: 0;
-    width: 56px;
+    width: 260px;
     border-radius: 0;
-    padding: 0 0 1.5rem;
+    padding: 5rem 0.8rem 1.5rem;
+    transform: translateX(-100%);
     z-index: 100;
     overflow-y: auto;
-    transform: none;
-    transition: width 0.25s ease;
+    transition: transform 0.3s ease;
   }
 
   .dash-sidebar.open {
-    width: 240px;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+    transform: translateX(0);
   }
 
   .dash-sidebar-header {
     display: none;
   }
 
-  .dash-sidebar.open .dash-sidebar-header {
-    display: block;
-    padding: 0.3rem 0.5rem 0.6rem;
+  .dash-sidebar-nav {
+    gap: 0.15rem;
+  }
+
+  .dash-sidebar-tab {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
   }
 
   .dash-sidebar-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    position: relative;
-    top: auto;
-    left: auto;
-    width: 100%;
-    height: 44px;
-    border-radius: 0;
-    background: transparent;
-    color: rgba(255,255,255,0.8);
-    box-shadow: none;
-    margin-bottom: 0.3rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    font-size: 0.7rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
+    gap: 0.4rem;
+    position: fixed;
+    top: 5.5rem;
+    left: 1rem;
+    z-index: 102;
+    width: 48px;
+    height: 40px;
+    background: #1e1b4b;
+    color: #fff;
     border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(30, 27, 75, 0.2);
+    transition: background 0.2s;
+    font-family: inherit;
+    font-weight: 600;
   }
 
   .dash-sidebar-toggle:hover {
-    background: rgba(255,255,255,0.08);
+    background: #312e81;
   }
 
-  .dash-sidebar-toggle span:last-child {
+  .dash-sidebar-toggle span {
     display: none;
-  }
-
-  .dash-sidebar.open .dash-sidebar-toggle {
-    justify-content: flex-start;
-    padding-left: 0.8rem;
-    font-size: 0.85rem;
-  }
-
-  .dash-sidebar.open .dash-sidebar-toggle span:last-child {
-    display: inline;
-  }
-
-  .dash-sidebar-nav {
-    gap: 0.1rem;
-    align-items: center;
-  }
-
-  .dash-sidebar.open .dash-sidebar-nav {
-    align-items: stretch;
-    padding: 0 0.4rem;
-  }
-
-  .dash-sidebar-tab {
-    padding: 0.5rem 0;
-    font-size: 0.75rem;
-    justify-content: center;
-    text-align: center;
-    gap: 0.1rem;
-    flex-direction: column;
-    width: 48px;
-    margin: 0 auto;
-    border-radius: 10px;
-  }
-
-  .dash-sidebar.open .dash-sidebar-tab {
-    flex-direction: row;
-    justify-content: flex-start;
-    text-align: left;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 0.5rem 0.7rem;
-    font-size: 0.82rem;
-    margin: 0;
-  }
-
-  .dash-sidebar-tab-icon {
-    font-size: 1.05rem;
-    width: auto;
-  }
-
-  .dash-sidebar-tab span:last-child {
-    font-size: 0.55rem;
-    line-height: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 48px;
-  }
-
-  .dash-sidebar.open .dash-sidebar-tab span:last-child {
-    font-size: 0.82rem;
-    max-width: none;
   }
 
   .dash-sidebar-overlay {
