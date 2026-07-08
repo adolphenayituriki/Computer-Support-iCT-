@@ -1,4 +1,5 @@
 import Conversation from '../models/Conversation.js';
+import { sendAdminNotification } from '../services/mailer.js';
 
 export async function getMyConversation(req, res) {
   try {
@@ -17,6 +18,7 @@ export async function addUserMessage(req, res) {
     if (!conv) return res.status(404).json({ error: 'Conversation not found.' });
     conv.messages.push({ sender: 'user', senderName: req.user.name, text });
     await conv.save();
+    sendAdminNotification('New User Message', `From: ${req.user.name} (${req.user.email})\n\n${text}`).catch(() => {});
     res.status(201).json(conv);
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });

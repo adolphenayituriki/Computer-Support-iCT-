@@ -1,11 +1,12 @@
 import Suggestion from '../models/Suggestion.js';
+import { sendAdminNotification } from '../services/mailer.js';
 
 export async function createSuggestion(req, res) {
   try {
     const { title, description } = req.body;
     if (!title || !description) return res.status(400).json({ error: 'Title and description are required.' });
     await Suggestion.create({ userId: req.user.id, userName: req.user.name, title, description });
-    console.log(`New suggestion from ${req.user.name}: ${title}`);
+    sendAdminNotification('New Suggestion', `From: ${req.user.name} (${req.user.email})\nTitle: ${title}\n\n${description}`).catch(() => {});
     res.status(201).json({ success: true, message: 'Thanks for your suggestion! We review every idea.' });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });

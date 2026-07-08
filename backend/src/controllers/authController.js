@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { sendResetEmail } from '../services/mailer.js';
+import { sendResetEmail, sendUserWelcome, sendAdminNotification } from '../services/mailer.js';
 import TeamApp from '../models/TeamApp.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cshub_ict_secret_key_2026';
@@ -16,6 +16,8 @@ export async function register(req, res) {
     if (existing) return res.status(409).json({ error: 'Email already registered.' });
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashed });
+    sendUserWelcome(email, name).catch((e) => console.log('Email error:', e.message));
+    sendAdminNotification('New User Registered', `Name: ${name}\nEmail: ${email}`).catch(() => {});
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false } });
   } catch (err) {

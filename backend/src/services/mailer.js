@@ -163,6 +163,31 @@ export async function sendAccountSetupEmail(toEmail, token) {
   });
 }
 
+export async function sendUserWelcome(toEmail, name) {
+  await send({
+    to: toEmail,
+    subject: 'Welcome to CS Hub (iCT)!',
+    html: baseHtml(`
+      <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">Welcome, ${name}!</h2>
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
+        You are now part of CS Hub (iCT) — Computer Support for All Rwandans.
+      </p>
+      <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+        <p style="margin: 0 0 6px; color: #94a3b8; font-size: 0.82rem;">What you can do:</p>
+        <ul style="color: #cbd5e1; margin: 0; padding-left: 1.2rem; line-height: 1.7;">
+          <li>Submit support tickets</li>
+          <li>Send us suggestions</li>
+          <li>Chat with our team</li>
+          <li>Apply to join the team</li>
+        </ul>
+      </div>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin: 0;">
+        <a href="https://computer-support-ict.vercel.app/dashboard" style="color: #38bdf8;">Go to your dashboard</a>
+      </p>
+    `),
+  });
+}
+
 export async function sendAdminNotification(subject, body) {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;

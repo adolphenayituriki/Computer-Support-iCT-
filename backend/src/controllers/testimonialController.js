@@ -1,4 +1,5 @@
 import Testimonial from '../models/Testimonial.js';
+import { sendAdminNotification } from '../services/mailer.js';
 
 export async function getApprovedTestimonials(_req, res) {
   try {
@@ -14,6 +15,7 @@ export async function createTestimonial(req, res) {
     const { name, role, content, avatar, rating } = req.body;
     if (!name || !content) return res.status(400).json({ error: 'Name and content are required.' });
     const testimonial = await Testimonial.create({ name, role, content, avatar, rating, approved: false });
+    sendAdminNotification('New Testimonial', `From: ${name}${role ? ` (${role})` : ''}\nRating: ${rating || 'N/A'}\n\n${content}`).catch(() => {});
     res.status(201).json({ message: 'Testimonial submitted and awaiting approval.', id: testimonial._id });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
