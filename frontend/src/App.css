@@ -8,7 +8,7 @@
   box-sizing: border-box;
 }
 
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; width: 100%; overflow-x: hidden; }
 
 :root {
   --glass-bg: rgba(255, 255, 255, 0.12);
@@ -28,12 +28,16 @@ html { scroll-behavior: smooth; overflow-x: hidden; }
 }
 
 body {
+  width: 100%;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   color: #1e1b4b;
   line-height: 1.7;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
 }
+
+#root { width: 100%; overflow-x: hidden; }
 
 a, button, input, select, textarea, .btn, .hamburger, .dash-tab, .filter-btn {
   touch-action: manipulation;
@@ -560,6 +564,7 @@ header.dash-header .hamburger span {
 
 /* -- Hero -- */
 .hero {
+  width: 100%;
   min-height: 75vh;
   display: flex;
   align-items: center;
