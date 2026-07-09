@@ -44,7 +44,7 @@ export default function UserChatView() {
   };
 
   return (
-    <div className="user-chat-wrap">
+    <div className="dash-card" style={{ padding: 0, overflow: 'hidden' }}>
       <div className="user-chat-main">
         <div className="admin-chat-header">
           <FaComments /> Messages with Admin

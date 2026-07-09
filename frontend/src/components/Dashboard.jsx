@@ -5,7 +5,8 @@ import { useSidebar } from '../SidebarContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
 import SettingsModal from './SettingsModal';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList, FaCog } from 'react-icons/fa';
+import HelpModal from './HelpModal';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList, FaCog, FaAngleLeft, FaAngleRight, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -695,6 +696,18 @@ export default function Dashboard() {
   }, [sidebarOpen]);
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem('sidebarCollapsed') === 'true'
+  );
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', sidebarCollapsed);
+  }, [sidebarCollapsed]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const handleLogout = () => {
+    localStorage.removeItem('cshub_token');
+    navigate('/login');
+  };
 
   const sidebarTabs = [
     { key: 'tickets', icon: <FaTicketAlt />, label: 'Support Tickets' },
@@ -712,11 +725,14 @@ export default function Dashboard() {
     <div className="dashboard">
       <div className="dash-layout">
         {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`} role="navigation" aria-label="Dashboard navigation">
+        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}${sidebarCollapsed ? ' collapsed' : ''}`} role="navigation" aria-label="Dashboard navigation">
+          <button className="dash-sidebar-collapse" onClick={() => setSidebarCollapsed((v) => !v)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+            {sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
+          </button>
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
-            <div className="dash-sidebar-name">{user?.name}</div>
-            <div className="dash-sidebar-role">{sidebarRole}</div>
+            <div className={`dash-sidebar-name${sidebarCollapsed ? ' collapsed' : ''}`}>{user?.name}</div>
+            <div className={`dash-sidebar-role${sidebarCollapsed ? ' collapsed' : ''}`}>{sidebarRole}</div>
           </div>
           <div className="dash-sidebar-nav">
             {sidebarTabs.map((t) => (
@@ -724,13 +740,31 @@ export default function Dashboard() {
                 key={t.key}
                 className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
                 onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+                title={sidebarCollapsed ? t.label : undefined}
               >
                 <span className="dash-sidebar-tab-icon">{t.icon}</span>
-                <span>{t.label}</span>
+                <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>{t.label}</span>
               </button>
             ))}
           </div>
+          <div className="dash-sidebar-nav-bottom">
+            <button className="dash-sidebar-tab" onClick={() => setSettingsOpen(true)} title={sidebarCollapsed ? 'Settings' : undefined}>
+              <span className="dash-sidebar-tab-icon"><FaCog /></span>
+              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Settings</span>
+            </button>
+            <button className="dash-sidebar-tab" onClick={() => setHelpOpen(true)} title={sidebarCollapsed ? 'Help' : undefined}>
+              <span className="dash-sidebar-tab-icon"><FaQuestionCircle /></span>
+              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Help</span>
+            </button>
+            <button className="dash-sidebar-tab" onClick={handleLogout} title={sidebarCollapsed ? 'Logout' : undefined}>
+              <span className="dash-sidebar-tab-icon"><FaSignOutAlt /></span>
+              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Logout</span>
+            </button>
+          </div>
         </div>
+
+        {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+        {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
 
         <div className="dash-main">
           <div className="dash-top-tabs">

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminChatView from './AdminChatView';
+import HelpModal from './HelpModal';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
@@ -1531,8 +1533,18 @@ function Loading() {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('cshub_token');
+    navigate('/login');
+  };
   const [tab, setTab] = useState('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('adminSidebarCollapsed') === 'true');
+  useEffect(() => {
+    localStorage.setItem('adminSidebarCollapsed', sidebarCollapsed);
+  }, [sidebarCollapsed]);
   const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -1619,11 +1631,14 @@ export default function AdminDashboard() {
         <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
           <FaBars />
         </button>
-        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}${sidebarCollapsed ? ' collapsed' : ''}`} role="navigation" aria-label="Dashboard navigation">
+          <button className="dash-sidebar-collapse" onClick={() => setSidebarCollapsed((v) => !v)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+            {sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
+          </button>
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
-            <div className="dash-sidebar-name">{user?.name}</div>
-            <div className="dash-sidebar-role">Admin Dashboard</div>
+            <div className={`dash-sidebar-name${sidebarCollapsed ? ' collapsed' : ''}`}>{user?.name}</div>
+            <div className={`dash-sidebar-role${sidebarCollapsed ? ' collapsed' : ''}`}>Admin Dashboard</div>
           </div>
           <div className="dash-sidebar-nav">
             {sidebarTabs.map((t) => (
@@ -1631,13 +1646,26 @@ export default function AdminDashboard() {
                 key={t.key}
                 className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
                 onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+                title={sidebarCollapsed ? t.label : undefined}
               >
                 <span className="dash-sidebar-tab-icon">{t.icon}</span>
-                <span>{t.label}</span>
+                <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>{t.label}</span>
               </button>
             ))}
           </div>
+          <div className="dash-sidebar-nav-bottom">
+            <button className="dash-sidebar-tab" onClick={() => setHelpOpen(true)} title={sidebarCollapsed ? 'Help' : undefined}>
+              <span className="dash-sidebar-tab-icon"><FaQuestionCircle /></span>
+              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Help</span>
+            </button>
+            <button className="dash-sidebar-tab" onClick={handleLogout} title={sidebarCollapsed ? 'Logout' : undefined}>
+              <span className="dash-sidebar-tab-icon"><FaSignOutAlt /></span>
+              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Logout</span>
+            </button>
+          </div>
         </div>
+
+        {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
 
         <div className="dash-main">
           {renderContent()}
