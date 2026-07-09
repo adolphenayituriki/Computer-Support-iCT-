@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaNewspaper, FaYoutube, FaImage, FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
+import API_BASE from '../api';
 
 export default function NewsPreview() {
   const [news, setNews] = useState([]);
 
   useEffect(() => {
-    fetch('/api/news')
+    fetch(`${API_BASE}/api/news`)
       .then((r) => r.json())
       .then((data) => setNews(data.slice(0, 3)))
       .catch(() => {});

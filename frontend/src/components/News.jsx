@@ -3,6 +3,7 @@ import { FaNewspaper, FaYoutube, FaImage, FaCalendarAlt, FaHeart, FaRegHeart, Fa
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
+import API_BASE from '../api';
 
 function token() { return localStorage.getItem('cshub_token'); }
 
@@ -19,7 +20,7 @@ export default function News() {
   const msgEndRef = useRef(null);
 
   useEffect(() => {
-    fetch('/api/news')
+    fetch(`${API_BASE}/api/news`)
       .then((r) => r.json())
       .then((data) => {
         setNews(data);
@@ -56,7 +57,7 @@ export default function News() {
 
   const handleLike = async (id) => {
     if (!user) return showToast('Sign in to like posts.', 'error');
-    const res = await fetch(`/api/news/${id}/like`, {
+    const res = await fetch(`${API_BASE}/api/news/${id}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
     });
@@ -73,7 +74,7 @@ export default function News() {
     if (!user) return showToast('Sign in to comment.', 'error');
     if (!commentText.trim()) return;
     setSubmitting(true);
-    const res = await fetch(`/api/news/${id}/comment`, {
+    const res = await fetch(`${API_BASE}/api/news/${id}/comment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
       body: JSON.stringify({ text: commentText.trim() }),
