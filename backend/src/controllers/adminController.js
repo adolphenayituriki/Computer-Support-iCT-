@@ -256,23 +256,41 @@ export async function getOrCreateTeamAppConversation(req, res) {
   try {
     const app = await TeamApp.findById(req.params.id);
     if (!app) return res.status(404).json({ error: 'Application not found.' });
-    let user = app.userId ? await User.findById(app.userId) : null;
-    if (!user) {
+    let user = null;
+    try {
+      user = app.userId ? await User.findById(app.userId) : null;
+    } catch (_) {
+      user = null;
+    }
+    if (!user && app.email) {
       user = await User.findOne({ email: app.email });
     }
     if (!user) {
       const genPwd = Math.random().toString(36).slice(2, 10) + 'A1!';
       const hashed = await bcrypt.hash(genPwd, 10);
-      user = await User.create({ name: app.name, email: app.email, password: hashed, isAdmin: false });
+      try {
+        user = await User.create({ name: app.name, email: app.email, password: hashed, isAdmin: false });
+      } catch (createErr) {
+        if (createErr.code === 11000) {
+          user = await User.findOne({ email: app.email });
+        } else {
+          throw createErr;
+        }
+      }
     }
-    app.userId = user._id;
-    await app.save();
+    if (!user) {
+      return res.status(500).json({ error: 'Could not find or create a user for this application.' });
+    }
+    try {
+      await TeamApp.findByIdAndUpdate(app._id, { userId: user._id });
+    } catch (_) {}
     let conv = await Conversation.findOne({ userId: user._id });
     if (!conv) {
       conv = await Conversation.create({ userId: user._id, userName: user.name, userEmail: user.email });
     }
     res.json(conv);
   } catch (err) {
+    console.error('getOrCreateTeamAppConversation error:', err);
     res.status(500).json({ error: 'Server error.' });
   }
 }

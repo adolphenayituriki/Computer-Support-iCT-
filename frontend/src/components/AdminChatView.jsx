@@ -9,7 +9,11 @@ function api(url, opts = {}) {
   return fetch(`${API_BASE}${url}`, {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}`, ...opts.headers },
     ...opts,
-  }).then((r) => r.json());
+  }).then(async (r) => {
+    const data = await r.json();
+    if (!r.ok) return { error: data.error || `Request failed (${r.status})` };
+    return data;
+  });
 }
 
 export default function AdminChatView() {
@@ -25,6 +29,7 @@ export default function AdminChatView() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const msgEndRef = useRef(null);
 
   const fetchAll = async () => {
@@ -169,11 +174,17 @@ export default function AdminChatView() {
     setSelectedUserId('');
   };
 
-  const openNew = () => {
-    api('/api/admin/users').then((data) => {
-      if (!data.error) setUsers(data);
-    });
+  const openNew = async () => {
     setShowNew(true);
+    setLoadingUsers(true);
+    const data = await api('/api/admin/users');
+    setLoadingUsers(false);
+    if (data.error) {
+      showToast(data.error, 'error');
+      setUsers([]);
+    } else {
+      setUsers(data);
+    }
   };
 
   const handleSelect = (item) => {
@@ -208,8 +219,8 @@ export default function AdminChatView() {
         <div className="modal-overlay" onClick={() => setShowNew(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
             <h3>Start Direct Conversation</h3>
-            <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} style={{ width: '100%', margin: '1rem 0', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}>
-              <option value="">Select a user...</option>
+            <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} disabled={loadingUsers} style={{ width: '100%', margin: '1rem 0', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+              <option value="">{loadingUsers ? 'Loading users...' : 'Select a user...'}</option>
               {users.map((u) => <option key={u.id || u._id} value={u.id || u._id}>{u.name} ({u.email})</option>)}
             </select>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>

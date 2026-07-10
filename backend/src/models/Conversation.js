@@ -14,9 +14,8 @@ const conversationSchema = new mongoose.Schema({
   lastActivity: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-conversationSchema.pre('save', function (next) {
+conversationSchema.pre('save', function () {
   this.lastActivity = new Date();
-  next();
 });
 
 export default mongoose.model('Conversation', conversationSchema);

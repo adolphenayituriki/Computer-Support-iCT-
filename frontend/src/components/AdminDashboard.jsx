@@ -20,7 +20,11 @@ function api(url, opts = {}) {
   return fetch(`${API_BASE}${url}`, {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}`, ...opts.headers },
     ...opts,
-  }).then((r) => r.json());
+  }).then(async (r) => {
+    const data = await r.json();
+    if (!r.ok) return { error: data.error || `Request failed (${r.status})` };
+    return data;
+  });
 }
 
 function StatusBadge({ status, type }) {
@@ -740,14 +744,19 @@ function AdminTeams() {
 
   const handleChat = async (id) => {
     setChattingId(id);
-    const res = await api(`/api/admin/team-apps/${id}/conversation`, { method: 'POST' });
-    setChattingId(null);
-    if (res.error) return showToast(res.error, 'error');
-    if (res._id) {
-      window.dispatchEvent(new CustomEvent('opencode-navigate-tab', { detail: { tab: 'chat' } }));
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('opencode-select-conversation', { detail: { id: res._id, type: 'direct' } }));
-      }, 150);
+    try {
+      const res = await api(`/api/admin/team-apps/${id}/conversation`, { method: 'POST' });
+      setChattingId(null);
+      if (res.error) return showToast(res.error, 'error');
+      if (res._id) {
+        window.dispatchEvent(new CustomEvent('opencode-navigate-tab', { detail: { tab: 'chat' } }));
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('opencode-select-conversation', { detail: { id: res._id, type: 'direct' } }));
+        }, 200);
+      }
+    } catch (err) {
+      setChattingId(null);
+      showToast('Failed to start chat: ' + err.message, 'error');
     }
   };
 
@@ -1429,43 +1438,43 @@ function AdminBeneficiaries() {
   );
 }
 
-function AnalyticsView({ stats, ticketChart }) {
+function AnalyticsView({ stats, ticketChart, appChart, onNavigate }) {
   return (
     <>
       <div className="dash-stats">
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('tickets')}>
           <FaTicketAlt className="dash-stat-icon" />
           <div><strong>{stats.tickets}</strong><span>Tickets</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('users')}>
           <FaUsers className="dash-stat-icon" style={{ color: '#3b82f6' }} />
           <div><strong>{stats.users}</strong><span>Users</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('suggestions')}>
           <FaLightbulb className="dash-stat-icon" style={{ color: '#f59e0b' }} />
           <div><strong>{stats.suggestions}</strong><span>Suggestions</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('contacts')}>
           <FaEnvelope className="dash-stat-icon" style={{ color: '#8b5cf6' }} />
           <div><strong>{stats.contacts}</strong><span>Messages</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('teams')}>
           <FaUserTie className="dash-stat-icon" style={{ color: '#06b6d4' }} />
           <div><strong>{stats.teams}</strong><span>Applications</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('beneficiaries')}>
           <FaUserTie className="dash-stat-icon" style={{ color: '#8b5cf6' }} />
           <div><strong>{stats.beneficiaries}</strong><span>Beneficiaries</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('news')}>
           <FaNewspaper className="dash-stat-icon" style={{ color: '#FFCE08' }} />
           <div><strong>{stats.news}</strong><span>News</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('courses')}>
           <FaBookOpen className="dash-stat-icon" style={{ color: '#06b6d4' }} />
           <div><strong>{stats.courses}</strong><span>Courses</span></div>
         </div>
-        <div className="dash-stat-card">
+        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('testimonials')}>
           <FaStar className="dash-stat-icon" style={{ color: '#FFCE08' }} />
           <div><strong>{stats.testimonials}</strong><span>Testimonials</span></div>
         </div>
@@ -1475,20 +1484,20 @@ function AnalyticsView({ stats, ticketChart }) {
         <div className="dash-chart-header"><FaChartBar /> Overview Chart</div>
         <div className="dash-chart-bars">
           {[
-            { label: 'Tickets', count: stats.tickets, color: '#3b82f6' },
-            { label: 'Users', count: stats.users, color: '#10b981' },
-            { label: 'Suggestions', count: stats.suggestions, color: '#f59e0b' },
-            { label: 'Messages', count: stats.contacts, color: '#8b5cf6' },
-            { label: 'Applications', count: stats.teams, color: '#06b6d4' },
-            { label: 'Beneficiaries', count: stats.beneficiaries, color: '#ec4899' },
-            { label: 'News', count: stats.news, color: '#f97316' },
-            { label: 'Courses', count: stats.courses, color: '#14b8a6' },
-            { label: 'Testimonials', count: stats.testimonials, color: '#FFCE08' },
+            { label: 'Tickets', count: stats.tickets, color: '#3b82f6', tab: 'tickets' },
+            { label: 'Users', count: stats.users, color: '#10b981', tab: 'users' },
+            { label: 'Suggestions', count: stats.suggestions, color: '#f59e0b', tab: 'suggestions' },
+            { label: 'Messages', count: stats.contacts, color: '#8b5cf6', tab: 'contacts' },
+            { label: 'Applications', count: stats.teams, color: '#06b6d4', tab: 'teams' },
+            { label: 'Beneficiaries', count: stats.beneficiaries, color: '#ec4899', tab: 'beneficiaries' },
+            { label: 'News', count: stats.news, color: '#f97316', tab: 'news' },
+            { label: 'Courses', count: stats.courses, color: '#14b8a6', tab: 'courses' },
+            { label: 'Testimonials', count: stats.testimonials, color: '#FFCE08', tab: 'testimonials' },
           ].map((item) => {
             const max = Math.max(...Object.values(stats), 1);
             const pct = (item.count / max) * 100;
             return (
-              <div key={item.label} className="dash-chart-bar-row">
+              <div key={item.label} className="dash-chart-bar-row" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate(item.tab)}>
                 <span className="dash-chart-bar-label">{item.label}</span>
                 <div className="dash-chart-bar-track">
                   <div className="dash-chart-bar-fill" style={{ width: `${pct}%`, background: item.color }} />
@@ -1513,6 +1522,25 @@ function AnalyticsView({ stats, ticketChart }) {
               <div className="dash-chart-sub-item">
                 <span style={{ background: '#9ca3af' }} />
                 Closed <strong>{ticketChart.closed}</strong>
+              </div>
+            </div>
+          </div>
+        )}
+        {stats.teams > 0 && (
+          <div className="dash-chart-sub">
+            <div className="dash-chart-sub-title">Application Status</div>
+            <div className="dash-chart-sub-bars">
+              <div className="dash-chart-sub-item">
+                <span style={{ background: '#f59e0b' }} />
+                Pending <strong>{appChart.pending}</strong>
+              </div>
+              <div className="dash-chart-sub-item">
+                <span style={{ background: '#10b981' }} />
+                Approved <strong>{appChart.approved}</strong>
+              </div>
+              <div className="dash-chart-sub-item">
+                <span style={{ background: '#ef4444' }} />
+                Rejected <strong>{appChart.rejected}</strong>
               </div>
             </div>
           </div>
@@ -1555,6 +1583,7 @@ export default function AdminDashboard() {
   }, []);
 
   const [ticketChart, setTicketChart] = useState({ open: 0, inProgress: 0, resolved: 0, closed: 0 });
+  const [appChart, setAppChart] = useState({ pending: 0, approved: 0, rejected: 0 });
 
   useEffect(() => {
     const endpoints = [
@@ -1580,6 +1609,12 @@ export default function AdminDashboard() {
           open: ticketsArr.filter((t) => t.status === 'open' || t.status === 'in-progress').length,
           resolved: ticketsArr.filter((t) => t.status === 'resolved').length,
           closed: ticketsArr.filter((t) => t.status === 'closed').length,
+        });
+        const teamsArr = results[4].status === 'fulfilled' && Array.isArray(results[4].value) ? results[4].value : [];
+        setAppChart({
+          pending: teamsArr.filter((t) => t.status === 'pending').length,
+          approved: teamsArr.filter((t) => t.status === 'approved').length,
+          rejected: teamsArr.filter((t) => t.status === 'rejected').length,
         });
         setStatsLoading(false);
       });
@@ -1608,7 +1643,7 @@ export default function AdminDashboard() {
           <Loading />
         </>
       ) : (
-        <AnalyticsView stats={stats} ticketChart={ticketChart} />
+        <AnalyticsView stats={stats} ticketChart={ticketChart} appChart={appChart} onNavigate={(t) => setTab(t)} />
       );
     }
     if (tab === 'tickets') return <AdminTickets />;

@@ -2999,6 +2999,13 @@ header.dash-header .hamburger span {
   align-items: center;
   gap: 0.6rem;
   font-size: 0.78rem;
+  transition: background 0.15s, border-radius 0.15s;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+
+.dash-chart-bar-row:hover {
+  background: #f1f5f9;
 }
 
 .dash-chart-bar-label {
@@ -3720,11 +3727,12 @@ header.dash-header .hamburger span {
   padding: 0.8rem 1rem;
   font-weight: 700;
   font-size: 0.95rem;
-  color: #e2e8f0;
+  color: #1e1b4b;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .admin-chat-messages {
@@ -3740,7 +3748,7 @@ header.dash-header .hamburger span {
 .user-chat-wrap {
   background: transparent;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   min-height: 300px;
   display: flex;
@@ -3763,8 +3771,8 @@ header.dash-header .hamburger span {
   padding: 0.8rem 1rem;
   font-weight: 700;
   font-size: 0.95rem;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: #1e1b4b;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -3774,21 +3782,21 @@ header.dash-header .hamburger span {
   display: flex;
   gap: 0.5rem;
   padding: 0.8rem 1rem;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  background: transparent;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .admin-chat-input input {
   flex: 1;
   padding: 0.6rem 0.9rem;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid #d1d5db;
   border-radius: 10px;
   font-family: inherit;
   font-size: 0.88rem;
   outline: none;
   transition: border-color 0.2s;
-  background: rgba(255,255,255,0.06);
-  color: #e2e8f0;
+  background: #f9fafb;
+  color: #1e1b4b;
 }
 
 .admin-chat-input input:focus {
@@ -3796,7 +3804,7 @@ header.dash-header .hamburger span {
 }
 
 .admin-chat-input input::placeholder {
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .admin-chat-input .btn {
