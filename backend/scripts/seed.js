@@ -6,7 +6,7 @@ import News from '../src/models/News.js';
 import Course from '../src/models/Course.js';
 
 const MONGO_URI = process.env.MONGO_URI_CLOUD || process.env.MONGO_URI;
-const IMG = (id) => `https://picsum.photos/seed/${id}/800/450`;
+const U = (id, w = 800, h = 450) => `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
 const YT = (id) => `https://www.youtube.com/watch?v=${id}`;
 
 const newsData = [
@@ -14,14 +14,14 @@ const newsData = [
     title: 'Basic Computer Skills: What Every Beginner Should Know',
     content: `Starting your journey with computers can feel overwhelming, but mastering a few basic skills will give you confidence to do more.\n\nEssential Skills:\n\n1. Using a Mouse and Keyboard\n- Left-click to select, right-click for menus\n- Double-click to open files and programs\n- Keyboard shortcuts: Ctrl+C (copy), Ctrl+V (paste), Ctrl+Z (undo)\n\n2. File Management\n- Creating folders to organize your documents\n- Moving and copying files between folders\n- Using File Explorer (Windows) or Finder (Mac)\n- Understanding file extensions (.docx, .pdf, .jpg)\n\n3. Using the Internet\n- Opening a web browser (Chrome, Edge, Firefox)\n- Searching with Google\n- Bookmarking important websites\n- Downloading files safely\n\n4. Email Basics\n- Composing and sending emails\n- Attaching files\n- Organizing emails into folders\n\n5. Printing Documents\n- Connecting to a printer\n- Selecting print settings\n- Troubleshooting basic print issues\n\nPractice these skills daily and you'll be computer literate in no time!`,
     mediaType: 'image',
-    mediaUrl: IMG('basics101'),
+    mediaUrl: U('photo-1496181133206-80ce9b88a853'),
     author: 'Training Team',
   },
   {
     title: 'Step-by-Step: Installing Microsoft Office on Your Computer',
     content: `Microsoft Office is essential for school and work. Follow this guide to install it properly.\n\nMethod 1: Install from Office.com (Recommended)\n\n1. Go to office.com and sign in with your Microsoft account\n2. Click "Install Office" in the top right corner\n3. Select "Microsoft 365 Apps" from the dropdown\n4. The installer will download — run the file\n5. Click "Yes" when prompted by User Account Control\n6. Wait for the download and installation to complete (may take 5-10 minutes)\n7. Click "Close" when finished\n\nMethod 2: Install from a Disc or USB\n\n1. Insert the Office DVD or USB drive\n2. Open File Explorer and navigate to the drive\n3. Double-click "Setup.exe" or "Install"\n4. Follow the on-screen instructions\n5. Enter your product key when prompted (see our guide on product keys)\n\nMethod 3: Install the standalone version\n\n1. Purchase Office 2021 or 2024 from a retailer\n2. You'll receive a product key card\n3. Go to setup.microsoft.com\n4. Enter the product key\n5. Download and run the installer\n\nAfter installation, open any Office app (like Word) to complete setup and sign in.`,
     mediaType: 'image',
-    mediaUrl: IMG('officeinstall'),
+    mediaUrl: U('photo-1497366216548-37526070297c'),
     author: 'Software Team',
   },
   {
@@ -35,28 +35,28 @@ const newsData = [
     title: 'Complete Guide to Installing and Configuring Antivirus Software',
     content: `Protecting your computer from viruses and malware starts with a good antivirus. Follow this guide to install and configure one.\n\nChoosing an Antivirus\n\nFree Options (Good for basic protection):\n- Windows Defender (built into Windows 10/11) — already installed!\n- Avast Free Antivirus\n- AVG AntiVirus Free\n- Bitdefender Antivirus Free\n\nPaid Options (More features):\n- Norton 360\n- McAfee Total Protection\n- Kaspersky Internet Security\n- Bitdefender Internet Security\n\nInstalling Windows Defender (Already Built In)\nWindows Defender is already on your computer! Just make sure it's enabled:\n1. Open Windows Security (search in Start menu)\n2. Click "Virus & threat protection"\n3. Make sure "Real-time protection" is ON\n4. Click "Check for updates" to get the latest virus definitions\n\nInstalling a Third-Party Antivirus (e.g., Avast)\n1. Go to the official website (avast.com)\n2. Download the free antivirus installer\n3. Run the installer file\n4. Follow the installation wizard\n5. Choose "Recommended" settings\n6. Create an account (optional but recommended)\n7. Run the initial scan\n\nImportant Configuration Steps\n\nAfter installation, do these:\n1. Run a Full System Scan — not just a quick scan\n2. Enable Auto-Protect / Real-Time Scanning\n3. Schedule automatic scans (weekly is good)\n4. Enable automatic updates\n5. Configure exclusions for trusted apps (optional)\n\nWhat to Do When a Virus is Detected\n1. Quarantine the infected file — this isolates it safely\n2. Run a full system scan\n3. Restart your computer\n4. If problems persist, boot into Safe Mode and scan again\n\nRemember: Only ONE antivirus should be installed. Having multiple can cause conflicts and slow your computer.`,
     mediaType: 'image',
-    mediaUrl: IMG('antivirus'),
+    mediaUrl: U('photo-1555949963-aa79dcee981c'),
     author: 'Security Team',
   },
   {
     title: 'Computer Repair 101: Diagnosing Common Hardware Problems',
     content: `Learn to diagnose and fix the most common computer hardware issues. These skills will save you time and money.\n\nEssential Diagnostic Tools\n- Phillips head screwdriver (#00 and #0)\n- Can of compressed air\n- Anti-static wrist strap\n- Multimeter (for power supply testing)\n- USB bootable drive with diagnostic tools\n\nProblem 1: Computer Won't Power On\n\nCauses and Fixes:\n1. No power from outlet — Test with another device\n2. Loose power cable — Reconnect firmly\n3. Failed power supply — Use a multimeter to test voltages\n4. Faulty power button — Check front panel connectors on motherboard\n5. Dead motherboard — Look for swollen capacitors or burn marks\n\nProblem 2: Computer Turns On But No Display\n\nStep-by-step:\n1. Check monitor cable connections\n2. Try a different monitor or cable\n3. Remove and reseat the GPU\n4. Remove and reseat RAM sticks\n5. Clear CMOS by removing the motherboard battery for 30 seconds\n6. Try booting with one RAM stick at a time\n\nProblem 3: Computer is Overheating\n\nSigns:\n- Fans running loudly constantly\n- Random shutdowns or restarts\n- Performance drops after a few minutes\n\nFixes:\n1. Clean dust from fans and heatsinks with compressed air\n2. Ensure all case fans are spinning\n3. Reapply thermal paste on the CPU\n4. Improve cable management for better airflow\n5. Consider upgrading the CPU cooler\n\nProblem 4: Strange Noises\n\n- Clicking noise → Hard drive failing — backup immediately!\n- Grinding noise → Fan bearing failing — replace the fan\n- Beeping on startup → POST code — count the beeps and look up the pattern\n\nWhen to Recommend Replacement\n- If repair costs more than 50% of replacement value\n- If the component is more than 5 years old\n- If replacement parts are no longer available`,
     mediaType: 'image',
-    mediaUrl: IMG('repair101'),
+    mediaUrl: U('photo-1597872200969-2b65d56bd16b'),
     author: 'Repair Team',
   },
   {
     title: 'Microsoft Word Basics: Creating Your First Document',
     content: `Microsoft Word is the world's most popular word processor. Here's how to get started creating professional documents.\n\nGetting Started\n1. Open Word from the Start menu\n2. Click "Blank Document" to start fresh\n3. Or choose a template (resume, flyer, report)\n\nUnderstanding the Interface\n- Ribbon: The toolbar at the top with tabs (Home, Insert, Design, etc.)\n- Document Area: The white space where you type\n- Status Bar: Bottom bar showing page number, word count, etc.\n\nEssential Formatting\n\nText Formatting (Home tab):\n- Bold: Ctrl+B\n- Italic: Ctrl+I\n- Underline: Ctrl+U\n- Font size: Use the dropdown in the ribbon\n- Font color: Click the A with a color bar\n\nParagraph Formatting:\n- Align left: Ctrl+L\n- Center: Ctrl+E\n- Align right: Ctrl+R\n- Line spacing: Home tab > Paragraph > Line spacing\n- Bullet list: Home tab > Bullets button\n- Numbered list: Home tab > Numbering button\n\nAdding Elements (Insert tab):\n- Pictures: Insert > Pictures\n- Tables: Insert > Table\n- Headers/Footers: Insert > Header or Footer\n- Page numbers: Insert > Page Number\n\nSaving Your Document\n- Save: Ctrl+S (do this often!)\n- Save As: F12 (to save with a different name or location)\n- Recommended format: .docx (modern Word format)\n- For sharing with older versions: .doc\n- For PDF: File > Export > Create PDF\n\nPractice Exercise\nCreate a document with:\n1. A title centered and bold\n2. Two paragraphs with different formatting\n3. A bullet list\n4. An image\n5. Your name in the footer\n6. Save it as "My First Document.docx"`,
     mediaType: 'image',
-    mediaUrl: IMG('wordbasics'),
+    mediaUrl: U('photo-1455390582262-044cdead277a'),
     author: 'Training Team',
   },
   {
     title: 'Microsoft Excel Basics: Spreadsheets for Beginners',
     content: `Excel is a powerful tool for organizing data, performing calculations, and creating charts. Here's how to get started.\n\nUnderstanding the Grid\n- Columns: Labeled with letters (A, B, C...)\n- Rows: Labeled with numbers (1, 2, 3...)\n- Cell: The intersection of a column and row (e.g., A1)\n- Active Cell: The cell you're currently editing (has a bold border)\n\nEntering Data\n1. Click a cell to select it\n2. Type your data (text, numbers, or dates)\n3. Press Enter to confirm and move down\n4. Press Tab to move right\n\nBasic Formulas\nAll formulas start with = (equals sign)\n\n- =SUM(A1:A10) — Adds up all numbers in cells A1 through A10\n- =AVERAGE(B1:B10) — Calculates the average\n- =MAX(C1:C10) — Finds the largest value\n- =MIN(C1:C10) — Finds the smallest value\n- =COUNT(D1:D10) — Counts how many cells have numbers\n- =A1+B1 — Adds two cells together\n\nFormatting Your Spreadsheet\n- Bold headers: Select the row, click Bold (or Ctrl+B)\n- Currency: Select cells, Home tab > Number dropdown > Currency\n- Percentages: Select cells, Home tab > % button\n- Merge cells: Select cells, Home tab > Merge & Center\n- Borders: Home tab > Borders button\n\nCreating a Simple Table\n1. Enter your headers in row 1\n2. Enter your data below\n3. Select all the data (including headers)\n4. Insert tab > Table (or Ctrl+T)\n5. Make sure "My table has headers" is checked\n\nMaking a Chart\n1. Select your data\n2. Insert tab > Chart type (Recommended, Bar, Line, Pie)\n3. Excel will create the chart on your sheet\n4. Use Chart Tools to customize colors, labels, and style\n\nPractice Exercise\nCreate a budget spreadsheet:\n1. Columns: Item, Category, Amount, Date\n2. Add 5-10 expenses\n3. Use SUM to calculate the total\n4. Format Amount as currency\n5. Create a pie chart showing spending by category`,
     mediaType: 'image',
-    mediaUrl: IMG('excelbasics'),
+    mediaUrl: U('photo-1551288049-bebda4e38f71'),
     author: 'Training Team',
   },
   {
@@ -69,15 +69,15 @@ const newsData = [
   {
     title: 'Setting Up Email on Your Computer: Outlook and Webmail',
     content: `Learn how to set up and manage email on your computer using Microsoft Outlook and webmail services.\n\nSetting Up Gmail in Outlook\n\n1. Open Outlook\n2. Go to File > Add Account\n3. Enter your email address and click Connect\n4. Enter your password when prompted\n5. Outlook will configure settings automatically\n6. Click Done\n\nIf Automatic Setup Fails:\n1. Choose "Manual setup or additional server types"\n2. Select POP or IMAP\n3. Enter:\n   - Incoming server: imap.gmail.com (Port 993, SSL)\n   - Outgoing server: smtp.gmail.com (Port 587, TLS)\n4. You may need to enable "Less secure app access" or use an App Password\n\nSetting Up Outlook.com (Hotmail) in Outlook\n1. File > Add Account\n2. Enter your @outlook.com or @hotmail.com email\n3. Enter password\n4. Follow the prompts\n\nWebmail (Browser-Based Email)\n\nAccess your email from any browser without installing anything:\n- Gmail: mail.google.com\n- Outlook.com: outlook.com\n- Yahoo Mail: mail.yahoo.com\n\nEmail Best Practices\n1. Check email at least twice daily\n2. Use folders to organize messages\n3. Unsubscribe from unwanted newsletters\n4. Never click suspicious links in emails\n5. Use a professional email address for job applications\n6. Set up an email signature with your name and contact info`,
-    mediaType: 'text',
-    mediaUrl: '',
+    mediaType: 'image',
+    mediaUrl: U('photo-1516387938699-a93567ec168e'),
     author: 'Support Team',
   },
   {
     title: 'How to Install and Update Drivers on Windows',
     content: `Drivers are essential software that let your operating system communicate with hardware. Here's how to manage them.\n\nWhat are Drivers?\nDrivers act as translators between Windows and your hardware (GPU, Wi-Fi card, printer, etc.). Without the right driver, devices may not work correctly.\n\nMethod 1: Windows Update (Automatic)\n1. Open Settings > Windows Update\n2. Click "Check for updates"\n3. Windows will automatically download and install driver updates\n4. Restart your computer when prompted\n\nMethod 2: Device Manager\n1. Right-click the Start button > Device Manager\n2. Find the device with a yellow exclamation mark (!)\n3. Right-click the device > "Update driver"\n4. Select "Search automatically for drivers"\n5. Windows will search and install the best driver\n\nMethod 3: Manufacturer's Website\n1. Identify your hardware model (e.g., "NVIDIA GeForce RTX 3060")\n2. Go to the manufacturer's support website\n3. Search for your model\n4. Download the latest driver for your Windows version\n5. Run the installer and follow the prompts\n\nImportant Drivers to Keep Updated:\n- Graphics Card (GPU) — for games and design software\n- Wi-Fi/Network Adapter — for stable internet\n- Chipset — for overall system stability\n- Audio — for sound\n- Bluetooth — for peripherals\n\nDriver Update Tools (Use with Caution)\n- Some tools claim to update all drivers automatically\n- Stick to manufacturer websites or Windows Update\n- Avoid third-party driver updaters that may install unwanted software\n\nPro Tip: Create a System Restore point before updating critical drivers, so you can roll back if something goes wrong.`,
     mediaType: 'image',
-    mediaUrl: IMG('drivers'),
+    mediaUrl: U('photo-1461749280684-dccba630e2f6'),
     author: 'Tech Team',
   },
 ];
