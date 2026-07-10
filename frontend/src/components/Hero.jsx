@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { FaWrench, FaDesktop, FaShieldAlt, FaGraduationCap } from 'react-icons/fa';
 
 export default function Hero() {
   const canvasRef = useRef(null);
@@ -203,6 +204,28 @@ export default function Hero() {
         <div className="hero-btns">
           <a href="#how-it-works" className="btn">How It Works</a>
           <a href="#services" className="btn btn-outline">Our Services</a>
+        </div>
+
+        <div className="hero-glass-card">
+          <div className="hero-glass-card-item">
+            <span className="hero-glass-card-icon"><FaDesktop /></span>
+            <span className="hero-glass-card-label">Computer Repair</span>
+          </div>
+          <div className="hero-glass-card-divider" />
+          <div className="hero-glass-card-item">
+            <span className="hero-glass-card-icon"><FaWrench /></span>
+            <span className="hero-glass-card-label">Software Install</span>
+          </div>
+          <div className="hero-glass-card-divider" />
+          <div className="hero-glass-card-item">
+            <span className="hero-glass-card-icon"><FaShieldAlt /></span>
+            <span className="hero-glass-card-label">Antivirus Setup</span>
+          </div>
+          <div className="hero-glass-card-divider" />
+          <div className="hero-glass-card-item">
+            <span className="hero-glass-card-icon"><FaGraduationCap /></span>
+            <span className="hero-glass-card-label">Digital Skills</span>
+          </div>
         </div>
       </div>
     </section>
