@@ -67,7 +67,7 @@ export default function Contact() {
             />
             <textarea
               name="message"
-              rows="5"
+              rows="3"
               placeholder="Tell us what you need help with..."
               value={form.message}
               onChange={handleChange}

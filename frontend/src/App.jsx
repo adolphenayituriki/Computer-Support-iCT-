@@ -54,8 +54,8 @@ function HomePage({ onRegisterClick, onTeamClick }) {
       <WhyUs />
       <About />
       <FAQ />
-      <NewsPreview />
       <Testimonials />
+      <NewsPreview />
       <CTA onRegisterClick={onRegisterClick} onTeamClick={onTeamClick} />
       <Contact />
     </main>

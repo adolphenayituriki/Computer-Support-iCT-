@@ -16,7 +16,7 @@ export default function NewsPreview() {
   if (news.length === 0) return null;
 
   return (
-    <section id="news" className="section-reveal section-alt" style={{ padding: '4rem 1rem' }}>
+    <section id="news" className="section-reveal section-alt" style={{ padding: '2.5rem 1rem' }}>
       <div className="container">
         <h2 className="section-title">
           <FaNewspaper className="page-hero-icon" />
