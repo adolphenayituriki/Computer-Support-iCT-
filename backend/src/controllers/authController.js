@@ -68,6 +68,7 @@ export async function googleLogin(req, res) {
     if (!email) return res.status(400).json({ error: 'Could not retrieve email from Google account.' });
 
     let user = await User.findOne({ email });
+    let isNewUser = false;
 
     if (user) {
       if (!user.googleId) {
@@ -76,6 +77,12 @@ export async function googleLogin(req, res) {
       }
     } else {
       user = await User.create({ name: name || 'Google User', email, googleId });
+      isNewUser = true;
+    }
+
+    if (isNewUser) {
+      sendUserWelcome(email, name || 'User').catch((e) => console.log('Email error:', e.message));
+      sendAdminNotification('New User via Google', `Name: ${name}\nEmail: ${email}`).catch(() => {});
     }
 
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });

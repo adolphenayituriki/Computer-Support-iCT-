@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { useSidebar } from '../SidebarContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
 import SettingsModal from './SettingsModal';
 import HelpModal from './HelpModal';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList, FaCog, FaAngleLeft, FaAngleRight, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList, FaCog, FaAngleLeft, FaAngleRight, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -680,7 +679,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState('tickets');
   const [teamData, setTeamData] = useState(null);
   const [teamLoading, setTeamLoading] = useState(true);
-  const { sidebarOpen, setSidebarOpen } = useSidebar();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -715,24 +714,41 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [sidebarOpen]);
-
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(
-    () => localStorage.getItem('sidebarCollapsed') === 'true'
-  );
-  useEffect(() => {
-    localStorage.setItem('sidebarCollapsed', sidebarCollapsed);
-  }, [sidebarCollapsed]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const profileRef = useRef(null);
+  const notifRef = useRef(null);
   const handleLogout = () => {
     localStorage.removeItem('cshub_token');
     navigate('/');
   };
+
+  useEffect(() => {
+    if (tickets.length > 0) {
+      const openTickets = tickets.filter(t => t.status === 'open');
+      const items = openTickets.map(t => ({
+        id: t._id || t.id, type: 'ticket', icon: '🎫',
+        title: t.title || 'Ticket update',
+        sub: `${t.category || 'general'} — ${new Date(t.createdAt).toLocaleString()}`,
+      }));
+      setNotifications(items);
+      setUnreadCount(items.length);
+    }
+  }, [tickets]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+    };
+    if (profileOpen || notifOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileOpen, notifOpen]);
 
   const sidebarTabs = [
     { key: 'tickets', icon: <FaTicketAlt />, label: 'Support Tickets' },
@@ -744,79 +760,126 @@ export default function Dashboard() {
     sidebarTabs.push({ key: 'team', icon: <FaUserTie />, label: 'Team Dashboard' });
   }
 
-  const sidebarRole = teamData?.isTeamMember ? 'Team Member' : 'User Dashboard';
-
   return (
-    <div className="dashboard">
-      <div className="dash-layout">
-        {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}${sidebarCollapsed ? ' collapsed' : ''}`} role="navigation" aria-label="Dashboard navigation">
-          <button className="dash-sidebar-collapse" onClick={() => setSidebarCollapsed((v) => !v)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-            {sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
-          </button>
-          <button className="dash-sidebar-rail-avatar" onClick={() => setSidebarOpen(true)} title={user?.name}>
-            {initials}
-          </button>
-          <div className="dash-sidebar-header">
-            <div className="dash-sidebar-avatar">{initials}</div>
-            <div className={`dash-sidebar-name${sidebarCollapsed ? ' collapsed' : ''}`}>{user?.name}</div>
-            <div className={`dash-sidebar-role${sidebarCollapsed ? ' collapsed' : ''}`}>{sidebarRole}</div>
+    <div className="adm-layout">
+      {sidebarOpen && isMobile && <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
+      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className="adm-sidebar-header">
+          <div className="adm-sidebar-logo">
+            <img src="/LOGO IMAGE.png" alt="CS Hub" />
+            <div>
+              <strong>CS Hub</strong>
+              <span>User Panel</span>
+            </div>
           </div>
-          <div className="dash-sidebar-nav">
+        </div>
+        <div className="adm-sidebar-user">
+          <div className="adm-sidebar-avatar">{initials}</div>
+          <div className="adm-sidebar-user-info">
+            <span className="adm-sidebar-user-name">{user?.name || 'User'}</span>
+            <span className="adm-sidebar-user-role">{teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
+          </div>
+        </div>
+        <nav className="adm-sidebar-nav">
+          <div className="adm-sidebar-group">
+            <div className="adm-sidebar-group-label">MAIN</div>
             {sidebarTabs.map((t) => (
               <button
                 key={t.key}
-                className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
-                onClick={() => {
-                  if (isMobile && !sidebarOpen) {
-                    setSidebarOpen(true);
-                  } else {
-                    setTab(t.key);
-                    setSidebarOpen(false);
-                  }
-                }}
-                title={sidebarCollapsed ? t.label : undefined}
+                className={`adm-sidebar-item${tab === t.key ? ' active' : ''}`}
+                onClick={() => { setTab(t.key); setSidebarOpen(false); }}
               >
-                <span className="dash-sidebar-tab-icon">{t.icon}</span>
-                <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>{t.label}</span>
+                <span className="adm-sidebar-item-icon">{t.icon}</span>
+                <span className="adm-sidebar-item-label">{t.label}</span>
               </button>
             ))}
           </div>
-          <div className="dash-sidebar-nav-bottom">
-            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { setSettingsOpen(true); setSidebarOpen(false); } }} title={sidebarCollapsed ? 'Settings' : undefined}>
-              <span className="dash-sidebar-tab-icon"><FaCog /></span>
-              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Settings</span>
-            </button>
-            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { setHelpOpen(true); setSidebarOpen(false); } }} title={sidebarCollapsed ? 'Help' : undefined}>
-              <span className="dash-sidebar-tab-icon"><FaQuestionCircle /></span>
-              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Help</span>
-            </button>
-            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { handleLogout(); } }} title={sidebarCollapsed ? 'Logout' : undefined}>
-              <span className="dash-sidebar-tab-icon"><FaSignOutAlt /></span>
-              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Logout</span>
-            </button>
-          </div>
-          <button className="dash-sidebar-expand-btn" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle sidebar" title="Toggle sidebar">
-            <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 512" height="1.2em" width="1.2em" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+        </nav>
+        <div className="adm-sidebar-footer">
+          <button className="adm-sidebar-item" onClick={() => { setSettingsOpen(true); setSidebarOpen(false); }}>
+            <span className="adm-sidebar-item-icon"><FaCog /></span>
+            <span className="adm-sidebar-item-label">Settings</span>
+          </button>
+          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}>
+            <span className="adm-sidebar-item-icon"><FaQuestionCircle /></span>
+            <span className="adm-sidebar-item-label">Help</span>
+          </button>
+          <button className="adm-sidebar-item" onClick={handleLogout}>
+            <span className="adm-sidebar-item-icon"><FaSignOutAlt /></span>
+            <span className="adm-sidebar-item-label">Logout</span>
           </button>
         </div>
+      </aside>
 
-        {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
-        {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
 
-        <div className="dash-main">
-          <div className="dash-top-tabs">
-            {sidebarTabs.map((t) => (
-              <button
-                key={t.key}
-                className={`dash-top-tab${tab === t.key ? ' active' : ''}`}
-                onClick={() => setTab(t.key)}
-              >
-                <span className="dash-top-tab-icon">{t.icon}</span>
-                <span>{t.label}</span>
+      <div className="adm-main">
+        <header className="adm-header">
+          <button className="adm-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <FaBars />
+          </button>
+          <div className="adm-header-right" style={{ marginLeft: 'auto' }}>
+            <div className="adm-header-notif" ref={notifRef}>
+              <button className="adm-header-icon" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
+                <FaBell />
+                {unreadCount > 0 && <span className="adm-header-badge">{unreadCount}</span>}
               </button>
-            ))}
+              {notifOpen && (
+                <div className="adm-notif-dropdown">
+                  <div className="adm-notif-dropdown-header">
+                    <strong>Notifications</strong>
+                    {unreadCount > 0 && <span className="adm-notif-count">{unreadCount} new</span>}
+                  </div>
+                  <div className="adm-notif-dropdown-list">
+                    {notifications.length === 0 ? (
+                      <div className="adm-notif-empty">No new notifications</div>
+                    ) : (
+                      notifications.slice(0, 10).map((n) => (
+                        <button key={`${n.type}-${n.id}`} className="adm-notif-item" onClick={() => { setNotifOpen(false); setTab('tickets'); }}>
+                          <span className="adm-notif-icon">{n.icon}</span>
+                          <div className="adm-notif-content">
+                            <div className="adm-notif-title">{n.title}</div>
+                            <div className="adm-notif-sub">{n.sub}</div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="adm-header-user" ref={profileRef}>
+              <button className="adm-header-user-btn" onClick={() => setProfileOpen(!profileOpen)}>
+                <div className="adm-header-avatar">{initials}</div>
+                <span className="adm-header-name">{user?.name || 'User'}</span>
+              </button>
+              {profileOpen && (
+                <div className="adm-profile-dropdown">
+                  <div className="adm-profile-dropdown-header">
+                    <div className="adm-profile-dropdown-avatar">{initials}</div>
+                    <div>
+                      <div className="adm-profile-dropdown-name">{user?.name || 'User'}</div>
+                      <div className="adm-profile-dropdown-email">{user?.email || ''}</div>
+                      <span className="adm-profile-role-badge"><FaUserShield /> {teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
+                    </div>
+                  </div>
+                  <div className="adm-profile-dropdown-divider"></div>
+                  <button className="adm-profile-dropdown-item" onClick={() => { setSettingsOpen(true); setProfileOpen(false); }}>
+                    <FaCog /> Settings
+                  </button>
+                  <div className="adm-profile-dropdown-divider"></div>
+                  <button className="adm-profile-dropdown-item adm-profile-dropdown-logout" onClick={handleLogout}>
+                    <FaSignOutAlt /> Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
+        </header>
+
+        <main className="adm-content">
           {teamData?.application && !teamData.isTeamMember && (
             <div className="dash-card" style={{ marginBottom: '1rem', padding: '1rem 1.2rem', borderLeft: `4px solid ${teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b'}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
@@ -824,7 +887,7 @@ export default function Dashboard() {
                 <div>
                   <strong style={{ fontSize: '0.95rem' }}>Team Application — <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
                   <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: '2px 0 0' }}>
-                    {teamData.application.status === 'pending' ? 'Your application is being reviewed. We\'ll notify you by email once a decision is made.' : 'Your application was not approved at this time. You may reapply in the future.'}
+                    {teamData.application.status === 'pending' ? 'Your application is being reviewed.' : 'Your application was not approved at this time.'}
                   </p>
                 </div>
               </div>
@@ -841,7 +904,7 @@ export default function Dashboard() {
           ) : (
             <UserChatView />
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
