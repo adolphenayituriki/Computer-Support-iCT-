@@ -4,7 +4,7 @@ import AdminChatView from './AdminChatView';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
@@ -1521,9 +1521,10 @@ function AnalyticsView({ stats, ticketChart, appChart, onNavigate }) {
 
 function Loading() {
   return (
-    <div className="loading-spinner">
+    <div className="page-loader" style={{ minHeight: '60vh' }}>
+      <img src="/LOGO IMAGE.png" alt="CS Hub" className="page-loader-logo" style={{ width: 72, height: 72 }} />
+      <div className="page-loader-text" style={{ color: '#6b7280' }}>Loading...</div>
       <div className="loading-spinner-circle" />
-      <span>Loading...</span>
     </div>
   );
 }
@@ -1564,6 +1565,7 @@ export default function AdminDashboard() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileTab, setProfileTab] = useState('profile');
   const profileRef = useRef(null);
+  const notifRef = useRef(null);
   const isMobile = useIsMobile();
   const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
@@ -1653,6 +1655,51 @@ export default function AdminDashboard() {
       });
   }, []);
 
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = async () => {
+    try {
+      const [contactsRes, suggestionsRes, ticketsRes, teamsRes] = await Promise.allSettled([
+        api('/api/admin/contacts'),
+        api('/api/admin/suggestions'),
+        api('/api/admin/tickets'),
+        api('/api/admin/team-apps'),
+      ]);
+      const items = [];
+      const newContacts = contactsRes.status === 'fulfilled' && Array.isArray(contactsRes.value) ? contactsRes.value.filter(c => c.status === 'new') : [];
+      newContacts.forEach(c => items.push({ id: c._id, type: 'contact', icon: '✉️', title: c.subject || 'New contact message', sub: `${c.name} — ${new Date(c.createdAt).toLocaleString()}`, tab: 'contacts', status: c.status }));
+      const newSuggestions = suggestionsRes.status === 'fulfilled' && Array.isArray(suggestionsRes.value) ? suggestionsRes.value.filter(s => s.status === 'pending') : [];
+      newSuggestions.forEach(s => items.push({ id: s._id, type: 'suggestion', icon: '💡', title: s.title || 'New suggestion', sub: `${s.user?.name || 'User'} — ${new Date(s.createdAt).toLocaleString()}`, tab: 'suggestions', status: s.status }));
+      const openTickets = ticketsRes.status === 'fulfilled' && Array.isArray(ticketsRes.value) ? ticketsRes.value.filter(t => t.status === 'open') : [];
+      openTickets.slice(0, 10).forEach(t => items.push({ id: t._id, type: 'ticket', icon: '🎫', title: t.title || 'New ticket', sub: `${t.user?.name || 'User'} — ${new Date(t.createdAt).toLocaleString()}`, tab: 'tickets', status: t.status }));
+      const pendingTeams = teamsRes.status === 'fulfilled' && Array.isArray(teamsRes.value) ? teamsRes.value.filter(t => t.status === 'pending') : [];
+      pendingTeams.forEach(t => items.push({ id: t._id, type: 'team', icon: '👤', title: t.name || 'New application', sub: `${t.email || ''} — ${new Date(t.createdAt).toLocaleString()}`, tab: 'teams', status: t.status }));
+      setNotifications(items);
+      setUnreadCount(items.length);
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+    };
+    if (notifOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [notifOpen]);
+
+  const handleNotifClick = (item) => {
+    setNotifOpen(false);
+    setTab(item.tab);
+  };
+
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'A';
 
   const pageTitles = {
@@ -1699,7 +1746,7 @@ export default function AdminDashboard() {
       <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="adm-sidebar-header">
           <div className="adm-sidebar-logo">
-            <img src="/final-logo.jpg" alt="CS Hub" />
+            <img src="/LOGO IMAGE.png" alt="CS Hub" />
             <div>
               <strong>CS Hub</strong>
               <span>Admin Panel</span>
@@ -1752,10 +1799,40 @@ export default function AdminDashboard() {
             <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <div className="adm-header-right">
-            <button className="adm-header-icon" title="Notifications">
-              <FaEnvelope />
-              {(stats.contacts + stats.suggestions) > 0 && <span className="adm-header-badge">{stats.contacts + stats.suggestions}</span>}
-            </button>
+            <div className="adm-header-notif" ref={notifRef}>
+              <button className="adm-header-icon" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
+                <FaBell />
+                {unreadCount > 0 && <span className="adm-header-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+              </button>
+              {notifOpen && (
+                <div className="adm-notif-dropdown">
+                  <div className="adm-notif-dropdown-header">
+                    <strong>Notifications</strong>
+                    {unreadCount > 0 && <span className="adm-notif-count">{unreadCount} new</span>}
+                  </div>
+                  <div className="adm-notif-dropdown-list">
+                    {notifications.length === 0 ? (
+                      <div className="adm-notif-empty">No new notifications</div>
+                    ) : (
+                      notifications.slice(0, 15).map((n) => (
+                        <button key={`${n.type}-${n.id}`} className="adm-notif-item" onClick={() => handleNotifClick(n)}>
+                          <span className="adm-notif-icon">{n.icon}</span>
+                          <div className="adm-notif-content">
+                            <div className="adm-notif-title">{n.title}</div>
+                            <div className="adm-notif-sub">{n.sub}</div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <div className="adm-notif-dropdown-footer">
+                      <button onClick={() => { setNotifOpen(false); setTab('contacts'); }}>View all</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="adm-header-user" ref={profileRef}>
               <button className="adm-header-user-btn" onClick={() => setProfileOpen(!profileOpen)}>
                 <div className="adm-header-avatar">{initials}</div>
@@ -1768,6 +1845,7 @@ export default function AdminDashboard() {
                     <div>
                       <div className="adm-profile-dropdown-name">{user?.name || 'Admin'}</div>
                       <div className="adm-profile-dropdown-email">{user?.email || ''}</div>
+                      <span className="adm-profile-role-badge"><FaUserShield /> Administrator</span>
                     </div>
                   </div>
                   <div className="adm-profile-dropdown-divider"></div>
@@ -1775,7 +1853,7 @@ export default function AdminDashboard() {
                     <FaEdit /> Edit Profile
                   </button>
                   <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('password'); setProfileOpen(false); }}>
-                    <FaCog /> Change Password
+                    <FaCog /> Settings & Password
                   </button>
                   <div className="adm-profile-dropdown-divider"></div>
                   <button className="adm-profile-dropdown-item adm-profile-dropdown-logout" onClick={handleLogout}>

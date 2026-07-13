@@ -16,7 +16,7 @@ export default function Footer() {
       <div className="footer-content">
         <div className="footer-col">
           <h4>CS hub (iCT)</h4>
-          <img src="/final-logo.jpg" alt="CS hub (iCT)" className="footer-logo" />
+          <img src="/LOGO IMAGE.png" alt="CS hub (iCT)" className="footer-logo" />
           <p>Empowering students and teachers with digital skills and computer support.</p>
           <div className="footer-social">
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebook /></a>

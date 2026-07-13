@@ -2030,7 +2030,7 @@ header.dash-header .hamburger span {
 .adm-sidebar-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 50%;
   background: #FFCE08;
   color: #1a1d3a;
   display: flex;
@@ -2299,7 +2299,7 @@ header.dash-header .hamburger span {
 .adm-header-avatar {
   width: 34px;
   height: 34px;
-  border-radius: 8px;
+  border-radius: 50%;
   background: #FFCE08;
   color: #1a1d3a;
   display: flex;
@@ -2356,7 +2356,7 @@ header.dash-header .hamburger span {
 .adm-profile-dropdown-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 50%;
   background: #FFCE08;
   color: #1a1d3a;
   display: flex;
@@ -2368,6 +2368,20 @@ header.dash-header .hamburger span {
 }
 .adm-profile-dropdown-name { font-size: 0.85rem; font-weight: 600; color: #1f2937; }
 .adm-profile-dropdown-email { font-size: 0.72rem; color: #6b7280; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
+.adm-profile-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background: rgba(255,206,8,0.12);
+  color: #b8860b;
+  font-size: 0.62rem;
+  font-weight: 700;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 .adm-profile-dropdown-divider { height: 1px; background: #e5e7eb; margin: 0.35rem 0; }
 .adm-profile-dropdown-item {
   display: flex;
@@ -2386,6 +2400,87 @@ header.dash-header .hamburger span {
 .adm-profile-dropdown-item:hover { background: #f3f4f6; }
 .adm-profile-dropdown-logout { color: #dc2626; }
 .adm-profile-dropdown-logout:hover { background: #fef2f2; }
+
+/* ─── Notification Dropdown ─── */
+.adm-header-notif { position: relative; }
+.adm-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 340px;
+  max-height: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e5e7eb;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  animation: admFadeIn 0.15s ease;
+}
+.adm-notif-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.adm-notif-dropdown-header strong { font-size: 0.9rem; color: #1f2937; margin: 0; }
+.adm-notif-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  background: #ef4444;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.adm-notif-dropdown-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 320px;
+}
+.adm-notif-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+.adm-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  border-bottom: 1px solid #f3f4f6;
+}
+.adm-notif-item:hover { background: #f9fafb; }
+.adm-notif-item:last-child { border-bottom: none; }
+.adm-notif-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+.adm-notif-content { min-width: 0; }
+.adm-notif-title { font-size: 0.8rem; font-weight: 600; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.adm-notif-sub { font-size: 0.7rem; color: #6b7280; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.adm-notif-dropdown-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 0.5rem;
+  text-align: center;
+}
+.adm-notif-dropdown-footer button {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.adm-notif-dropdown-footer button:hover { background: #eef2ff; }
 
 /* ─── Profile Edit Modal ─── */
 .adm-modal-overlay {
@@ -2447,7 +2542,7 @@ header.dash-header .hamburger span {
 
 .adm-profile-form { display: flex; flex-direction: column; gap: 0.75rem; }
 .adm-profile-avatar-large {
-  width: 64px; height: 64px; border-radius: 14px; background: #FFCE08; color: #1a1d3a;
+  width: 64px; height: 64px; border-radius: 50%; background: #FFCE08; color: #1a1d3a;
   display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;
   margin: 0 auto 0.5rem;
 }
@@ -4412,11 +4507,61 @@ header.dash-header .hamburger span {
 .page-loader {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  color: #6b7280;
+  background: #fff;
+  gap: 1.5rem;
 }
+
+@keyframes logoZoomIn {
+  0% { transform: scale(0.3); opacity: 0; filter: blur(8px); }
+  60% { transform: scale(1.08); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes loaderFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-loader-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  animation: logoZoomIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             logoPulse 2s ease-in-out 0.8s infinite;
+}
+
+.page-loader-text {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  animation: loaderFadeIn 0.6s ease 0.4s both;
+}
+
+.page-loader-dots {
+  display: flex;
+  gap: 6px;
+  animation: loaderFadeIn 0.6s ease 0.6s both;
+}
+
+.page-loader-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FFCE08;
+  animation: logoPulse 1.2s ease-in-out infinite;
+}
+
+.page-loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+.page-loader-dots span:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
