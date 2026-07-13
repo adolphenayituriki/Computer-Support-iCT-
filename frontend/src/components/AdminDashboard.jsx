@@ -1547,15 +1547,23 @@ const SIDEBAR_GROUPS = [
 ];
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, logout, updateProfile, changePassword } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const handleLogout = () => {
-    localStorage.removeItem('cshub_token');
+    logout();
     navigate('/');
   };
   const [tab, setTab] = useState('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [pwdForm, setPwdForm] = useState({ current: '', newPwd: '', confirm: '' });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileTab, setProfileTab] = useState('profile');
+  const profileRef = useRef(null);
   const isMobile = useIsMobile();
   const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
@@ -1566,6 +1574,46 @@ export default function AdminDashboard() {
     window.addEventListener('opencode-navigate-tab', h);
     return () => window.removeEventListener('opencode-navigate-tab', h);
   }, []);
+
+  useEffect(() => {
+    if (user) setProfileForm({ name: user.name || '', email: user.email || '' });
+  }, [user]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+    };
+    if (profileOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileOpen]);
+
+  const handleProfileSave = async () => {
+    setProfileLoading(true);
+    try {
+      await updateProfile(profileForm.name, profileForm.email);
+      showToast('Profile updated successfully.');
+      setProfileEditOpen(false);
+    } catch (err) {
+      showToast(err.message || 'Failed to update profile.', 'error');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (pwdForm.newPwd !== pwdForm.confirm) { showToast('Passwords do not match.', 'error'); return; }
+    if (pwdForm.newPwd.length < 6) { showToast('Password must be at least 6 characters.', 'error'); return; }
+    setProfileLoading(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.newPwd);
+      showToast('Password changed successfully.');
+      setPwdForm({ current: '', newPwd: '', confirm: '' });
+    } catch (err) {
+      showToast(err.message || 'Failed to change password.', 'error');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const [ticketChart, setTicketChart] = useState({ open: 0, inProgress: 0, resolved: 0, closed: 0 });
   const [appChart, setAppChart] = useState({ pending: 0, approved: 0, rejected: 0 });
@@ -1708,9 +1756,33 @@ export default function AdminDashboard() {
               <FaEnvelope />
               {(stats.contacts + stats.suggestions) > 0 && <span className="adm-header-badge">{stats.contacts + stats.suggestions}</span>}
             </button>
-            <div className="adm-header-user">
-              <div className="adm-header-avatar">{initials}</div>
-              <span className="adm-header-name">{user?.name || 'Admin'}</span>
+            <div className="adm-header-user" ref={profileRef}>
+              <button className="adm-header-user-btn" onClick={() => setProfileOpen(!profileOpen)}>
+                <div className="adm-header-avatar">{initials}</div>
+                <span className="adm-header-name">{user?.name || 'Admin'}</span>
+              </button>
+              {profileOpen && (
+                <div className="adm-profile-dropdown">
+                  <div className="adm-profile-dropdown-header">
+                    <div className="adm-profile-dropdown-avatar">{initials}</div>
+                    <div>
+                      <div className="adm-profile-dropdown-name">{user?.name || 'Admin'}</div>
+                      <div className="adm-profile-dropdown-email">{user?.email || ''}</div>
+                    </div>
+                  </div>
+                  <div className="adm-profile-dropdown-divider"></div>
+                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('profile'); setProfileOpen(false); }}>
+                    <FaEdit /> Edit Profile
+                  </button>
+                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('password'); setProfileOpen(false); }}>
+                    <FaCog /> Change Password
+                  </button>
+                  <div className="adm-profile-dropdown-divider"></div>
+                  <button className="adm-profile-dropdown-item adm-profile-dropdown-logout" onClick={handleLogout}>
+                    <FaSignOutAlt /> Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -1721,6 +1793,47 @@ export default function AdminDashboard() {
       </div>
 
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+
+      {profileEditOpen && (
+        <div className="adm-modal-overlay" onClick={() => setProfileEditOpen(false)}>
+          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h3>{profileTab === 'password' ? 'Change Password' : 'Edit Profile'}</h3>
+              <button className="adm-modal-close" onClick={() => setProfileEditOpen(false)}><FaTimes /></button>
+            </div>
+            <div className="adm-modal-body">
+              <div className="adm-profile-tabs">
+                <button className={`adm-profile-tab${profileTab === 'profile' ? ' active' : ''}`} onClick={() => setProfileTab('profile')}>Profile</button>
+                <button className={`adm-profile-tab${profileTab === 'password' ? ' active' : ''}`} onClick={() => setProfileTab('password')}>Password</button>
+              </div>
+              {profileTab === 'profile' ? (
+                <div className="adm-profile-form">
+                  <div className="adm-profile-avatar-large">{initials}</div>
+                  <label className="adm-form-label">Full Name</label>
+                  <input className="adm-form-input" type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                  <label className="adm-form-label">Email</label>
+                  <input className="adm-form-input" type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                  <button className="adm-btn adm-btn-primary" onClick={handleProfileSave} disabled={profileLoading}>
+                    {profileLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              ) : (
+                <div className="adm-profile-form">
+                  <label className="adm-form-label">Current Password</label>
+                  <input className="adm-form-input" type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} />
+                  <label className="adm-form-label">New Password</label>
+                  <input className="adm-form-input" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
+                  <label className="adm-form-label">Confirm New Password</label>
+                  <input className="adm-form-input" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
+                  <button className="adm-btn adm-btn-primary" onClick={handlePasswordChange} disabled={profileLoading}>
+                    {profileLoading ? 'Updating...' : 'Update Password'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
