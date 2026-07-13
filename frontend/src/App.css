@@ -2486,8 +2486,9 @@ header.dash-header .hamburger span {
 .adm-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 27, 75, 0.75) 50%, rgba(15, 23, 42, 0.7) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3035,8 +3036,9 @@ header.dash-header .hamburger span {
   position: fixed;
   inset: 0;
   top: 80px;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 27, 75, 0.75) 50%, rgba(15, 23, 42, 0.7) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 500;
   display: flex;
   align-items: flex-start;
@@ -6863,6 +6865,9 @@ header.dash-header .hamburger span {
 /* ── News Modal ── */
 .news-modal-overlay {
   z-index: 9999 !important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 27, 75, 0.75) 50%, rgba(15, 23, 42, 0.7) 100%) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
 .news-modal {
