@@ -9,6 +9,17 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 const token = () => localStorage.getItem('cshub_token');
 const TICKET_STATUSES = ['open', 'in-progress', 'resolved', 'closed'];
 const SUGGESTION_STATUSES = ['pending', 'reviewed', 'implemented'];
@@ -290,8 +301,11 @@ function AdminTickets() {
   const [sendingReply, setSendingReply] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const tid = (t) => t.id || t._id;
+
   const fetchData = () => {
-    api('/api/admin/tickets').then(setTickets).catch(() => {});
+    setLoading(true);
+    api('/api/admin/tickets').then((d) => { setTickets(d); setLoading(false); }).catch(() => setLoading(false));
   };
 
   const handleSendReply = async () => {
@@ -354,8 +368,6 @@ function AdminTickets() {
     setUpdatingId(null);
     showToast(`Status changed to ${status}.`);
   };
-
-  const tid = (t) => t.id || t._id;
 
   const filtered = tickets.filter((t) => {
     if (filter === 'all') return true;
@@ -524,7 +536,7 @@ function AdminUsers() {
 
   const handleUpdate = async (id) => {
     setSavingId(id);
-    const res = await api(`${API_BASE}/api/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
+    const res = await api(`/api/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(editForm) });
     setSavingId(null);
     if (res.error) return showToast(res.error, 'error');
     setUsers((prev) => prev.map((u) => (u.id === id || u._id === id ? res : u)));
@@ -1564,11 +1576,12 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem('cshub_token');
-    navigate('/login');
+    navigate('/');
   };
   const [tab, setTab] = useState('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('adminSidebarCollapsed') === 'true');
   useEffect(() => {
     localStorage.setItem('adminSidebarCollapsed', sidebarCollapsed);
@@ -1670,6 +1683,9 @@ export default function AdminDashboard() {
           <button className="dash-sidebar-collapse" onClick={() => setSidebarCollapsed((v) => !v)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
             {sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
           </button>
+          <button className="dash-sidebar-rail-avatar" onClick={() => setSidebarOpen(true)} title={user?.name}>
+            {initials}
+          </button>
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
             <div className={`dash-sidebar-name${sidebarCollapsed ? ' collapsed' : ''}`}>{user?.name}</div>
@@ -1680,7 +1696,14 @@ export default function AdminDashboard() {
               <button
                 key={t.key}
                 className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
-                onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+                onClick={() => {
+                  if (isMobile && !sidebarOpen) {
+                    setSidebarOpen(true);
+                  } else {
+                    setTab(t.key);
+                    setSidebarOpen(false);
+                  }
+                }}
                 title={sidebarCollapsed ? t.label : undefined}
               >
                 <span className="dash-sidebar-tab-icon">{t.icon}</span>
@@ -1689,15 +1712,18 @@ export default function AdminDashboard() {
             ))}
           </div>
           <div className="dash-sidebar-nav-bottom">
-            <button className="dash-sidebar-tab" onClick={() => setHelpOpen(true)} title={sidebarCollapsed ? 'Help' : undefined}>
+            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { setHelpOpen(true); setSidebarOpen(false); } }} title={sidebarCollapsed ? 'Help' : undefined}>
               <span className="dash-sidebar-tab-icon"><FaQuestionCircle /></span>
               <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Help</span>
             </button>
-            <button className="dash-sidebar-tab" onClick={handleLogout} title={sidebarCollapsed ? 'Logout' : undefined}>
+            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { handleLogout(); } }} title={sidebarCollapsed ? 'Logout' : undefined}>
               <span className="dash-sidebar-tab-icon"><FaSignOutAlt /></span>
               <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Logout</span>
             </button>
           </div>
+          <button className="dash-sidebar-expand-btn" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle sidebar" title="Toggle sidebar">
+            <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 512" height="1.2em" width="1.2em" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+          </button>
         </div>
 
         {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaStar, FaQuoteLeft, FaUser, FaTimes, FaCamera } from 'react-icons/fa';
+import API_BASE from '../api';
 
 function StarRating({ value, onChange }) {
   return (
@@ -26,7 +27,7 @@ function SubmitTestimonialModal({ open, onClose }) {
     if (!form.name.trim() || !form.content.trim()) return;
     setSubmitting(true);
     try {
-      await fetch('/api/testimonials', {
+      await fetch(`${API_BASE}/api/testimonials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -100,7 +101,7 @@ export default function Testimonials() {
   const [showSubmit, setShowSubmit] = useState(false);
 
   useEffect(() => {
-    fetch('/api/testimonials')
+    fetch(`${API_BASE}/api/testimonials`)
       .then((r) => r.json())
       .then(setTestimonials)
       .catch(() => {});

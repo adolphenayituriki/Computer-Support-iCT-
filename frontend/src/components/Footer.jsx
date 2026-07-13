@@ -1,6 +1,16 @@
 import { FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaAngleRight, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 export default function Footer() {
+  const navigate = useNavigate();
+  const goHome = (hash) => {
+    if (window.location.pathname === '/') {
+      document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/' + hash);
+    }
+  };
+
   return (
     <footer className="site-footer">
       <div className="footer-content">
@@ -20,10 +30,10 @@ export default function Footer() {
         </div>
         <div className="footer-col">
           <h4>Quick Links</h4>
-          <a href="#home"><FaAngleRight className="footer-link-icon" /> Home</a>
-          <a href="#services"><FaAngleRight className="footer-link-icon" /> Services</a>
-          <a href="#about"><FaAngleRight className="footer-link-icon" /> About Us</a>
-          <a href="#contact"><FaAngleRight className="footer-link-icon" /> Contact</a>
+          <button type="button" onClick={() => goHome('#home')}><FaAngleRight className="footer-link-icon" /> Home</button>
+          <button type="button" onClick={() => goHome('#services')}><FaAngleRight className="footer-link-icon" /> Services</button>
+          <button type="button" onClick={() => goHome('#about')}><FaAngleRight className="footer-link-icon" /> About Us</button>
+          <button type="button" onClick={() => goHome('#contact')}><FaAngleRight className="footer-link-icon" /> Contact</button>
         </div>
         <div className="footer-col">
           <h4>Contact</h4>

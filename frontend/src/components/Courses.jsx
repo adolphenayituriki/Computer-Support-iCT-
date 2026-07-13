@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaBookOpen, FaClock, FaSignal, FaArrowLeft, FaTag, FaUser, FaHeart, FaRegHeart, FaComment, FaShare, FaPaperPlane } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import API_BASE from '../api';
@@ -32,6 +33,7 @@ function CategoryBadge({ category }) {
 export default function Courses() {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
@@ -199,7 +201,7 @@ export default function Courses() {
                 </div>
               ) : (
                 <p style={{ fontSize: '0.8rem', color: '#9ca3af', textAlign: 'center', padding: '0.5rem 0' }}>
-                  <button type="button" className="btn-link" onClick={() => {}}>Sign in</button> to leave a comment.
+                  <button type="button" className="btn-link" onClick={() => navigate('/')}>Sign in</button> to leave a comment.
                 </p>
               )}
             </div>

@@ -1,25 +1,27 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import { sendResetEmail, sendUserWelcome, sendAdminNotification } from '../services/mailer.js';
 import TeamApp from '../models/TeamApp.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cshub_ict_secret_key_2026';
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
     const existing = await User.findOne({ email });
     if (existing) return res.status(409).json({ error: 'Email already registered.' });
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
+    const user = await User.create({ name, email, password: hashed, phone: phone || '', phoneVerified: !!phone });
     sendUserWelcome(email, name).catch((e) => console.log('Email error:', e.message));
-    sendAdminNotification('New User Registered', `Name: ${name}\nEmail: ${email}`).catch(() => {});
+    sendAdminNotification('New User Registered', `Name: ${name}\nEmail: ${email}${phone ? '\nPhone: ' + phone : ''}`).catch(() => {});
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false } });
+    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, phoneVerified: user.phoneVerified, isAdmin: false, isTeamMember: false } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -39,6 +41,48 @@ export async function login(req, res) {
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function loginByPhone(req, res) {
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ error: 'Phone number is required.' });
+    const user = await User.findOne({ phone });
+    if (!user) return res.status(404).json({ error: 'No account found with this phone number. Please register first.' });
+    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, phoneVerified: user.phoneVerified, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function googleLogin(req, res) {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) return res.status(400).json({ error: 'Google token is required.' });
+
+    const ticket = await googleClient.verifyIdToken({ idToken, audience: process.env.GOOGLE_CLIENT_ID });
+    const { sub: googleId, email, name, picture } = ticket.getPayload();
+
+    if (!email) return res.status(400).json({ error: 'Could not retrieve email from Google account.' });
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      user = await User.create({ name: name || 'Google User', email, googleId });
+    }
+
+    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+  } catch (err) {
+    console.error('Google login error:', err.message);
+    res.status(401).json({ error: 'Google authentication failed. Please try again.' });
   }
 }
 

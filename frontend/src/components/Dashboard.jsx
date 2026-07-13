@@ -11,6 +11,17 @@ import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 function TicketsView({ tickets, setTickets }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({ title: '', description: '', category: 'general' });
@@ -26,9 +37,11 @@ function TicketsView({ tickets, setTickets }) {
   const msgEndRef = useRef(null);
   useEffect(() => { msgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewTicket?.messages]);
 
+  const tid = (t) => t?.id || t?._id;
+
   useEffect(() => {
     if (viewTicket) {
-      fetch(`${API_BASE}/api/tickets/${viewTicket.id || viewTicket._id}`, { headers: { Authorization: `Bearer ${token()}` } })
+      fetch(`${API_BASE}/api/tickets/${tid(viewTicket)}`, { headers: { Authorization: `Bearer ${token()}` } })
         .then((r) => r.json())
         .then((data) => { if (!data.error) setViewTicket(data); })
         .catch(() => {});
@@ -69,7 +82,7 @@ function TicketsView({ tickets, setTickets }) {
         body: JSON.stringify(editForm),
       });
       if (res.ok) {
-        setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, ...editForm } : t)));
+        setTickets((prev) => prev.map((t) => (tid(t) === id ? { ...t, ...editForm } : t)));
         setEditingId(null);
         setEditForm({});
         showToast('Ticket updated!');
@@ -87,8 +100,8 @@ function TicketsView({ tickets, setTickets }) {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) {
-        setTickets((prev) => prev.filter((t) => t.id !== id));
-        if (viewTicket?.id === id) setViewTicket(null);
+        setTickets((prev) => prev.filter((t) => (t.id || t._id) !== id));
+        if ((viewTicket?.id || viewTicket?._id) === id) setViewTicket(null);
         showToast('Ticket deleted.');
       }
     } catch {}
@@ -101,14 +114,14 @@ function TicketsView({ tickets, setTickets }) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ status }),
       });
-      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
-      if (viewTicket?.id === id) setViewTicket((prev) => ({ ...prev, status }));
+      setTickets((prev) => prev.map((t) => (tid(t) === id ? { ...t, status } : t)));
+      if (tid(viewTicket) === id) setViewTicket((prev) => ({ ...prev, status }));
       showToast(status === 'closed' ? 'Ticket resolved!' : 'Ticket reopened.');
     } catch {}
   };
 
   const startEdit = (t) => {
-    setEditingId(t.id);
+    setEditingId(tid(t));
     setEditForm({ title: t.title, description: t.description, category: t.category });
   };
 
@@ -125,7 +138,7 @@ function TicketsView({ tickets, setTickets }) {
     if (!replyText.trim()) return;
     setSendingReply(true);
     try {
-      const res = await fetch(`${API_BASE}/api/tickets/${viewTicket.id}/messages`, {
+      const res = await fetch(`${API_BASE}/api/tickets/${tid(viewTicket)}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ text: replyText }),
@@ -133,7 +146,7 @@ function TicketsView({ tickets, setTickets }) {
       const data = await res.json();
       if (res.ok) {
         setViewTicket(data);
-        setTickets((prev) => prev.map((t) => (t.id === data.id ? data : t)));
+        setTickets((prev) => prev.map((t) => (tid(t) === tid(data) ? data : t)));
         setReplyText('');
       } else {
         showToast('Failed to send.', 'error');
@@ -158,12 +171,12 @@ function TicketsView({ tickets, setTickets }) {
           <p className="dash-modal-date">Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1rem' }}>
             {viewTicket.status === 'open' && (
-              <button className="btn btn-sm" onClick={() => handleStatus(viewTicket.id, 'closed')}><FaCheckCircle style={{ marginRight: '0.3rem' }} /> Mark Resolved</button>
+              <button className="btn btn-sm" onClick={() => handleStatus(tid(viewTicket), 'closed')}><FaCheckCircle style={{ marginRight: '0.3rem' }} /> Mark Resolved</button>
             )}
             {viewTicket.status === 'closed' && (
-              <button className="btn btn-outline btn-sm" onClick={() => handleStatus(viewTicket.id, 'open')}><FaUndo style={{ marginRight: '0.3rem' }} /> Reopen</button>
+              <button className="btn btn-outline btn-sm" onClick={() => handleStatus(tid(viewTicket), 'open')}><FaUndo style={{ marginRight: '0.3rem' }} /> Reopen</button>
             )}
-            <button className="btn btn-outline btn-sm" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(viewTicket.id); }}><FaTrash style={{ marginRight: '0.3rem' }} /> Delete</button>
+            <button className="btn btn-outline btn-sm" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(tid(viewTicket)); }}><FaTrash style={{ marginRight: '0.3rem' }} /> Delete</button>
           </div>
         </div>
         <div className="dash-modal-conv">
@@ -269,7 +282,7 @@ function TicketsView({ tickets, setTickets }) {
           ) : (
             <div className="ticket-list">
               {filteredTickets.map((t) => (
-                <div key={t.id} className="ticket-item" style={{ cursor: 'pointer' }} onClick={() => setViewTicket(t)}>
+                <div key={tid(t)} className="ticket-item" style={{ cursor: 'pointer' }} onClick={() => setViewTicket(t)}>
                   <div className="ticket-top">
                     <span className={`ticket-status status-${t.status}`}>
                       {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
@@ -278,11 +291,11 @@ function TicketsView({ tickets, setTickets }) {
                     <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
                       <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
                       <button className="ticket-action-btn" title="Edit" onClick={() => startEdit(t)}><FaEdit /></button>
-                      <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(t.id)} style={{ color: '#ef4444' }}><FaTrash /></button>
+                      <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
                     </div>
                   </div>
 
-                  {editingId === t.id ? (
+                  {editingId === tid(t) ? (
                     <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
                       <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
                       <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
@@ -295,7 +308,7 @@ function TicketsView({ tickets, setTickets }) {
                       </select>
                       <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === t.id} onClick={() => handleUpdate(t.id)}>{savingId === t.id ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
+                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
                       </div>
                     </div>
@@ -309,12 +322,12 @@ function TicketsView({ tickets, setTickets }) {
                         </span>
                         <div onClick={(e) => e.stopPropagation()}>
                           {(t.status === 'open' || t.status === 'in-progress') && (
-                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(t.id, 'resolved')}>
+                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(tid(t), 'resolved')}>
                               <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
                             </button>
                           )}
                           {t.status === 'resolved' && (
-                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(t.id, 'open')}>
+                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(tid(t), 'open')}>
                               <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
                             </button>
                           )}
@@ -344,9 +357,11 @@ function SuggestionsView() {
   const sugMsgEndRef = useRef(null);
   useEffect(() => { sugMsgEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewSug?.messages]);
 
+  const sid = (s) => s?.id || s?._id;
+
   useEffect(() => {
     if (viewSug) {
-      fetch(`${API_BASE}/api/suggestions/${viewSug.id || viewSug._id}`, { headers: { Authorization: `Bearer ${token()}` } })
+      fetch(`${API_BASE}/api/suggestions/${sid(viewSug)}`, { headers: { Authorization: `Bearer ${token()}` } })
         .then((r) => r.json())
         .then((data) => { if (!data.error) setViewSug(data); })
         .catch(() => {});
@@ -366,7 +381,7 @@ function SuggestionsView() {
     if (!sugReplyText.trim()) return;
     setSugSendingReply(true);
     try {
-      const res = await fetch(`${API_BASE}/api/suggestions/${viewSug.id}/messages`, {
+      const res = await fetch(`${API_BASE}/api/suggestions/${sid(viewSug)}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ text: sugReplyText }),
@@ -374,7 +389,7 @@ function SuggestionsView() {
       const data = await res.json();
       if (res.ok) {
         setViewSug(data);
-        setSuggestions((prev) => prev.map((s) => (s.id === data.id ? data : s)));
+        setSuggestions((prev) => prev.map((s) => (sid(s) === sid(data) ? data : s)));
         setSugReplyText('');
       } else {
         showToast('Failed to send.', 'error');
@@ -486,8 +501,8 @@ function SuggestionsView() {
           </div>
         ) : (
           <div className="sug-list">
-            {suggestions.map((s) => (
-              <div key={s.id} className="sug-item" onClick={() => setViewSug(s)}>
+              {suggestions.map((s) => (
+              <div key={sid(s)} className="sug-item" onClick={() => setViewSug(s)}>
                 <div className="sug-item-top">
                   <h4>{s.title}</h4>
                   {(s.messages || []).length > 0 && (
@@ -666,6 +681,7 @@ export default function Dashboard() {
   const [teamData, setTeamData] = useState(null);
   const [teamLoading, setTeamLoading] = useState(true);
   const { sidebarOpen, setSidebarOpen } = useSidebar();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -680,6 +696,15 @@ export default function Dashboard() {
       .then((r) => r.json())
       .then((data) => { setTeamData(data); setTeamLoading(false); })
       .catch(() => setTeamLoading(false));
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const tok = localStorage.getItem('cshub_token');
+    fetch(`${API_BASE}/api/tickets`, { headers: { Authorization: `Bearer ${tok}` } })
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setTickets(data); })
+      .catch(() => {});
   }, [user]);
 
   useEffect(() => {
@@ -706,7 +731,7 @@ export default function Dashboard() {
   const [helpOpen, setHelpOpen] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem('cshub_token');
-    navigate('/login');
+    navigate('/');
   };
 
   const sidebarTabs = [
@@ -729,6 +754,9 @@ export default function Dashboard() {
           <button className="dash-sidebar-collapse" onClick={() => setSidebarCollapsed((v) => !v)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
             {sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
           </button>
+          <button className="dash-sidebar-rail-avatar" onClick={() => setSidebarOpen(true)} title={user?.name}>
+            {initials}
+          </button>
           <div className="dash-sidebar-header">
             <div className="dash-sidebar-avatar">{initials}</div>
             <div className={`dash-sidebar-name${sidebarCollapsed ? ' collapsed' : ''}`}>{user?.name}</div>
@@ -739,7 +767,14 @@ export default function Dashboard() {
               <button
                 key={t.key}
                 className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
-                onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+                onClick={() => {
+                  if (isMobile && !sidebarOpen) {
+                    setSidebarOpen(true);
+                  } else {
+                    setTab(t.key);
+                    setSidebarOpen(false);
+                  }
+                }}
                 title={sidebarCollapsed ? t.label : undefined}
               >
                 <span className="dash-sidebar-tab-icon">{t.icon}</span>
@@ -748,19 +783,22 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="dash-sidebar-nav-bottom">
-            <button className="dash-sidebar-tab" onClick={() => setSettingsOpen(true)} title={sidebarCollapsed ? 'Settings' : undefined}>
+            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { setSettingsOpen(true); setSidebarOpen(false); } }} title={sidebarCollapsed ? 'Settings' : undefined}>
               <span className="dash-sidebar-tab-icon"><FaCog /></span>
               <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Settings</span>
             </button>
-            <button className="dash-sidebar-tab" onClick={() => setHelpOpen(true)} title={sidebarCollapsed ? 'Help' : undefined}>
+            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { setHelpOpen(true); setSidebarOpen(false); } }} title={sidebarCollapsed ? 'Help' : undefined}>
               <span className="dash-sidebar-tab-icon"><FaQuestionCircle /></span>
               <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Help</span>
             </button>
-            <button className="dash-sidebar-tab" onClick={handleLogout} title={sidebarCollapsed ? 'Logout' : undefined}>
+            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { handleLogout(); } }} title={sidebarCollapsed ? 'Logout' : undefined}>
               <span className="dash-sidebar-tab-icon"><FaSignOutAlt /></span>
               <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Logout</span>
             </button>
           </div>
+          <button className="dash-sidebar-expand-btn" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle sidebar" title="Toggle sidebar">
+            <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 512" height="1.2em" width="1.2em" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+          </button>
         </div>
 
         {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}

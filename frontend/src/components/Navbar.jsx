@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { useSidebar } from '../SidebarContext';
-import { FaUser, FaBars } from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 
 import SettingsModal from './SettingsModal';
 
@@ -67,14 +66,10 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   };
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
-  const { sidebarOpen, setSidebarOpen } = useSidebar();
 
   return (
     <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
       <nav>
-        <button className="dash-menu-btn" aria-label="Toggle dashboard menu" onClick={() => setSidebarOpen((v) => !v)}>
-          <FaBars /> Menu
-        </button>
         <a href="/" className="logo">
           <img src="/final-logo.jpg" alt="CS hub (iCT)" className="logo-img" />
           <span className="logo-text">
