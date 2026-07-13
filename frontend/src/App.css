@@ -1265,6 +1265,16 @@ header.dash-header .hamburger span {
   z-index: 1;
 }
 
+.contact-form-col {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
 .contact-form-col form { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .contact-form-col input, .contact-form-col textarea, .contact-form-col select {
@@ -2496,7 +2506,10 @@ header.dash-header .hamburger span {
   padding: 1rem;
 }
 .adm-modal {
-  background: #fff;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.5);
   border-radius: 16px;
   width: 100%;
   max-width: 420px;
@@ -3048,7 +3061,9 @@ header.dash-header .hamburger span {
 }
 
 .dash-modal {
-  background: #0f172a;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   width: 100%;
@@ -3572,11 +3587,13 @@ header.dash-header .hamburger span {
 }
 
 .dash-card {
-  background: #fff;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.5);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e2e8f0;
   transition: box-shadow 0.2s;
 }
 
@@ -3715,14 +3732,19 @@ header.dash-header .hamburger span {
   gap: 0.5rem;
   margin-top: 0.5rem;
   padding: 0.8rem;
-  background: #f8fafc;
+  background: rgba(248,250,252,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.5);
   border-radius: 8px;
 }
 
 /* ─── Suggestions ─── */
 .sug-form-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.5);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
@@ -5494,6 +5516,12 @@ header.dash-header .hamburger span {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  padding: 0.5rem;
+  background: rgba(248,250,252,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 10px;
 }
 
 .msg-reply-form input {
@@ -5519,7 +5547,10 @@ header.dash-header .hamburger span {
 
 /* -- Dark Settings Modal -- */
 .settings-modal {
-  background: #1e293b;
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
   color: #e2e8f0;
   border-radius: 16px;
   padding: 2rem 1.8rem;
