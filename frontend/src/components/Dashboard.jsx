@@ -5,7 +5,12 @@ import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
 import SettingsModal from './SettingsModal';
 import HelpModal from './HelpModal';
-import { FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit, FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie, FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt, FaListUl, FaUsers, FaClipboardList, FaCog, FaAngleLeft, FaAngleRight, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield } from 'react-icons/fa';
+import {
+  FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
+  FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
+  FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
+  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield
+} from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -20,6 +25,18 @@ function useIsMobile(breakpoint = 768) {
   }, [breakpoint]);
   return isMobile;
 }
+
+const SIDEBAR_GROUPS = [
+  {
+    label: 'MAIN',
+    items: [
+      { key: 'dashboard', icon: <FaTachometerAlt />, label: 'Dashboard' },
+      { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
+      { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
+      { key: 'chat', icon: <FaComments />, label: 'Messages' },
+    ],
+  },
+];
 
 function TicketsView({ tickets, setTickets }) {
   const { showToast } = useToast();
@@ -124,8 +141,8 @@ function TicketsView({ tickets, setTickets }) {
     setEditForm({ title: t.title, description: t.description, category: t.category });
   };
 
-  const openTickets = tickets.filter((t) => t.status === 'open' || t.status === 'in-progress').length;
-  const resolvedTickets = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
+  const openCount = tickets.filter((t) => t.status === 'open' || t.status === 'in-progress').length;
+  const resolvedCount = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
   const filteredTickets = tickets.filter((t) => {
     if (filter === 'all') return true;
     if (filter === 'open') return t.status === 'open' || t.status === 'in-progress';
@@ -155,50 +172,50 @@ function TicketsView({ tickets, setTickets }) {
   };
 
   const modalContent = viewTicket ? (
-    <div className="dash-modal-overlay" onClick={() => setViewTicket(null)}>
-      <div className="dash-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="dash-modal-close" onClick={() => setViewTicket(null)}><FaTimes /></button>
-        <div className="dash-modal-header">
-          <h2>{viewTicket.title}</h2>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
+    <div className="adm-modal-overlay" onClick={() => setViewTicket(null)}>
+      <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="adm-modal-header">
+          <h3>{viewTicket.title}</h3>
+          <button className="adm-modal-close" onClick={() => setViewTicket(null)}><FaTimes /></button>
+        </div>
+        <div className="adm-modal-body">
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             <span className={`ticket-status status-${viewTicket.status}`}>{viewTicket.status.toUpperCase()}</span>
             <span className="ticket-category">{viewTicket.category}</span>
           </div>
-        </div>
-        <div className="dash-modal-body">
-          <p className="dash-modal-desc">{viewTicket.description}</p>
-          <p className="dash-modal-date">Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+          <p style={{ color: '#6b7280', lineHeight: 1.6, marginBottom: '0.5rem' }}>{viewTicket.description}</p>
+          <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
             {viewTicket.status === 'open' && (
               <button className="btn btn-sm" onClick={() => handleStatus(tid(viewTicket), 'closed')}><FaCheckCircle style={{ marginRight: '0.3rem' }} /> Mark Resolved</button>
             )}
             {viewTicket.status === 'closed' && (
               <button className="btn btn-outline btn-sm" onClick={() => handleStatus(tid(viewTicket), 'open')}><FaUndo style={{ marginRight: '0.3rem' }} /> Reopen</button>
             )}
-            <button className="btn btn-outline btn-sm" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => { handleDelete(tid(viewTicket)); }}><FaTrash style={{ marginRight: '0.3rem' }} /> Delete</button>
+            <button className="btn btn-outline btn-sm" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleDelete(tid(viewTicket))}><FaTrash style={{ marginRight: '0.3rem' }} /> Delete</button>
           </div>
-        </div>
-        <div className="dash-modal-conv">
-          <h4><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({viewTicket.messages?.length || 0})</h4>
-          <div className="msg-thread">
-            {(!viewTicket.messages || viewTicket.messages.length === 0) ? (
-              <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
-            ) : (
-              viewTicket.messages.map((m, i) => (
-                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
-                  <div className="msg-header">
-                    <strong>{m.senderName}</strong>
-                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+          <div style={{ marginTop: '1.2rem', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
+            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.9rem', color: '#374151' }}><FaReply style={{ transform: 'scaleX(-1)', marginRight: '0.4rem' }} />Conversation ({viewTicket.messages?.length || 0})</h4>
+            <div className="msg-thread">
+              {(!viewTicket.messages || viewTicket.messages.length === 0) ? (
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+              ) : (
+                viewTicket.messages.map((m, i) => (
+                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                    <div className="msg-header">
+                      <strong>{m.senderName}</strong>
+                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p>{m.text}</p>
                   </div>
-                  <p>{m.text}</p>
-                </div>
-              ))
-            )}
-            <div ref={msgEndRef} />
-          </div>
-          <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-            <input type="text" placeholder="Type your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
-            <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+                ))
+              )}
+              <div ref={msgEndRef} />
+            </div>
+            <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
+              <input type="text" placeholder="Type your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
+              <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+            </div>
           </div>
         </div>
       </div>
@@ -207,40 +224,30 @@ function TicketsView({ tickets, setTickets }) {
 
   return (
     <>
-      <div className="dash-stats">
-        <div className="dash-stat-card">
-          <FaTicketAlt className="dash-stat-icon" />
-          <div><strong>{tickets.length}</strong><span>Total Tickets</span></div>
+      <div className="adm-page-header">
+        <h2>Support Tickets</h2>
+        <p>Manage your support requests and track their status.</p>
+      </div>
+      <div className="adm-stats-grid">
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><FaTicketAlt /></div>
+          <div className="adm-stat-info"><strong>{tickets.length}</strong><span>Total</span></div>
         </div>
-        <div className="dash-stat-card">
-          <FaExclamationCircle className="dash-stat-icon" style={{ color: '#f59e0b' }} />
-          <div><strong>{openTickets}</strong><span>Open / In Progress</span></div>
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#fffbeb', color: '#f59e0b' }}><FaExclamationCircle /></div>
+          <div className="adm-stat-info"><strong>{openCount}</strong><span>Open</span></div>
         </div>
-        <div className="dash-stat-card">
-          <FaCheckCircle className="dash-stat-icon" style={{ color: '#16a34a' }} />
-          <div><strong>{resolvedTickets}</strong><span>Resolved / Closed</span></div>
-        </div>
-        <div className="dash-stat-card">
-          <FaClock className="dash-stat-icon" style={{ color: '#3b82f6' }} />
-          <div><strong>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</strong><span>{new Date().getFullYear()}</span></div>
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><FaCheckCircle /></div>
+          <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved</span></div>
         </div>
       </div>
-
       <div className="dashboard-grid">
         <div className="dash-card request-card">
           <h3>New Support Request</h3>
           <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Title (e.g. Laptop won't boot)"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              required
-            />
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            >
+            <input type="text" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
               <option value="general">General</option>
               <option value="hardware">Hardware</option>
               <option value="software">Software</option>
@@ -248,18 +255,11 @@ function TicketsView({ tickets, setTickets }) {
               <option value="network">Network</option>
               <option value="training">Training</option>
             </select>
-            <textarea
-              rows="4"
-              placeholder="Describe your issue in detail..."
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              required
-            />
+            <textarea rows="4" placeholder="Describe your issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
             <button type="submit" className="btn" disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Request'}</button>
           </form>
           {message && <p className="form-feedback">{message}</p>}
         </div>
-
         <div className="dash-card tickets-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0 }}>My Tickets ({tickets.length})</h3>
@@ -271,7 +271,6 @@ function TicketsView({ tickets, setTickets }) {
               ))}
             </div>
           </div>
-
           {filteredTickets.length === 0 ? (
             <div className="empty-state">
               <FaTicketAlt size={40} style={{ color: '#d1d5db' }} />
@@ -293,7 +292,6 @@ function TicketsView({ tickets, setTickets }) {
                       <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
                     </div>
                   </div>
-
                   {editingId === tid(t) ? (
                     <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
                       <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
@@ -307,7 +305,7 @@ function TicketsView({ tickets, setTickets }) {
                       </select>
                       <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <><span className="btn-spinner"></span></> : <><FaSave /> Save</>}</button>
+                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <span className="btn-spinner"></span> : <><FaSave /> Save</>}</button>
                         <button className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
                       </div>
                     </div>
@@ -423,37 +421,37 @@ function SuggestionsView() {
   };
 
   const sugModalContent = viewSug ? (
-    <div className="dash-modal-overlay" onClick={() => setViewSug(null)}>
-      <div className="dash-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="dash-modal-close" onClick={() => setViewSug(null)}><FaTimes /></button>
-        <div className="dash-modal-header">
-          <h2>{viewSug.title}</h2>
+    <div className="adm-modal-overlay" onClick={() => setViewSug(null)}>
+      <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="adm-modal-header">
+          <h3>{viewSug.title}</h3>
+          <button className="adm-modal-close" onClick={() => setViewSug(null)}><FaTimes /></button>
         </div>
-        <div className="dash-modal-body">
-          <p className="dash-modal-desc">{viewSug.description}</p>
-          <p className="dash-modal-date">{new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-        </div>
-        <div className="dash-modal-conv">
-          <h4><FaReply style={{ transform: 'scaleX(-1)' }} /> Conversation ({viewSug.messages?.length || 0})</h4>
-          <div className="msg-thread">
-            {(!viewSug.messages || viewSug.messages.length === 0) ? (
-              <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
-            ) : (
-              viewSug.messages.map((m, i) => (
-                <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
-                  <div className="msg-header">
-                    <strong>{m.senderName}</strong>
-                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+        <div className="adm-modal-body">
+          <p style={{ color: '#6b7280', lineHeight: 1.6, marginBottom: '0.5rem' }}>{viewSug.description}</p>
+          <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '1.2rem' }}>{new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
+            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.9rem', color: '#374151' }}><FaReply style={{ transform: 'scaleX(-1)', marginRight: '0.4rem' }} />Conversation ({viewSug.messages?.length || 0})</h4>
+            <div className="msg-thread">
+              {(!viewSug.messages || viewSug.messages.length === 0) ? (
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+              ) : (
+                viewSug.messages.map((m, i) => (
+                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
+                    <div className="msg-header">
+                      <strong>{m.senderName}</strong>
+                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p>{m.text}</p>
                   </div>
-                  <p>{m.text}</p>
-                </div>
-              ))
-            )}
-            <div ref={sugMsgEndRef} />
-          </div>
-          <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-            <input type="text" placeholder="Type your reply..." value={sugReplyText} onChange={(e) => setSugReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }} />
-            <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+                ))
+              )}
+              <div ref={sugMsgEndRef} />
+            </div>
+            <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
+              <input type="text" placeholder="Type your reply..." value={sugReplyText} onChange={(e) => setSugReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }} />
+              <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+            </div>
           </div>
         </div>
       </div>
@@ -461,68 +459,61 @@ function SuggestionsView() {
   ) : null;
 
   return (
-    <div className="dashboard-grid">
-      <div className="sug-form-card">
-        <div className="sug-form-header">
-          <FaLightbulb className="sug-form-icon" />
-          <div>
-            <h3>Suggest a Service</h3>
-            <p>Tell us what support or service you want us to add. We review every suggestion.</p>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="What service would you like to see?"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            required
-          />
-          <textarea
-            rows="3"
-            placeholder="Describe your idea in detail..."
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            required
-          />
-          <button type="submit" className="btn" disabled={suggesting}>{suggesting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Suggestion'}</button>
-        </form>
-        {feedback && <p className="form-feedback" style={{ marginTop: '0.8rem' }}>{feedback}</p>}
+    <>
+      <div className="adm-page-header">
+        <h2>Suggestions</h2>
+        <p>Share your ideas to help us improve our services.</p>
       </div>
-
-      <div className="sug-list-card">
-        <h3>My Suggestions <span className="sug-count">{suggestions.length}</span></h3>
-        {suggestions.length === 0 ? (
-          <div className="empty-state">
-            <FaLightbulb size={36} style={{ color: 'rgba(255,255,255,0.12)' }} />
-            <p>No suggestions yet.</p>
-            <span>Share your ideas to help us improve.</span>
+      <div className="dashboard-grid">
+        <div className="sug-form-card">
+          <div className="sug-form-header">
+            <FaLightbulb className="sug-form-icon" />
+            <div>
+              <h3>Suggest a Service</h3>
+              <p>Tell us what support or service you want us to add.</p>
+            </div>
           </div>
-        ) : (
-          <div className="sug-list">
+          <form onSubmit={handleSubmit}>
+            <input type="text" placeholder="What service would you like to see?" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+            <textarea rows="3" placeholder="Describe your idea in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+            <button type="submit" className="btn" disabled={suggesting}>{suggesting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Suggestion'}</button>
+          </form>
+          {feedback && <p className="form-feedback" style={{ marginTop: '0.8rem' }}>{feedback}</p>}
+        </div>
+        <div className="sug-list-card">
+          <h3>My Suggestions <span className="sug-count">{suggestions.length}</span></h3>
+          {suggestions.length === 0 ? (
+            <div className="empty-state">
+              <FaLightbulb size={36} style={{ color: 'rgba(255,255,255,0.12)' }} />
+              <p>No suggestions yet.</p>
+              <span>Share your ideas to help us improve.</span>
+            </div>
+          ) : (
+            <div className="sug-list">
               {suggestions.map((s) => (
-              <div key={sid(s)} className="sug-item" onClick={() => setViewSug(s)}>
-                <div className="sug-item-top">
-                  <h4>{s.title}</h4>
-                  {(s.messages || []).length > 0 && (
-                    <span className="sug-reply-count">
-                      <FaReply style={{ transform: 'scaleX(-1)' }} /> {s.messages.length}
+                <div key={sid(s)} className="sug-item" onClick={() => setViewSug(s)}>
+                  <div className="sug-item-top">
+                    <h4>{s.title}</h4>
+                    {(s.messages || []).length > 0 && (
+                      <span className="sug-reply-count">
+                        <FaReply style={{ transform: 'scaleX(-1)' }} /> {s.messages.length}
+                      </span>
+                    )}
+                  </div>
+                  <p>{s.description}</p>
+                  <div className="sug-item-meta">
+                    <span className="sug-date">
+                      {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
-                  )}
+                  </div>
                 </div>
-                <p>{s.description}</p>
-                <div className="sug-item-meta">
-                  <span className="sug-date">
-                    {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       {sugModalContent}
-    </div>
+    </>
   );
 }
 
@@ -562,113 +553,220 @@ function TeamView({ teamData, setTeamData }) {
   ];
 
   return (
-    <div className="team-dash">
-      <div className="team-dash-sub-nav">
-        {subTabs.map((st) => (
-          <button key={st.key} className={`team-sub-tab${subTab === st.key ? ' active' : ''}`} onClick={() => setSubTab(st.key)}>
-            {st.icon} {st.label}
-          </button>
-        ))}
+    <>
+      <div className="adm-page-header">
+        <h2>Team Dashboard</h2>
+        <p>Manage your team profile and assigned beneficiaries.</p>
+      </div>
+      <div className="team-dash">
+        <div className="team-dash-sub-nav">
+          {subTabs.map((st) => (
+            <button key={st.key} className={`team-sub-tab${subTab === st.key ? ' active' : ''}`} onClick={() => setSubTab(st.key)}>
+              {st.icon} {st.label}
+            </button>
+          ))}
+        </div>
+        {subTab === 'overview' && (
+          <div className="team-overview-grid">
+            <div className="team-dash-card">
+              <h3><FaUserTie style={{ color: '#06b6d4' }} /> My Profile</h3>
+              <div className="team-dash-info">
+                <p><strong>{app.name}</strong></p>
+                <p><FaEnvelope /> {app.email}</p>
+                {app.phone && <p><FaPhone /> {app.phone}</p>}
+                {app.location && <p><FaMapMarkerAlt /> {app.location}</p>}
+                {app.involvement && <p>Role: <strong>{app.involvement}</strong></p>}
+                {app.applicantType && <p>Type: <strong>{app.applicantType}</strong></p>}
+                {app.skills?.length > 0 && <p className="team-dash-skills">{app.skills.map((s) => <span key={s}>{s}</span>)}</p>}
+              </div>
+            </div>
+            <div className="team-stats-grid">
+              <div className="team-stat-card">
+                <FaHandshake size={24} color="#8b5cf6" />
+                <span className="team-stat-num">{beneficiaries.length}</span>
+                <span className="team-stat-label">Beneficiaries</span>
+              </div>
+              <div className="team-stat-card">
+                <FaCheckCircle size={24} color="#10b981" />
+                <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'resolved' || b.status === 'closed').length}</span>
+                <span className="team-stat-label">Resolved</span>
+              </div>
+              <div className="team-stat-card">
+                <FaClock size={24} color="#f59e0b" />
+                <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'in-progress').length}</span>
+                <span className="team-stat-label">In Progress</span>
+              </div>
+              <div className="team-stat-card">
+                <FaExclamationCircle size={24} color="#ef4444" />
+                <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'open').length}</span>
+                <span className="team-stat-label">Open</span>
+              </div>
+            </div>
+          </div>
+        )}
+        {subTab === 'beneficiaries' && (
+          <div className="team-dash-card">
+            <h3><FaHandshake style={{ color: '#8b5cf6' }} /> Assigned Beneficiaries ({beneficiaries.length})</h3>
+            {beneficiaries.length === 0 ? (
+              <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
+            ) : (
+              <div className="team-dash-list">
+                {beneficiaries.map((b) => (
+                  <div key={b._id || b.id} className="team-dash-item">
+                    <div className="team-dash-item-main">
+                      <strong>{b.name}</strong>
+                      <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{b.issue?.slice(0, 120)}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
+                    </div>
+                    <div className="team-dash-item-actions">
+                      <select value={b.status} onChange={(e) => updateBeneficiaryStatus(b._id || b.id, e.target.value)} className="beneficiary-status-select">
+                        <option value="open">Open</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                      <span className={`ticket-status ${b.status === 'resolved' || b.status === 'closed' ? 'status-resolved' : b.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{b.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {subTab === 'tickets' && (
+          <div className="team-dash-card">
+            <h3><FaTicketAlt style={{ color: '#f59e0b' }} /> All Support Tickets</h3>
+            {ticketsLoading ? (
+              <p style={{ textAlign: 'center', color: '#6b7280', padding: '2rem' }}>Loading tickets...</p>
+            ) : teamTickets.length === 0 ? (
+              <div className="empty-state"><FaTicketAlt size={32} style={{ color: '#d1d5db' }} /><p>No tickets in the system.</p></div>
+            ) : (
+              <div className="team-dash-list">
+                {teamTickets.map((t) => (
+                  <div key={t._id} className="team-dash-item">
+                    <div className="team-dash-item-main">
+                      <strong>{t.title}</strong>
+                      <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{t.description?.slice(0, 100)}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>by {t.userName} • {t.category}</span>
+                    </div>
+                    <span className={`ticket-status ${t.status === 'resolved' || t.status === 'closed' ? 'status-resolved' : t.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{t.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+function DashboardView({ tickets, user }) {
+  const openCount = tickets.filter((t) => t.status === 'open' || t.status === 'in-progress').length;
+  const resolvedCount = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
+  const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const yearStr = new Date().getFullYear();
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  })();
+
+  const recentTickets = tickets.slice(0, 5);
+  const maxTicket = Math.max(tickets.length, 1);
+
+  return (
+    <>
+      <div className="adm-page-header" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)', color: '#fff', borderRadius: '12px', padding: '1.8rem 2rem' }}>
+        <h2 style={{ color: '#fff', margin: '0 0 0.3rem' }}>{greeting}, {user?.name?.split(' ')[0] || 'there'}!</h2>
+        <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>Here's an overview of your support activity.</p>
       </div>
 
-      {subTab === 'overview' && (
-        <div className="team-overview-grid">
-          <div className="team-dash-card">
-            <h3><FaUserTie style={{ color: '#06b6d4' }} /> My Profile</h3>
-            <div className="team-dash-info">
-              <p><strong>{app.name}</strong></p>
-              <p><FaEnvelope /> {app.email}</p>
-              {app.phone && <p><FaPhone /> {app.phone}</p>}
-              {app.location && <p><FaMapMarkerAlt /> {app.location}</p>}
-              {app.involvement && <p>Role: <strong>{app.involvement}</strong></p>}
-              {app.applicantType && <p>Type: <strong>{app.applicantType}</strong></p>}
-              {app.skills?.length > 0 && <p className="team-dash-skills">{app.skills.map((s) => <span key={s}>{s}</span>)}</p>}
-            </div>
-          </div>
-
-          <div className="team-stats-grid">
-            <div className="team-stat-card">
-              <FaHandshake size={24} color="#8b5cf6" />
-              <span className="team-stat-num">{beneficiaries.length}</span>
-              <span className="team-stat-label">Beneficiaries</span>
-            </div>
-            <div className="team-stat-card">
-              <FaCheckCircle size={24} color="#10b981" />
-              <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'resolved' || b.status === 'closed').length}</span>
-              <span className="team-stat-label">Resolved</span>
-            </div>
-            <div className="team-stat-card">
-              <FaClock size={24} color="#f59e0b" />
-              <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'in-progress').length}</span>
-              <span className="team-stat-label">In Progress</span>
-            </div>
-            <div className="team-stat-card">
-              <FaExclamationCircle size={24} color="#ef4444" />
-              <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'open').length}</span>
-              <span className="team-stat-label">Open</span>
-            </div>
-          </div>
+      <div className="adm-stats-grid">
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><FaTicketAlt /></div>
+          <div className="adm-stat-info"><strong>{tickets.length}</strong><span>Total Tickets</span></div>
         </div>
-      )}
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#fffbeb', color: '#f59e0b' }}><FaExclamationCircle /></div>
+          <div className="adm-stat-info"><strong>{openCount}</strong><span>Open / In Progress</span></div>
+        </div>
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><FaCheckCircle /></div>
+          <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved / Closed</span></div>
+        </div>
+        <div className="adm-stat-card">
+          <div className="adm-stat-icon" style={{ background: '#f5f3ff', color: '#8b5cf6' }}><FaClock /></div>
+          <div className="adm-stat-info"><strong>{todayStr}</strong><span>{yearStr}</span></div>
+        </div>
+      </div>
 
-      {subTab === 'beneficiaries' && (
-        <div className="team-dash-card">
-          <h3><FaHandshake style={{ color: '#8b5cf6' }} /> Assigned Beneficiaries ({beneficiaries.length})</h3>
-          {beneficiaries.length === 0 ? (
-            <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
+      <div className="adm-chart-section">
+        <div className="adm-chart-header"><FaTicketAlt /> Ticket Status</div>
+        <div className="adm-chart-bars">
+          {[
+            { label: 'Open', count: tickets.filter((t) => t.status === 'open').length, color: '#f59e0b' },
+            { label: 'In Progress', count: tickets.filter((t) => t.status === 'in-progress').length, color: '#3b82f6' },
+            { label: 'Resolved', count: tickets.filter((t) => t.status === 'resolved').length, color: '#10b981' },
+            { label: 'Closed', count: tickets.filter((t) => t.status === 'closed').length, color: '#6b7280' },
+          ].map((item) => (
+            <div key={item.label} className="adm-chart-row">
+              <span className="adm-chart-label">{item.label}</span>
+              <div className="adm-chart-track">
+                <div className="adm-chart-fill" style={{ width: `${(item.count / maxTicket) * 100}%`, background: item.color }} />
+              </div>
+              <span className="adm-chart-count">{item.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="adm-chart-row-group">
+        <div className="adm-chart-sub-card">
+          <h4>Recent Tickets</h4>
+          {recentTickets.length === 0 ? (
+            <div className="empty-state" style={{ padding: '1rem' }}>
+              <FaTicketAlt size={28} style={{ color: '#d1d5db' }} />
+              <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem' }}>No tickets yet.</p>
+            </div>
           ) : (
-            <div className="team-dash-list">
-              {beneficiaries.map((b) => (
-                <div key={b._id || b.id} className="team-dash-item">
-                  <div className="team-dash-item-main">
-                    <strong>{b.name}</strong>
-                    <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{b.issue?.slice(0, 120)}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
-                  </div>
-                  <div className="team-dash-item-actions">
-                    <select
-                      value={b.status}
-                      onChange={(e) => updateBeneficiaryStatus(b._id || b.id, e.target.value)}
-                      className="beneficiary-status-select"
-                    >
-                      <option value="open">Open</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                    <span className={`ticket-status ${b.status === 'resolved' || b.status === 'closed' ? 'status-resolved' : b.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{b.status}</span>
-                  </div>
+            <div className="adm-chart-sub-items">
+              {recentTickets.map((t) => (
+                <div key={t._id || t.id} className="adm-chart-sub-item">
+                  <span style={{ background: t.status === 'open' ? '#f59e0b' : t.status === 'in-progress' ? '#3b82f6' : t.status === 'resolved' ? '#10b981' : '#6b7280' }} />
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title || 'Untitled'}</span>
+                  <strong style={{ textTransform: 'capitalize', fontSize: '0.75rem' }}>{t.status}</strong>
                 </div>
               ))}
             </div>
           )}
         </div>
-      )}
-
-      {subTab === 'tickets' && (
-        <div className="team-dash-card">
-          <h3><FaTicketAlt style={{ color: '#f59e0b' }} /> All Support Tickets</h3>
-          {ticketsLoading ? (
-            <p style={{ textAlign: 'center', color: '#6b7280', padding: '2rem' }}>Loading tickets...</p>
-          ) : teamTickets.length === 0 ? (
-            <div className="empty-state"><FaTicketAlt size={32} style={{ color: '#d1d5db' }} /><p>No tickets in the system.</p></div>
+        <div className="adm-chart-sub-card">
+          <h4>Categories</h4>
+          {tickets.length === 0 ? (
+            <div className="empty-state" style={{ padding: '1rem' }}>
+              <FaLightbulb size={28} style={{ color: '#d1d5db' }} />
+              <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem' }}>No data yet.</p>
+            </div>
           ) : (
-            <div className="team-dash-list">
-              {teamTickets.map((t) => (
-                <div key={t._id} className="team-dash-item">
-                  <div className="team-dash-item-main">
-                    <strong>{t.title}</strong>
-                    <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{t.description?.slice(0, 100)}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>by {t.userName} • {t.category}</span>
+            <div className="adm-chart-sub-items">
+              {['general', 'hardware', 'software', 'virus', 'network', 'training'].map((cat) => {
+                const count = tickets.filter((t) => t.category === cat).length;
+                if (count === 0) return null;
+                return (
+                  <div key={cat} className="adm-chart-sub-item">
+                    <span style={{ background: '#3b82f6' }} />
+                    <span style={{ flex: 1, textTransform: 'capitalize' }}>{cat}</span>
+                    <strong>{count}</strong>
                   </div>
-                  <span className={`ticket-status ${t.status === 'resolved' || t.status === 'closed' ? 'status-resolved' : t.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{t.status}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -676,7 +774,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
-  const [tab, setTab] = useState('tickets');
+  const [tab, setTab] = useState('dashboard');
   const [teamData, setTeamData] = useState(null);
   const [teamLoading, setTeamLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -690,8 +788,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    const token = localStorage.getItem('cshub_token');
-    fetch(`${API_BASE}/api/auth/team-status`, { headers: { Authorization: `Bearer ${token}` } })
+    const t = localStorage.getItem('cshub_token');
+    fetch(`${API_BASE}/api/auth/team-status`, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.json())
       .then((data) => { setTeamData(data); setTeamLoading(false); })
       .catch(() => setTeamLoading(false));
@@ -699,8 +797,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    const tok = localStorage.getItem('cshub_token');
-    fetch(`${API_BASE}/api/tickets`, { headers: { Authorization: `Bearer ${tok}` } })
+    const t = localStorage.getItem('cshub_token');
+    fetch(`${API_BASE}/api/tickets`, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setTickets(data); })
       .catch(() => {});
@@ -718,23 +816,39 @@ export default function Dashboard() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
+  const [profileTab, setProfileTab] = useState('profile');
+  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [pwdForm, setPwdForm] = useState({ current: '', newPwd: '', confirm: '' });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [pwdSaving, setPwdSaving] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const profileRef = useRef(null);
   const notifRef = useRef(null);
+
+  const { updateProfile, changePassword } = useAuth();
+
   const handleLogout = () => {
     localStorage.removeItem('cshub_token');
     navigate('/');
   };
 
   useEffect(() => {
+    if (user) {
+      setProfileForm({ name: user.name || '', email: user.email || '' });
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (tickets.length > 0) {
       const openTickets = tickets.filter(t => t.status === 'open');
       const items = openTickets.map(t => ({
-        id: t._id || t.id, type: 'ticket', icon: '🎫',
+        id: t._id || t.id, type: 'ticket', icon: '\uD83C\uDFAB',
         title: t.title || 'Ticket update',
-        sub: `${t.category || 'general'} — ${new Date(t.createdAt).toLocaleString()}`,
+        sub: `${t.category || 'general'} \u2014 ${new Date(t.createdAt).toLocaleString()}`,
       }));
       setNotifications(items);
       setUnreadCount(items.length);
@@ -750,15 +864,38 @@ export default function Dashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [profileOpen, notifOpen]);
 
-  const sidebarTabs = [
-    { key: 'tickets', icon: <FaTicketAlt />, label: 'Support Tickets' },
-    { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
-    { key: 'chat', icon: <FaComments />, label: 'Messages' },
-  ];
+  const handleProfileSave = async () => {
+    setProfileSaving(true);
+    try {
+      await updateProfile(profileForm);
+      setProfileEditOpen(false);
+    } catch (e) {}
+    setProfileSaving(false);
+  };
 
+  const handlePwdSave = async () => {
+    if (pwdForm.newPwd !== pwdForm.confirm) return;
+    setPwdSaving(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.newPwd);
+      setPwdForm({ current: '', newPwd: '', confirm: '' });
+      setProfileEditOpen(false);
+    } catch (e) {}
+    setPwdSaving(false);
+  };
+
+  const sidebarGroups = [...SIDEBAR_GROUPS];
   if (teamData?.isTeamMember) {
-    sidebarTabs.push({ key: 'team', icon: <FaUserTie />, label: 'Team Dashboard' });
+    sidebarGroups.push({
+      label: 'ACCOUNT',
+      items: [{ key: 'team', icon: <FaUserTie />, label: 'Team Dashboard' }],
+    });
   }
+
+  const allTabs = sidebarGroups.flatMap((g) => g.items);
+  const filteredTickets = searchQuery.trim()
+    ? tickets.filter((t) => t.title?.toLowerCase().includes(searchQuery.toLowerCase()) || t.description?.toLowerCase().includes(searchQuery.toLowerCase()) || t.category?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : tickets;
 
   return (
     <div className="adm-layout">
@@ -782,19 +919,21 @@ export default function Dashboard() {
           </div>
         </div>
         <nav className="adm-sidebar-nav">
-          <div className="adm-sidebar-group">
-            <div className="adm-sidebar-group-label">MAIN</div>
-            {sidebarTabs.map((t) => (
-              <button
-                key={t.key}
-                className={`adm-sidebar-item${tab === t.key ? ' active' : ''}`}
-                onClick={() => { setTab(t.key); setSidebarOpen(false); }}
-              >
-                <span className="adm-sidebar-item-icon">{t.icon}</span>
-                <span className="adm-sidebar-item-label">{t.label}</span>
-              </button>
-            ))}
-          </div>
+          {sidebarGroups.map((group) => (
+            <div key={group.label} className="adm-sidebar-group">
+              <div className="adm-sidebar-group-label">{group.label}</div>
+              {group.items.map((item) => (
+                <button
+                  key={item.key}
+                  className={`adm-sidebar-item${tab === item.key ? ' active' : ''}`}
+                  onClick={() => { setTab(item.key); setSidebarOpen(false); }}
+                >
+                  <span className="adm-sidebar-item-icon">{item.icon}</span>
+                  <span className="adm-sidebar-item-label">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          ))}
         </nav>
         <div className="adm-sidebar-footer">
           <button className="adm-sidebar-item" onClick={() => { setSettingsOpen(true); setSidebarOpen(false); }}>
@@ -820,7 +959,16 @@ export default function Dashboard() {
           <button className="adm-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <FaBars />
           </button>
-          <div className="adm-header-right" style={{ marginLeft: 'auto' }}>
+          <div className="adm-header-search">
+            <FaSearch />
+            <input
+              type="text"
+              placeholder="Search tickets..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="adm-header-right">
             <div className="adm-header-notif" ref={notifRef}>
               <button className="adm-header-icon" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
                 <FaBell />
@@ -847,6 +995,9 @@ export default function Dashboard() {
                       ))
                     )}
                   </div>
+                  <div className="adm-notif-dropdown-footer">
+                    <button onClick={() => { setNotifOpen(false); setTab('tickets'); }}>View all tickets</button>
+                  </div>
                 </div>
               )}
             </div>
@@ -866,8 +1017,11 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="adm-profile-dropdown-divider"></div>
+                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileOpen(false); }}>
+                    <FaEdit /> Edit Profile
+                  </button>
                   <button className="adm-profile-dropdown-item" onClick={() => { setSettingsOpen(true); setProfileOpen(false); }}>
-                    <FaCog /> Settings
+                    <FaCog /> Settings & Password
                   </button>
                   <div className="adm-profile-dropdown-divider"></div>
                   <button className="adm-profile-dropdown-item adm-profile-dropdown-logout" onClick={handleLogout}>
@@ -885,7 +1039,7 @@ export default function Dashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
                 <FaUserTie style={{ fontSize: '1.2rem', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }} />
                 <div>
-                  <strong style={{ fontSize: '0.95rem' }}>Team Application — <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
+                  <strong style={{ fontSize: '0.95rem' }}>Team Application \u2014 <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
                   <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: '2px 0 0' }}>
                     {teamData.application.status === 'pending' ? 'Your application is being reviewed.' : 'Your application was not approved at this time.'}
                   </p>
@@ -893,8 +1047,10 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-          {tab === 'tickets' ? (
-            <TicketsView tickets={tickets} setTickets={setTickets} />
+          {tab === 'dashboard' ? (
+            <DashboardView tickets={searchQuery.trim() ? filteredTickets : tickets} user={user} />
+          ) : tab === 'tickets' ? (
+            <TicketsView tickets={searchQuery.trim() ? filteredTickets : tickets} setTickets={setTickets} />
           ) : tab === 'suggestions' ? (
             <SuggestionsView />
           ) : tab === 'chat' ? (
@@ -906,6 +1062,43 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {profileEditOpen && (
+        <div className="adm-modal-overlay" onClick={() => setProfileEditOpen(false)}>
+          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header">
+              <h3>{profileTab === 'password' ? 'Change Password' : 'Edit Profile'}</h3>
+              <button className="adm-modal-close" onClick={() => setProfileEditOpen(false)}><FaTimes /></button>
+            </div>
+            <div className="adm-modal-body">
+              <div className="adm-profile-tabs">
+                <button className={`adm-profile-tab${profileTab === 'profile' ? ' active' : ''}`} onClick={() => setProfileTab('profile')}>Profile</button>
+                <button className={`adm-profile-tab${profileTab === 'password' ? ' active' : ''}`} onClick={() => setProfileTab('password')}>Password</button>
+              </div>
+              {profileTab === 'profile' ? (
+                <div className="adm-profile-form">
+                  <div className="adm-profile-avatar-large">{initials}</div>
+                  <label className="adm-form-label">Full Name</label>
+                  <input className="adm-form-input" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                  <label className="adm-form-label">Email</label>
+                  <input className="adm-form-input" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                  <button className="adm-btn adm-btn-primary" disabled={profileSaving} onClick={handleProfileSave}>{profileSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              ) : (
+                <div className="adm-profile-form">
+                  <label className="adm-form-label">Current Password</label>
+                  <input className="adm-form-input" type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} />
+                  <label className="adm-form-label">New Password</label>
+                  <input className="adm-form-input" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
+                  <label className="adm-form-label">Confirm New Password</label>
+                  <input className="adm-form-input" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
+                  <button className="adm-btn adm-btn-primary" disabled={pwdSaving || !pwdForm.current || !pwdForm.newPwd || pwdForm.newPwd !== pwdForm.confirm} onClick={handlePwdSave}>{pwdSaving ? 'Updating...' : 'Update Password'}</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
