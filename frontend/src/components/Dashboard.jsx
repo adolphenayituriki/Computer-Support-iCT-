@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
-import SettingsModal from './SettingsModal';
 import HelpModal from './HelpModal';
 import {
   FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
   FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
-  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield,
-  FaAngleLeft, FaAngleRight
+  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -772,15 +770,28 @@ function DashboardView({ tickets, user }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout, updateProfile, changePassword } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
-  const [tickets, setTickets] = useState([]);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   const [tab, setTab] = useState('dashboard');
-  const [teamData, setTeamData] = useState(null);
-  const [teamLoading, setTeamLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [pwdForm, setPwdForm] = useState({ current: '', newPwd: '', confirm: '' });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileTab, setProfileTab] = useState('profile');
+  const profileRef = useRef(null);
+  const notifRef = useRef(null);
   const isMobile = useIsMobile();
+  const [tickets, setTickets] = useState([]);
+  const [teamData, setTeamData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -789,12 +800,52 @@ export default function Dashboard() {
   }, [user, navigate]);
 
   useEffect(() => {
+    if (user) setProfileForm({ name: user.name || '', email: user.email || '' });
+  }, [user]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+    };
+    if (profileOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileOpen]);
+
+  const handleProfileSave = async () => {
+    setProfileLoading(true);
+    try {
+      await updateProfile(profileForm.name, profileForm.email);
+      showToast('Profile updated successfully.');
+      setProfileEditOpen(false);
+    } catch (err) {
+      showToast(err.message || 'Failed to update profile.', 'error');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (pwdForm.newPwd !== pwdForm.confirm) { showToast('Passwords do not match.', 'error'); return; }
+    if (pwdForm.newPwd.length < 6) { showToast('Password must be at least 6 characters.', 'error'); return; }
+    setProfileLoading(true);
+    try {
+      await changePassword(pwdForm.current, pwdForm.newPwd);
+      showToast('Password changed successfully.');
+      setPwdForm({ current: '', newPwd: '', confirm: '' });
+    } catch (err) {
+      showToast(err.message || 'Failed to change password.', 'error');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (!user) return;
     const t = localStorage.getItem('cshub_token');
     fetch(`${API_BASE}/api/auth/team-status`, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.json())
-      .then((data) => { setTeamData(data); setTeamLoading(false); })
-      .catch(() => setTeamLoading(false));
+      .then((data) => setTeamData(data))
+      .catch(() => {});
   }, [user]);
 
   useEffect(() => {
@@ -806,51 +857,17 @@ export default function Dashboard() {
       .catch(() => {});
   }, [user]);
 
-  useEffect(() => {
-    function handleKey(e) {
-      if (e.key === 'Escape') setSidebarOpen(false);
-    }
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, []);
-
-  const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [profileEditOpen, setProfileEditOpen] = useState(false);
-  const [profileTab, setProfileTab] = useState('profile');
-  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
-  const [pwdForm, setPwdForm] = useState({ current: '', newPwd: '', confirm: '' });
-  const [profileSaving, setProfileSaving] = useState(false);
-  const [pwdSaving, setPwdSaving] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const profileRef = useRef(null);
-  const notifRef = useRef(null);
-
-  const { updateProfile, changePassword } = useAuth();
-
-  const handleLogout = () => {
-    localStorage.removeItem('cshub_token');
-    navigate('/');
-  };
-
-  useEffect(() => {
-    if (user) {
-      setProfileForm({ name: user.name || '', email: user.email || '' });
-    }
-  }, [user]);
 
   useEffect(() => {
     if (tickets.length > 0) {
       const openTickets = tickets.filter(t => t.status === 'open');
       const items = openTickets.map(t => ({
-        id: t._id || t.id, type: 'ticket', icon: '\uD83C\uDFAB',
+        id: t._id || t.id, type: 'ticket', icon: '🎫',
         title: t.title || 'Ticket update',
-        sub: `${t.category || 'general'} \u2014 ${new Date(t.createdAt).toLocaleString()}`,
+        sub: `${t.category || 'general'} — ${new Date(t.createdAt).toLocaleString()}`,
       }));
       setNotifications(items);
       setUnreadCount(items.length);
@@ -859,32 +876,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
       if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
     };
-    if (profileOpen || notifOpen) document.addEventListener('mousedown', handleClickOutside);
+    if (notifOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [profileOpen, notifOpen]);
+  }, [notifOpen]);
 
-  const handleProfileSave = async () => {
-    setProfileSaving(true);
-    try {
-      await updateProfile(profileForm);
-      setProfileEditOpen(false);
-    } catch (e) {}
-    setProfileSaving(false);
+  const handleNotifClick = (item) => {
+    setNotifOpen(false);
+    setTab('tickets');
   };
 
-  const handlePwdSave = async () => {
-    if (pwdForm.newPwd !== pwdForm.confirm) return;
-    setPwdSaving(true);
-    try {
-      await changePassword(pwdForm.current, pwdForm.newPwd);
-      setPwdForm({ current: '', newPwd: '', confirm: '' });
-      setProfileEditOpen(false);
-    } catch (e) {}
-    setPwdSaving(false);
-  };
+  const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   const sidebarGroups = [...SIDEBAR_GROUPS];
   if (teamData?.isTeamMember) {
@@ -894,7 +897,6 @@ export default function Dashboard() {
     });
   }
 
-  const allTabs = sidebarGroups.flatMap((g) => g.items);
   const filteredTickets = searchQuery.trim()
     ? tickets.filter((t) => t.title?.toLowerCase().includes(searchQuery.toLowerCase()) || t.description?.toLowerCase().includes(searchQuery.toLowerCase()) || t.category?.toLowerCase().includes(searchQuery.toLowerCase()))
     : tickets;
@@ -903,69 +905,51 @@ export default function Dashboard() {
     <div className="adm-layout">
       {sidebarOpen && isMobile && <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}${sidebarCollapsed ? ' collapsed' : ''}`}>
-        <button className="adm-sidebar-toggle" onClick={() => isMobile ? setSidebarOpen(!sidebarOpen) : setSidebarCollapsed(!sidebarCollapsed)}>
-          {isMobile ? <FaTimes /> : sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
-        </button>
+      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="adm-sidebar-header">
           <div className="adm-sidebar-logo">
             <img src="/LOGO IMAGE.png" alt="CS Hub" />
-            {!sidebarCollapsed && <div>
+            <div>
               <strong>CS Hub</strong>
               <span>User Panel</span>
-            </div>}
-          </div>
-        </div>
-        {!sidebarCollapsed && (
-          <div className="adm-sidebar-user">
-            <div className="adm-sidebar-avatar">{initials}</div>
-            <div className="adm-sidebar-user-info">
-              <span className="adm-sidebar-user-name">{user?.name || 'User'}</span>
-              <span className="adm-sidebar-user-role">{teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
             </div>
           </div>
-        )}
-        {sidebarCollapsed && (
-          <div className="adm-sidebar-user" style={{ justifyContent: 'center', padding: '0.75rem 0' }}>
-            <div className="adm-sidebar-avatar">{initials}</div>
+        </div>
+        <div className="adm-sidebar-user">
+          <div className="adm-sidebar-avatar">{initials}</div>
+          <div className="adm-sidebar-user-info">
+            <span className="adm-sidebar-user-name">{user?.name || 'User'}</span>
+            <span className="adm-sidebar-user-role">{teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
           </div>
-        )}
+        </div>
         <nav className="adm-sidebar-nav">
           {sidebarGroups.map((group) => (
             <div key={group.label} className="adm-sidebar-group">
-              {!sidebarCollapsed && <div className="adm-sidebar-group-label">{group.label}</div>}
+              <div className="adm-sidebar-group-label">{group.label}</div>
               {group.items.map((item) => (
                 <button
                   key={item.key}
                   className={`adm-sidebar-item${tab === item.key ? ' active' : ''}`}
-                  onClick={() => { setTab(item.key); if (isMobile) setSidebarOpen(false); }}
-                  title={sidebarCollapsed ? item.label : undefined}
+                  onClick={() => { setTab(item.key); setSidebarOpen(false); }}
                 >
                   <span className="adm-sidebar-item-icon">{item.icon}</span>
-                  {!sidebarCollapsed && <span className="adm-sidebar-item-label">{item.label}</span>}
+                  <span className="adm-sidebar-item-label">{item.label}</span>
                 </button>
               ))}
             </div>
           ))}
         </nav>
         <div className="adm-sidebar-footer">
-          <button className="adm-sidebar-item" onClick={() => { setSettingsOpen(true); if (isMobile) setSidebarOpen(false); }} title={sidebarCollapsed ? 'Settings' : undefined}>
-            <span className="adm-sidebar-item-icon"><FaCog /></span>
-            {!sidebarCollapsed && <span className="adm-sidebar-item-label">Settings</span>}
-          </button>
-          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); if (isMobile) setSidebarOpen(false); }} title={sidebarCollapsed ? 'Help' : undefined}>
+          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}>
             <span className="adm-sidebar-item-icon"><FaQuestionCircle /></span>
-            {!sidebarCollapsed && <span className="adm-sidebar-item-label">Help</span>}
+            <span className="adm-sidebar-item-label">Help</span>
           </button>
-          <button className="adm-sidebar-item" onClick={handleLogout} title={sidebarCollapsed ? 'Logout' : undefined}>
+          <button className="adm-sidebar-item" onClick={handleLogout}>
             <span className="adm-sidebar-item-icon"><FaSignOutAlt /></span>
-            {!sidebarCollapsed && <span className="adm-sidebar-item-label">Logout</span>}
+            <span className="adm-sidebar-item-label">Logout</span>
           </button>
         </div>
       </aside>
-
-      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
-      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
 
       <div className="adm-main">
         <header className="adm-header">
@@ -974,18 +958,13 @@ export default function Dashboard() {
           </button>
           <div className="adm-header-search">
             <FaSearch />
-            <input
-              type="text"
-              placeholder="Search tickets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <div className="adm-header-right">
             <div className="adm-header-notif" ref={notifRef}>
               <button className="adm-header-icon" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
                 <FaBell />
-                {unreadCount > 0 && <span className="adm-header-badge">{unreadCount}</span>}
+                {unreadCount > 0 && <span className="adm-header-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
               </button>
               {notifOpen && (
                 <div className="adm-notif-dropdown">
@@ -997,8 +976,8 @@ export default function Dashboard() {
                     {notifications.length === 0 ? (
                       <div className="adm-notif-empty">No new notifications</div>
                     ) : (
-                      notifications.slice(0, 10).map((n) => (
-                        <button key={`${n.type}-${n.id}`} className="adm-notif-item" onClick={() => { setNotifOpen(false); setTab('tickets'); }}>
+                      notifications.slice(0, 15).map((n) => (
+                        <button key={`${n.type}-${n.id}`} className="adm-notif-item" onClick={() => handleNotifClick(n)}>
                           <span className="adm-notif-icon">{n.icon}</span>
                           <div className="adm-notif-content">
                             <div className="adm-notif-title">{n.title}</div>
@@ -1008,9 +987,11 @@ export default function Dashboard() {
                       ))
                     )}
                   </div>
-                  <div className="adm-notif-dropdown-footer">
-                    <button onClick={() => { setNotifOpen(false); setTab('tickets'); }}>View all tickets</button>
-                  </div>
+                  {notifications.length > 0 && (
+                    <div className="adm-notif-dropdown-footer">
+                      <button onClick={() => { setNotifOpen(false); setTab('tickets'); }}>View all</button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1030,10 +1011,10 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="adm-profile-dropdown-divider"></div>
-                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileOpen(false); }}>
+                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('profile'); setProfileOpen(false); }}>
                     <FaEdit /> Edit Profile
                   </button>
-                  <button className="adm-profile-dropdown-item" onClick={() => { setSettingsOpen(true); setProfileOpen(false); }}>
+                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('password'); setProfileOpen(false); }}>
                     <FaCog /> Settings & Password
                   </button>
                   <div className="adm-profile-dropdown-divider"></div>
@@ -1052,7 +1033,7 @@ export default function Dashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
                 <FaUserTie style={{ fontSize: '1.2rem', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }} />
                 <div>
-                  <strong style={{ fontSize: '0.95rem' }}>Team Application \u2014 <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
+                  <strong style={{ fontSize: '0.95rem' }}>Team Application — <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
                   <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: '2px 0 0' }}>
                     {teamData.application.status === 'pending' ? 'Your application is being reviewed.' : 'Your application was not approved at this time.'}
                   </p>
@@ -1076,6 +1057,8 @@ export default function Dashboard() {
         </main>
       </div>
 
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+
       {profileEditOpen && (
         <div className="adm-modal-overlay" onClick={() => setProfileEditOpen(false)}>
           <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
@@ -1092,10 +1075,12 @@ export default function Dashboard() {
                 <div className="adm-profile-form">
                   <div className="adm-profile-avatar-large">{initials}</div>
                   <label className="adm-form-label">Full Name</label>
-                  <input className="adm-form-input" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                  <input className="adm-form-input" type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
                   <label className="adm-form-label">Email</label>
-                  <input className="adm-form-input" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
-                  <button className="adm-btn adm-btn-primary" disabled={profileSaving} onClick={handleProfileSave}>{profileSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <input className="adm-form-input" type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                  <button className="adm-btn adm-btn-primary" onClick={handleProfileSave} disabled={profileLoading}>
+                    {profileLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
                 </div>
               ) : (
                 <div className="adm-profile-form">
@@ -1105,7 +1090,9 @@ export default function Dashboard() {
                   <input className="adm-form-input" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
                   <label className="adm-form-label">Confirm New Password</label>
                   <input className="adm-form-input" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
-                  <button className="adm-btn adm-btn-primary" disabled={pwdSaving || !pwdForm.current || !pwdForm.newPwd || pwdForm.newPwd !== pwdForm.confirm} onClick={handlePwdSave}>{pwdSaving ? 'Updating...' : 'Update Password'}</button>
+                  <button className="adm-btn adm-btn-primary" onClick={handlePasswordChange} disabled={profileLoading}>
+                    {profileLoading ? 'Updating...' : 'Update Password'}
+                  </button>
                 </div>
               )}
             </div>
