@@ -1451,113 +1451,70 @@ function AdminBeneficiaries() {
 }
 
 function AnalyticsView({ stats, ticketChart, appChart, onNavigate }) {
+  const max = Math.max(...Object.values(stats), 1);
+  const cards = [
+    { key: 'tickets', label: 'Tickets', count: stats.tickets, icon: <FaTicketAlt />, color: '#3b82f6', bg: '#eff6ff' },
+    { key: 'users', label: 'Users', count: stats.users, icon: <FaUsers />, color: '#10b981', bg: '#ecfdf5' },
+    { key: 'suggestions', label: 'Suggestions', count: stats.suggestions, icon: <FaLightbulb />, color: '#f59e0b', bg: '#fffbeb' },
+    { key: 'contacts', label: 'Messages', count: stats.contacts, icon: <FaEnvelope />, color: '#8b5cf6', bg: '#f5f3ff' },
+    { key: 'teams', label: 'Applications', count: stats.teams, icon: <FaUserTie />, color: '#06b6d4', bg: '#ecfeff' },
+    { key: 'beneficiaries', label: 'Beneficiaries', count: stats.beneficiaries, icon: <FaUserTie />, color: '#ec4899', bg: '#fdf2f8' },
+    { key: 'news', label: 'News', count: stats.news, icon: <FaNewspaper />, color: '#FFCE08', bg: '#fefce8' },
+    { key: 'courses', label: 'Courses', count: stats.courses, icon: <FaBookOpen />, color: '#14b8a6', bg: '#f0fdfa' },
+    { key: 'testimonials', label: 'Testimonials', count: stats.testimonials, icon: <FaStar />, color: '#f97316', bg: '#fff7ed' },
+  ];
   return (
     <>
-      <div className="dash-stats">
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('tickets')}>
-          <FaTicketAlt className="dash-stat-icon" />
-          <div><strong>{stats.tickets}</strong><span>Tickets</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('users')}>
-          <FaUsers className="dash-stat-icon" style={{ color: '#3b82f6' }} />
-          <div><strong>{stats.users}</strong><span>Users</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('suggestions')}>
-          <FaLightbulb className="dash-stat-icon" style={{ color: '#f59e0b' }} />
-          <div><strong>{stats.suggestions}</strong><span>Suggestions</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('contacts')}>
-          <FaEnvelope className="dash-stat-icon" style={{ color: '#8b5cf6' }} />
-          <div><strong>{stats.contacts}</strong><span>Messages</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('teams')}>
-          <FaUserTie className="dash-stat-icon" style={{ color: '#06b6d4' }} />
-          <div><strong>{stats.teams}</strong><span>Applications</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('beneficiaries')}>
-          <FaUserTie className="dash-stat-icon" style={{ color: '#8b5cf6' }} />
-          <div><strong>{stats.beneficiaries}</strong><span>Beneficiaries</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('news')}>
-          <FaNewspaper className="dash-stat-icon" style={{ color: '#FFCE08' }} />
-          <div><strong>{stats.news}</strong><span>News</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('courses')}>
-          <FaBookOpen className="dash-stat-icon" style={{ color: '#06b6d4' }} />
-          <div><strong>{stats.courses}</strong><span>Courses</span></div>
-        </div>
-        <div className="dash-stat-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('testimonials')}>
-          <FaStar className="dash-stat-icon" style={{ color: '#FFCE08' }} />
-          <div><strong>{stats.testimonials}</strong><span>Testimonials</span></div>
-        </div>
+      <div className="adm-page-header">
+        <div><h1>Analytics</h1><p>Overview of your platform activity</p></div>
       </div>
-
-      <div className="dash-chart-section">
-        <div className="dash-chart-header"><FaChartBar /> Overview Chart</div>
-        <div className="dash-chart-bars">
-          {[
-            { label: 'Tickets', count: stats.tickets, color: '#3b82f6', tab: 'tickets' },
-            { label: 'Users', count: stats.users, color: '#10b981', tab: 'users' },
-            { label: 'Suggestions', count: stats.suggestions, color: '#f59e0b', tab: 'suggestions' },
-            { label: 'Messages', count: stats.contacts, color: '#8b5cf6', tab: 'contacts' },
-            { label: 'Applications', count: stats.teams, color: '#06b6d4', tab: 'teams' },
-            { label: 'Beneficiaries', count: stats.beneficiaries, color: '#ec4899', tab: 'beneficiaries' },
-            { label: 'News', count: stats.news, color: '#f97316', tab: 'news' },
-            { label: 'Courses', count: stats.courses, color: '#14b8a6', tab: 'courses' },
-            { label: 'Testimonials', count: stats.testimonials, color: '#FFCE08', tab: 'testimonials' },
-          ].map((item) => {
-            const max = Math.max(...Object.values(stats), 1);
+      <div className="adm-stats-grid">
+        {cards.map((c) => (
+          <div key={c.key} className="adm-stat-card" onClick={() => onNavigate && onNavigate(c.key)}>
+            <div className="adm-stat-icon" style={{ background: c.bg, color: c.color }}>{c.icon}</div>
+            <div className="adm-stat-info"><strong>{c.count}</strong><span>{c.label}</span></div>
+          </div>
+        ))}
+      </div>
+      <div className="adm-chart-section">
+        <div className="adm-chart-header"><FaChartBar /> Overview</div>
+        <div className="adm-chart-bars">
+          {cards.map((item) => {
             const pct = (item.count / max) * 100;
             return (
-              <div key={item.label} className="dash-chart-bar-row" style={{ cursor: 'pointer' }} onClick={() => onNavigate && onNavigate(item.tab)}>
-                <span className="dash-chart-bar-label">{item.label}</span>
-                <div className="dash-chart-bar-track">
-                  <div className="dash-chart-bar-fill" style={{ width: `${pct}%`, background: item.color }} />
-                </div>
-                <span className="dash-chart-bar-count">{item.count}</span>
+              <div key={item.key} className="adm-chart-row" onClick={() => onNavigate && onNavigate(item.key)}>
+                <span className="adm-chart-label">{item.label}</span>
+                <div className="adm-chart-track"><div className="adm-chart-fill" style={{ width: `${pct}%`, background: item.color }} /></div>
+                <span className="adm-chart-count">{item.count}</span>
               </div>
             );
           })}
         </div>
-        {stats.tickets > 0 && (
-          <div className="dash-chart-sub">
-            <div className="dash-chart-sub-title">Ticket Status</div>
-            <div className="dash-chart-sub-bars">
-              <div className="dash-chart-sub-item">
-                <span style={{ background: '#f59e0b' }} />
-                Open / In Progress <strong>{ticketChart.open}</strong>
-              </div>
-              <div className="dash-chart-sub-item">
-                <span style={{ background: '#3b82f6' }} />
-                Resolved <strong>{ticketChart.resolved}</strong>
-              </div>
-              <div className="dash-chart-sub-item">
-                <span style={{ background: '#9ca3af' }} />
-                Closed <strong>{ticketChart.closed}</strong>
-              </div>
-            </div>
-          </div>
-        )}
-        {stats.teams > 0 && (
-          <div className="dash-chart-sub">
-            <div className="dash-chart-sub-title">Application Status</div>
-            <div className="dash-chart-sub-bars">
-              <div className="dash-chart-sub-item">
-                <span style={{ background: '#f59e0b' }} />
-                Pending <strong>{appChart.pending}</strong>
-              </div>
-              <div className="dash-chart-sub-item">
-                <span style={{ background: '#10b981' }} />
-                Approved <strong>{appChart.approved}</strong>
-              </div>
-              <div className="dash-chart-sub-item">
-                <span style={{ background: '#ef4444' }} />
-                Rejected <strong>{appChart.rejected}</strong>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+      {(stats.tickets > 0 || stats.teams > 0) && (
+        <div className="adm-chart-row-group">
+          {stats.tickets > 0 && (
+            <div className="adm-chart-sub-card">
+              <h4>Ticket Status</h4>
+              <div className="adm-chart-sub-items">
+                <div className="adm-chart-sub-item"><span style={{ background: '#f59e0b' }} />Open / In Progress <strong>{ticketChart.open}</strong></div>
+                <div className="adm-chart-sub-item"><span style={{ background: '#3b82f6' }} />Resolved <strong>{ticketChart.resolved}</strong></div>
+                <div className="adm-chart-sub-item"><span style={{ background: '#9ca3af' }} />Closed <strong>{ticketChart.closed}</strong></div>
+              </div>
+            </div>
+          )}
+          {stats.teams > 0 && (
+            <div className="adm-chart-sub-card">
+              <h4>Application Status</h4>
+              <div className="adm-chart-sub-items">
+                <div className="adm-chart-sub-item"><span style={{ background: '#f59e0b' }} />Pending <strong>{appChart.pending}</strong></div>
+                <div className="adm-chart-sub-item"><span style={{ background: '#10b981' }} />Approved <strong>{appChart.approved}</strong></div>
+                <div className="adm-chart-sub-item"><span style={{ background: '#ef4444' }} />Rejected <strong>{appChart.rejected}</strong></div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
@@ -1571,6 +1528,24 @@ function Loading() {
   );
 }
 
+const SIDEBAR_GROUPS = [
+  { label: 'MAIN', items: [
+    { key: 'analytics', icon: <FaChartBar />, label: 'Analytics' },
+    { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
+    { key: 'users', icon: <FaUsers />, label: 'Users' },
+    { key: 'chat', icon: <FaComments />, label: 'Chat' },
+  ]},
+  { label: 'MANAGEMENT', items: [
+    { key: 'contacts', icon: <FaEnvelope />, label: 'Contacts' },
+    { key: 'teams', icon: <FaUserTie />, label: 'Applications' },
+    { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
+    { key: 'news', icon: <FaNewspaper />, label: 'News' },
+    { key: 'courses', icon: <FaBookOpen />, label: 'Courses' },
+    { key: 'beneficiaries', icon: <FaUserTie />, label: 'Beneficiaries' },
+    { key: 'testimonials', icon: <FaStar />, label: 'Testimonials' },
+  ]},
+];
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -1582,12 +1557,9 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const isMobile = useIsMobile();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('adminSidebarCollapsed') === 'true');
-  useEffect(() => {
-    localStorage.setItem('adminSidebarCollapsed', sidebarCollapsed);
-  }, [sidebarCollapsed]);
   const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const h = (e) => setTab(e.detail.tab);
@@ -1635,26 +1607,26 @@ export default function AdminDashboard() {
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'A';
 
-  const sidebarTabs = [
-    { key: 'analytics', icon: <FaChartBar />, label: 'Analytics' },
-    { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
-    { key: 'users', icon: <FaUsers />, label: 'Users' },
-    { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
-    { key: 'contacts', icon: <FaEnvelope />, label: 'Contacts' },
-    { key: 'teams', icon: <FaUserTie />, label: 'Applications' },
-    { key: 'chat', icon: <FaComments />, label: 'Chat' },
-    { key: 'news', icon: <FaNewspaper />, label: 'News' },
-    { key: 'courses', icon: <FaBookOpen />, label: 'Courses' },
-    { key: 'beneficiaries', icon: <FaUserTie />, label: 'Beneficiaries' },
-    { key: 'testimonials', icon: <FaStar />, label: 'Testimonials' },
-  ];
+  const pageTitles = {
+    analytics: { title: 'Analytics', sub: 'Overview of your platform activity' },
+    tickets: { title: 'Tickets', sub: 'Manage and track all support requests' },
+    users: { title: 'Users', sub: 'Manage user accounts and permissions' },
+    suggestions: { title: 'Suggestions', sub: 'Review and manage user suggestions' },
+    contacts: { title: 'Contacts', sub: 'View and respond to contact messages' },
+    teams: { title: 'Applications', sub: 'Review team applications' },
+    chat: { title: 'Chat', sub: 'Communicate with users in real-time' },
+    news: { title: 'News', sub: 'Create and manage news articles' },
+    courses: { title: 'Courses', sub: 'Manage courses and learning materials' },
+    beneficiaries: { title: 'Beneficiaries', sub: 'Track and manage beneficiaries' },
+    testimonials: { title: 'Testimonials', sub: 'Review and approve testimonials' },
+  };
+
+  const currentPage = pageTitles[tab] || pageTitles.analytics;
 
   const renderContent = () => {
     if (tab === 'analytics') {
       return statsLoading ? (
-        <>
-          <Loading />
-        </>
+        <Loading />
       ) : (
         <AnalyticsView stats={stats} ticketChart={ticketChart} appChart={appChart} onNavigate={(t) => setTab(t)} />
       );
@@ -1673,65 +1645,82 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="dashboard admin-dashboard">
-      <div className="dash-layout">
-        {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-        <button className="dash-sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <FaBars />
-        </button>
-        <div className={`dash-sidebar${sidebarOpen ? ' open' : ''}${sidebarCollapsed ? ' collapsed' : ''}`} role="navigation" aria-label="Dashboard navigation">
-          <button className="dash-sidebar-collapse" onClick={() => setSidebarCollapsed((v) => !v)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-            {sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
+    <div className="adm-layout">
+      {sidebarOpen && isMobile && <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
+      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className="adm-sidebar-header">
+          <div className="adm-sidebar-logo">
+            <img src="/final-logo.jpg" alt="CS Hub" />
+            <div>
+              <strong>CS Hub</strong>
+              <span>Admin Panel</span>
+            </div>
+          </div>
+        </div>
+        <div className="adm-sidebar-user">
+          <div className="adm-sidebar-avatar">{initials}</div>
+          <div className="adm-sidebar-user-info">
+            <span className="adm-sidebar-user-name">{user?.name || 'Admin'}</span>
+            <span className="adm-sidebar-user-role">Administrator</span>
+          </div>
+        </div>
+        <nav className="adm-sidebar-nav">
+          {SIDEBAR_GROUPS.map((group) => (
+            <div key={group.label} className="adm-sidebar-group">
+              <div className="adm-sidebar-group-label">{group.label}</div>
+              {group.items.map((item) => (
+                <button
+                  key={item.key}
+                  className={`adm-sidebar-item${tab === item.key ? ' active' : ''}`}
+                  onClick={() => { setTab(item.key); setSidebarOpen(false); }}
+                >
+                  <span className="adm-sidebar-item-icon">{item.icon}</span>
+                  <span className="adm-sidebar-item-label">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+        <div className="adm-sidebar-footer">
+          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}>
+            <span className="adm-sidebar-item-icon"><FaQuestionCircle /></span>
+            <span className="adm-sidebar-item-label">Help</span>
           </button>
-          <button className="dash-sidebar-rail-avatar" onClick={() => setSidebarOpen(true)} title={user?.name}>
-            {initials}
-          </button>
-          <div className="dash-sidebar-header">
-            <div className="dash-sidebar-avatar">{initials}</div>
-            <div className={`dash-sidebar-name${sidebarCollapsed ? ' collapsed' : ''}`}>{user?.name}</div>
-            <div className={`dash-sidebar-role${sidebarCollapsed ? ' collapsed' : ''}`}>Admin Dashboard</div>
-          </div>
-          <div className="dash-sidebar-nav">
-            {sidebarTabs.map((t) => (
-              <button
-                key={t.key}
-                className={`dash-sidebar-tab${tab === t.key ? ' active' : ''}`}
-                onClick={() => {
-                  if (isMobile && !sidebarOpen) {
-                    setSidebarOpen(true);
-                  } else {
-                    setTab(t.key);
-                    setSidebarOpen(false);
-                  }
-                }}
-                title={sidebarCollapsed ? t.label : undefined}
-              >
-                <span className="dash-sidebar-tab-icon">{t.icon}</span>
-                <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>{t.label}</span>
-              </button>
-            ))}
-          </div>
-          <div className="dash-sidebar-nav-bottom">
-            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { setHelpOpen(true); setSidebarOpen(false); } }} title={sidebarCollapsed ? 'Help' : undefined}>
-              <span className="dash-sidebar-tab-icon"><FaQuestionCircle /></span>
-              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Help</span>
-            </button>
-            <button className="dash-sidebar-tab" onClick={() => { if (isMobile && !sidebarOpen) { setSidebarOpen(true); } else { handleLogout(); } }} title={sidebarCollapsed ? 'Logout' : undefined}>
-              <span className="dash-sidebar-tab-icon"><FaSignOutAlt /></span>
-              <span className={`dash-sidebar-tab-label${sidebarCollapsed ? ' collapsed' : ''}`}>Logout</span>
-            </button>
-          </div>
-          <button className="dash-sidebar-expand-btn" onClick={() => setSidebarOpen((v) => !v)} aria-label="Toggle sidebar" title="Toggle sidebar">
-            <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 512" height="1.2em" width="1.2em" xmlns="http://www.w3.org/2000/svg"><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path></svg>
+          <button className="adm-sidebar-item" onClick={handleLogout}>
+            <span className="adm-sidebar-item-icon"><FaSignOutAlt /></span>
+            <span className="adm-sidebar-item-label">Logout</span>
           </button>
         </div>
+      </aside>
 
-        {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+      <div className="adm-main">
+        <header className="adm-header">
+          <button className="adm-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <FaBars />
+          </button>
+          <div className="adm-header-search">
+            <FaSearch />
+            <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          </div>
+          <div className="adm-header-right">
+            <button className="adm-header-icon" title="Notifications">
+              <FaEnvelope />
+              {(stats.contacts + stats.suggestions) > 0 && <span className="adm-header-badge">{stats.contacts + stats.suggestions}</span>}
+            </button>
+            <div className="adm-header-user">
+              <div className="adm-header-avatar">{initials}</div>
+              <span className="adm-header-name">{user?.name || 'Admin'}</span>
+            </div>
+          </div>
+        </header>
 
-        <div className="dash-main">
+        <main className="adm-content">
           {renderContent()}
-        </div>
+        </main>
       </div>
+
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }

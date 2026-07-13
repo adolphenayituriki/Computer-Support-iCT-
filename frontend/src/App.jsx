@@ -75,11 +75,21 @@ export default function App() {
 
   function AppLayout() {
     const location = useLocation();
-    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/admin' || location.pathname === '/setup-account';
+    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/setup-account';
+    const isAdmin = location.pathname === '/admin';
+    const [waVisible, setWaVisible] = useState(false);
+
+    useEffect(() => {
+      if (isDashboard || isAdmin) return;
+      const onScroll = () => setWaVisible(window.scrollY > window.innerHeight * 0.6);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      return () => window.removeEventListener('scroll', onScroll);
+    }, [isDashboard, isAdmin]);
 
     return (
       <>
-        <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />
+        {!isAdmin && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/news" element={<News />} />
@@ -88,8 +98,8 @@ export default function App() {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
         </Routes>
-        {!isDashboard && <Footer />}
-        <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="whatsapp-float" title="Join our WhatsApp group"><FaWhatsapp /></a>
+        {!isDashboard && !isAdmin && <Footer />}
+        {!isDashboard && !isAdmin && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
         <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>
