@@ -1982,6 +1982,82 @@ header.dash-header .hamburger span {
   overflow-y: auto;
   overflow-x: hidden;
   border-right: 1px solid rgba(255,255,255,0.04);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.adm-sidebar.collapsed {
+  width: 70px;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-header {
+  padding: 1.25rem 0.5rem 0.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-logo {
+  justify-content: center;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-logo img {
+  margin: 0;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-nav {
+  padding: 0.5rem 0;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-group {
+  padding: 0;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-group-label {
+  display: none;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-item {
+  justify-content: center;
+  padding: 0.65rem 0;
+  margin: 0.15rem 0.5rem;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-item-label {
+  display: none;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-footer {
+  padding: 0.5rem 0;
+}
+
+.adm-sidebar.collapsed .adm-sidebar-footer .adm-sidebar-item {
+  justify-content: center;
+  margin: 0.15rem 0.5rem;
+}
+
+.adm-sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  right: -14px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 101;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.adm-sidebar-toggle:hover {
+  background: #f3f4f6;
+  transform: translateY(-50%) scale(1.1);
 }
 
 .adm-sidebar-overlay {
@@ -5378,6 +5454,29 @@ header.dash-header .hamburger span {
   .adm-sidebar.open {
     transform: translateX(0);
     box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+  }
+  .adm-sidebar.collapsed {
+    width: 260px;
+  }
+  .adm-sidebar-toggle {
+    right: auto;
+    left: auto;
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 200;
+    background: linear-gradient(135deg, #1a1d3a, #2563eb);
+    color: #fff;
+    border: none;
+  }
+  .adm-sidebar-toggle:hover {
+    background: linear-gradient(135deg, #2563eb, #1a1d3a);
+    transform: scale(1.1);
   }
   .adm-sidebar-overlay {
     display: block;

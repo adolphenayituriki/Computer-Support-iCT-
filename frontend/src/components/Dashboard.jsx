@@ -9,7 +9,8 @@ import {
   FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
   FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
-  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield
+  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield,
+  FaAngleLeft, FaAngleRight
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -778,6 +779,7 @@ export default function Dashboard() {
   const [teamData, setTeamData] = useState(null);
   const [teamLoading, setTeamLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -901,52 +903,63 @@ export default function Dashboard() {
     <div className="adm-layout">
       {sidebarOpen && isMobile && <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
+      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}${sidebarCollapsed ? ' collapsed' : ''}`}>
+        <button className="adm-sidebar-toggle" onClick={() => isMobile ? setSidebarOpen(!sidebarOpen) : setSidebarCollapsed(!sidebarCollapsed)}>
+          {isMobile ? <FaTimes /> : sidebarCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
+        </button>
         <div className="adm-sidebar-header">
           <div className="adm-sidebar-logo">
             <img src="/LOGO IMAGE.png" alt="CS Hub" />
-            <div>
+            {!sidebarCollapsed && <div>
               <strong>CS Hub</strong>
               <span>User Panel</span>
+            </div>}
+          </div>
+        </div>
+        {!sidebarCollapsed && (
+          <div className="adm-sidebar-user">
+            <div className="adm-sidebar-avatar">{initials}</div>
+            <div className="adm-sidebar-user-info">
+              <span className="adm-sidebar-user-name">{user?.name || 'User'}</span>
+              <span className="adm-sidebar-user-role">{teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
             </div>
           </div>
-        </div>
-        <div className="adm-sidebar-user">
-          <div className="adm-sidebar-avatar">{initials}</div>
-          <div className="adm-sidebar-user-info">
-            <span className="adm-sidebar-user-name">{user?.name || 'User'}</span>
-            <span className="adm-sidebar-user-role">{teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
+        )}
+        {sidebarCollapsed && (
+          <div className="adm-sidebar-user" style={{ justifyContent: 'center', padding: '0.75rem 0' }}>
+            <div className="adm-sidebar-avatar">{initials}</div>
           </div>
-        </div>
+        )}
         <nav className="adm-sidebar-nav">
           {sidebarGroups.map((group) => (
             <div key={group.label} className="adm-sidebar-group">
-              <div className="adm-sidebar-group-label">{group.label}</div>
+              {!sidebarCollapsed && <div className="adm-sidebar-group-label">{group.label}</div>}
               {group.items.map((item) => (
                 <button
                   key={item.key}
                   className={`adm-sidebar-item${tab === item.key ? ' active' : ''}`}
-                  onClick={() => { setTab(item.key); setSidebarOpen(false); }}
+                  onClick={() => { setTab(item.key); if (isMobile) setSidebarOpen(false); }}
+                  title={sidebarCollapsed ? item.label : undefined}
                 >
                   <span className="adm-sidebar-item-icon">{item.icon}</span>
-                  <span className="adm-sidebar-item-label">{item.label}</span>
+                  {!sidebarCollapsed && <span className="adm-sidebar-item-label">{item.label}</span>}
                 </button>
               ))}
             </div>
           ))}
         </nav>
         <div className="adm-sidebar-footer">
-          <button className="adm-sidebar-item" onClick={() => { setSettingsOpen(true); setSidebarOpen(false); }}>
+          <button className="adm-sidebar-item" onClick={() => { setSettingsOpen(true); if (isMobile) setSidebarOpen(false); }} title={sidebarCollapsed ? 'Settings' : undefined}>
             <span className="adm-sidebar-item-icon"><FaCog /></span>
-            <span className="adm-sidebar-item-label">Settings</span>
+            {!sidebarCollapsed && <span className="adm-sidebar-item-label">Settings</span>}
           </button>
-          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}>
+          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); if (isMobile) setSidebarOpen(false); }} title={sidebarCollapsed ? 'Help' : undefined}>
             <span className="adm-sidebar-item-icon"><FaQuestionCircle /></span>
-            <span className="adm-sidebar-item-label">Help</span>
+            {!sidebarCollapsed && <span className="adm-sidebar-item-label">Help</span>}
           </button>
-          <button className="adm-sidebar-item" onClick={handleLogout}>
+          <button className="adm-sidebar-item" onClick={handleLogout} title={sidebarCollapsed ? 'Logout' : undefined}>
             <span className="adm-sidebar-item-icon"><FaSignOutAlt /></span>
-            <span className="adm-sidebar-item-label">Logout</span>
+            {!sidebarCollapsed && <span className="adm-sidebar-item-label">Logout</span>}
           </button>
         </div>
       </aside>
