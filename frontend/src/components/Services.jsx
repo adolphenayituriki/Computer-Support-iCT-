@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { FaWrench, FaLaptop, FaGraduationCap, FaShieldAlt, FaVirus, FaMicrosoft, FaWifi, FaHdd, FaKeyboard, FaSearch, FaEnvelope, FaCloud, FaHeadphones, FaCheckCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import ServiceModal from './ServiceModal';
 
 const services = [
   {
@@ -55,18 +56,8 @@ const quickLinks = [
 ];
 
 export default function Services({ onLoginClick }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
-
-  const handleQuickAccess = () => {
-    if (user) {
-      navigate('/dashboard');
-    } else if (onLoginClick) {
-      onLoginClick();
-    } else {
-      navigate('/dashboard');
-    }
-  };
+  const [selectedService, setSelectedService] = useState(null);
 
   return (
     <section id="services" className="services section-reveal">
@@ -99,7 +90,7 @@ export default function Services({ onLoginClick }) {
             <button
               key={item.label}
               className="quick-access-btn"
-              onClick={handleQuickAccess}
+              onClick={() => setSelectedService(item)}
             >
               <span className="quick-access-btn-icon">{item.icon}</span>
               <span className="quick-access-btn-label">{item.label}</span>
@@ -107,6 +98,14 @@ export default function Services({ onLoginClick }) {
           ))}
         </div>
       </div>
+
+      {selectedService && (
+        <ServiceModal
+          service={selectedService}
+          onClose={() => setSelectedService(null)}
+          onLoginClick={onLoginClick}
+        />
+      )}
     </section>
   );
 }

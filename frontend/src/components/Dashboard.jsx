@@ -8,7 +8,9 @@ import {
   FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
   FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
-  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome
+  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome,
+  FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
+  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -33,6 +35,12 @@ const SIDEBAR_GROUPS = [
       { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
       { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
       { key: 'chat', icon: <FaComments />, label: 'Messages' },
+    ],
+  },
+  {
+    label: 'SUPPORT',
+    items: [
+      { key: 'help', icon: <FaBook />, label: 'Help Center' },
     ],
   },
 ];
@@ -760,6 +768,96 @@ function DashboardView({ tickets, user }) {
   );
 }
 
+function HelpCenterView() {
+  const [openFaq, setOpenFaq] = useState(null);
+
+  const faqs = [
+    { q: 'How do I submit a support ticket?', a: 'Go to the Tickets tab and fill out the form with your issue title, category, and description. Our team will respond through the ticket conversation.' },
+    { q: 'How do I suggest a new service?', a: 'Navigate to the Suggestions tab and describe the service or feature you\'d like us to add. We review every suggestion.' },
+    { q: 'How can I contact support quickly?', a: 'Use the WhatsApp button (bottom-right) to reach us instantly, or call +250 780 505 948. You can also message us directly through the Messages tab.' },
+    { q: 'What services does CS Hub offer?', a: 'We provide repair & troubleshooting, software installation, virus removal, network fixes, hardware upgrades, peripheral setup, data backup, security setup, email/cloud configuration, and computer training.' },
+    { q: 'How do I change my password?', a: 'Click your profile icon in the top-right corner, select Settings, then switch to the Password tab to update it.' },
+    { q: 'Can I track my support requests?', a: 'Yes! The Analytics tab shows your ticket statistics, and the Tickets tab lets you filter by status (open, in-progress, resolved, closed) and view conversations.' },
+    { q: 'How do I join the CS Hub team?', a: 'Click "Join Our Team" on the homepage or footer. Fill out the application form with your skills and experience. Admins will review and respond.' },
+    { q: 'Is my data secure?', a: 'Yes. We use JWT authentication, encrypted passwords, and secure API endpoints. Your personal data is never shared with third parties.' },
+  ];
+
+  const quickLinks = [
+    { icon: <FaTicketAlt />, label: 'Submit Ticket', tab: 'tickets', color: '#3b82f6' },
+    { icon: <FaLightbulb />, label: 'Suggest Idea', tab: 'suggestions', color: '#8b5cf6' },
+    { icon: <FaComments />, label: 'Message Us', tab: 'chat', color: '#10b981' },
+    { icon: <FaWhatsapp />, label: 'WhatsApp', href: 'https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN', color: '#25d366' },
+    { icon: <FaPhone />, label: 'Call Us', href: 'tel:+250780505948', color: '#f59e0b' },
+  ];
+
+  return (
+    <>
+      <div className="adm-page-header">
+        <h2>Help Center</h2>
+        <p>Find answers and get the support you need.</p>
+      </div>
+
+      <div className="dash-hc-grid">
+        {quickLinks.map((link) => (
+          link.href ? (
+            <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="dash-hc-card">
+              <div className="dash-hc-card-icon" style={{ background: `${link.color}18`, color: link.color }}>{link.icon}</div>
+              <span className="dash-hc-card-label">{link.label}</span>
+              <FaExternalLinkAlt className="dash-hc-card-ext" />
+            </a>
+          ) : (
+            <button key={link.label} className="dash-hc-card" onClick={() => document.querySelector(`.adm-sidebar-item`)?.click()}>
+              <div className="dash-hc-card-icon" style={{ background: `${link.color}18`, color: link.color }}>{link.icon}</div>
+              <span className="dash-hc-card-label">{link.label}</span>
+            </button>
+          )
+        ))}
+      </div>
+
+      <div className="adm-chart-section">
+        <div className="adm-chart-header"><FaBook /> Frequently Asked Questions</div>
+        <div className="dash-hc-faq-list">
+          {faqs.map((faq, i) => (
+            <div key={i} className={`dash-hc-faq-item${openFaq === i ? ' open' : ''}`}>
+              <button className="dash-hc-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                <span>{faq.q}</span>
+                <span className="dash-hc-faq-arrow">{openFaq === i ? '−' : '+'}</span>
+              </button>
+              {openFaq === i && <div className="dash-hc-faq-a">{faq.a}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="adm-chart-section">
+        <div className="adm-chart-header"><FaGraduationCap /> Services We Offer</div>
+        <div className="dash-hc-services-grid">
+          {[
+            { icon: <FaWrench />, name: 'Repair & Troubleshooting', desc: 'Laptop/PC optimization, crash diagnosis, hardware advice' },
+            { icon: <FaLaptop />, name: 'Software Installation', desc: 'Office, browsers, antivirus, school apps, drivers' },
+            { icon: <FaVirus />, name: 'Virus Removal', desc: 'Malware, trojan, ransomware removal & security setup' },
+            { icon: <FaShieldAlt />, name: 'Security Setup', desc: 'Antivirus, firewall, encryption, privacy hardening' },
+            { icon: <FaWifi />, name: 'Network Support', desc: 'Wi-Fi, router, DNS, VPN configuration & fixes' },
+            { icon: <FaHdd />, name: 'Hardware Upgrade', desc: 'RAM, SSD, GPU upgrades with professional install' },
+            { icon: <FaKeyboard />, name: 'Peripheral Setup', desc: 'Printers, scanners, webcams, USB devices' },
+            { icon: <FaEnvelope />, name: 'Email & Cloud', desc: 'Gmail, Outlook, Google Drive, OneDrive setup' },
+            { icon: <FaCloud />, name: 'Data Backup', desc: 'Automated backup strategy, local & cloud' },
+            { icon: <FaHeadphones />, name: 'Remote Support', desc: 'Instant remote desktop help from our technicians' },
+          ].map((svc) => (
+            <div key={svc.name} className="dash-hc-service-card">
+              <div className="dash-hc-service-icon">{svc.icon}</div>
+              <div>
+                <strong>{svc.name}</strong>
+                <span>{svc.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function Dashboard() {
   const { user, logout, updateProfile, changePassword } = useAuth();
   const { showToast } = useToast();
@@ -1040,6 +1138,8 @@ export default function Dashboard() {
             <SuggestionsView />
           ) : tab === 'chat' ? (
             <UserChatView />
+          ) : tab === 'help' ? (
+            <HelpCenterView />
           ) : tab === 'team' && teamData?.isTeamMember ? (
             <TeamView teamData={teamData} setTeamData={setTeamData} />
           ) : (
