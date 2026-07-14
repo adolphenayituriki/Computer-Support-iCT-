@@ -68,7 +68,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>&copy; 2026 CS hub (iCT). Made with  for our community.</p>
+        <p>&copy; 2026 CS hub (iCT). Made with for our community.</p>
       </div>
     </footer>
   );
