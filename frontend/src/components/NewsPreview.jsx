@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaNewspaper, FaYoutube, FaImage, FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
+import { FaNewspaper, FaYoutube, FaArrowRight } from 'react-icons/fa';
 import API_BASE from '../api';
 
 export default function NewsPreview() {
@@ -37,13 +37,6 @@ export default function NewsPreview() {
                 </div>
               )}
               <div className="news-preview-content">
-                <div className="news-card-meta" style={{ marginBottom: '0.25rem' }}>
-                  <span>
-                    <FaCalendarAlt /> {new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                  </span>
-                  {item.mediaType === 'image' && <span className="badge badge-media-photo"><FaImage /> Photo</span>}
-                  {item.mediaType === 'video' && <span className="badge badge-media-video"><FaYoutube /> Video</span>}
-                </div>
                 <h4>{item.title}</h4>
               </div>
               <FaArrowRight className="news-preview-arrow" />
