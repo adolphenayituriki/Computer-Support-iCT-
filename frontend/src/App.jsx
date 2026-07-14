@@ -89,7 +89,7 @@ export default function App() {
 
     return (
       <>
-        {!isAdmin && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
+        {!isAdmin && !isDashboard && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/news" element={<News />} />

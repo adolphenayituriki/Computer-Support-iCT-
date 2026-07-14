@@ -8,7 +8,7 @@ import {
   FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
   FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
-  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield
+  FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -29,7 +29,7 @@ const SIDEBAR_GROUPS = [
   {
     label: 'MAIN',
     items: [
-      { key: 'dashboard', icon: <FaTachometerAlt />, label: 'Dashboard' },
+      { key: 'analytics', icon: <FaTachometerAlt />, label: 'Analytics' },
       { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
       { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
       { key: 'chat', icon: <FaComments />, label: 'Messages' },
@@ -224,9 +224,9 @@ function TicketsView({ tickets, setTickets }) {
   return (
     <>
       <div className="adm-page-header">
-        <h2>Support Tickets</h2>
-        <p>Manage your support requests and track their status.</p>
+        <div><h1>Support Tickets</h1><p>Manage your support requests and track their status.</p></div>
       </div>
+
       <div className="adm-stats-grid">
         <div className="adm-stat-card">
           <div className="adm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><FaTicketAlt /></div>
@@ -241,101 +241,103 @@ function TicketsView({ tickets, setTickets }) {
           <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved</span></div>
         </div>
       </div>
-      <div className="dashboard-grid">
-        <div className="dash-card request-card">
-          <h3>New Support Request</h3>
-          <form onSubmit={handleSubmit}>
-            <input type="text" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              <option value="general">General</option>
-              <option value="hardware">Hardware</option>
-              <option value="software">Software</option>
-              <option value="virus">Virus / Malware</option>
-              <option value="network">Network</option>
-              <option value="training">Training</option>
-            </select>
-            <textarea rows="4" placeholder="Describe your issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-            <button type="submit" className="btn" disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Request'}</button>
-          </form>
-          {message && <p className="form-feedback">{message}</p>}
-        </div>
-        <div className="dash-card tickets-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>My Tickets ({tickets.length})</h3>
-            <div className="dash-filters">
-              {['all', 'open', 'closed'].map((f) => (
-                <button key={f} className={`filter-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
-                  {f.charAt(0).toUpperCase() + f.slice(1)}
-                </button>
-              ))}
-            </div>
+
+      <div className="adm-chart-section" style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '1.25rem' }}><FaPlus /> New Support Request</div>
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <input type="text" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required style={{ gridColumn: '1 / -1' }} />
+          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+            <option value="general">General</option>
+            <option value="hardware">Hardware</option>
+            <option value="software">Software</option>
+            <option value="virus">Virus / Malware</option>
+            <option value="network">Network</option>
+            <option value="training">Training</option>
+          </select>
+          <div></div>
+          <textarea rows="3" placeholder="Describe your issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required style={{ gridColumn: '1 / -1' }} />
+          <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="submit" className="btn" disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Submitting...</> : <><FaPlus /> Submit Request</>}</button>
           </div>
-          {filteredTickets.length === 0 ? (
-            <div className="empty-state">
-              <FaTicketAlt size={40} style={{ color: '#d1d5db' }} />
-              <p>No {filter !== 'all' ? filter : ''} tickets yet.</p>
-              <span>Fill in the form to create your first ticket.</span>
-            </div>
-          ) : (
-            <div className="ticket-list">
-              {filteredTickets.map((t) => (
-                <div key={tid(t)} className="ticket-item" style={{ cursor: 'pointer' }} onClick={() => setViewTicket(t)}>
-                  <div className="ticket-top">
-                    <span className={`ticket-status status-${t.status}`}>
-                      {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
-                    </span>
-                    <span className="ticket-category">{t.category}</span>
-                    <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
-                      <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
-                      <button className="ticket-action-btn" title="Edit" onClick={() => startEdit(t)}><FaEdit /></button>
-                      <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
+          {message && <p className="form-feedback" style={{ gridColumn: '1 / -1' }}>{message}</p>}
+        </form>
+      </div>
+
+      <div className="adm-chart-section">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaTicketAlt /> My Tickets ({tickets.length})</div>
+          <div className="dash-filters">
+            {['all', 'open', 'closed'].map((f) => (
+              <button key={f} className={`filter-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
+                {f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {filteredTickets.length === 0 ? (
+          <div className="empty-state" style={{ padding: '2rem' }}>
+            <FaTicketAlt size={36} style={{ color: '#d1d5db' }} />
+            <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>No {filter !== 'all' ? filter : ''} tickets yet.</p>
+          </div>
+        ) : (
+          <div className="ticket-list">
+            {filteredTickets.map((t) => (
+              <div key={tid(t)} className="ticket-item" onClick={() => setViewTicket(t)}>
+                <div className="ticket-top">
+                  <span className={`ticket-status status-${t.status}`}>
+                    {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
+                  </span>
+                  <span className="ticket-category">{t.category}</span>
+                  <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
+                    <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
+                    <button className="ticket-action-btn" title="Edit" onClick={() => startEdit(t)}><FaEdit /></button>
+                    <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
+                  </div>
+                </div>
+                {editingId === tid(t) ? (
+                  <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
+                    <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
+                    <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
+                      <option value="general">General</option>
+                      <option value="hardware">Hardware</option>
+                      <option value="software">Software</option>
+                      <option value="virus">Virus / Malware</option>
+                      <option value="network">Network</option>
+                      <option value="training">Training</option>
+                    </select>
+                    <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <span className="btn-spinner"></span> : <><FaSave /> Save</>}</button>
+                      <button className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
                     </div>
                   </div>
-                  {editingId === tid(t) ? (
-                    <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
-                      <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
-                      <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
-                        <option value="general">General</option>
-                        <option value="hardware">Hardware</option>
-                        <option value="software">Software</option>
-                        <option value="virus">Virus / Malware</option>
-                        <option value="network">Network</option>
-                        <option value="training">Training</option>
-                      </select>
-                      <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <span className="btn-spinner"></span> : <><FaSave /> Save</>}</button>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
+                ) : (
+                  <>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937', margin: '0.5rem 0 0.25rem' }}>{t.title}</h4>
+                    <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>{t.description}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                        {new Date(t.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </span>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        {(t.status === 'open' || t.status === 'in-progress') && (
+                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#10b981' }} onClick={() => handleStatus(tid(t), 'resolved')}>
+                            <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
+                          </button>
+                        )}
+                        {t.status === 'resolved' && (
+                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(tid(t), 'open')}>
+                            <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <h4>{t.title}</h4>
-                      <p>{t.description}</p>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.3rem' }}>
-                        <span className="ticket-date">
-                          {new Date(t.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                        </span>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          {(t.status === 'open' || t.status === 'in-progress') && (
-                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#16a34a' }} onClick={() => handleStatus(tid(t), 'resolved')}>
-                              <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
-                            </button>
-                          )}
-                          {t.status === 'resolved' && (
-                            <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(tid(t), 'open')}>
-                              <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {modalContent}
     </>
@@ -663,41 +665,30 @@ function TeamView({ teamData, setTeamData }) {
 function DashboardView({ tickets, user }) {
   const openCount = tickets.filter((t) => t.status === 'open' || t.status === 'in-progress').length;
   const resolvedCount = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
-  const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const yearStr = new Date().getFullYear();
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    return 'Good evening';
-  })();
-
-  const recentTickets = tickets.slice(0, 5);
   const maxTicket = Math.max(tickets.length, 1);
 
   return (
     <>
-      <div className="adm-page-header" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)', color: '#fff', borderRadius: '12px', padding: '1.8rem 2rem' }}>
-        <h2 style={{ color: '#fff', margin: '0 0 0.3rem' }}>{greeting}, {user?.name?.split(' ')[0] || 'there'}!</h2>
-        <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>Here's an overview of your support activity.</p>
+      <div className="adm-page-header">
+        <div><h1>Analytics</h1><p>Overview of your support activity</p></div>
       </div>
 
       <div className="adm-stats-grid">
         <div className="adm-stat-card">
           <div className="adm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><FaTicketAlt /></div>
-          <div className="adm-stat-info"><strong>{tickets.length}</strong><span>Total Tickets</span></div>
+          <div className="adm-stat-info"><strong>{tickets.length}</strong><span>Tickets</span></div>
         </div>
         <div className="adm-stat-card">
           <div className="adm-stat-icon" style={{ background: '#fffbeb', color: '#f59e0b' }}><FaExclamationCircle /></div>
-          <div className="adm-stat-info"><strong>{openCount}</strong><span>Open / In Progress</span></div>
+          <div className="adm-stat-info"><strong>{openCount}</strong><span>Open</span></div>
         </div>
         <div className="adm-stat-card">
           <div className="adm-stat-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><FaCheckCircle /></div>
-          <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved / Closed</span></div>
+          <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved</span></div>
         </div>
         <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#f5f3ff', color: '#8b5cf6' }}><FaClock /></div>
-          <div className="adm-stat-info"><strong>{todayStr}</strong><span>{yearStr}</span></div>
+          <div className="adm-stat-icon" style={{ background: '#f5f3ff', color: '#8b5cf6' }}><FaLightbulb /></div>
+          <div className="adm-stat-info"><strong>0</strong><span>Suggestions</span></div>
         </div>
       </div>
 
@@ -724,14 +715,14 @@ function DashboardView({ tickets, user }) {
       <div className="adm-chart-row-group">
         <div className="adm-chart-sub-card">
           <h4>Recent Tickets</h4>
-          {recentTickets.length === 0 ? (
+          {tickets.length === 0 ? (
             <div className="empty-state" style={{ padding: '1rem' }}>
               <FaTicketAlt size={28} style={{ color: '#d1d5db' }} />
               <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem' }}>No tickets yet.</p>
             </div>
           ) : (
             <div className="adm-chart-sub-items">
-              {recentTickets.map((t) => (
+              {tickets.slice(0, 5).map((t) => (
                 <div key={t._id || t.id} className="adm-chart-sub-item">
                   <span style={{ background: t.status === 'open' ? '#f59e0b' : t.status === 'in-progress' ? '#3b82f6' : t.status === 'resolved' ? '#10b981' : '#6b7280' }} />
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title || 'Untitled'}</span>
@@ -777,7 +768,7 @@ export default function Dashboard() {
     logout();
     navigate('/');
   };
-  const [tab, setTab] = useState('dashboard');
+  const [tab, setTab] = useState('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -1012,10 +1003,10 @@ export default function Dashboard() {
                   </div>
                   <div className="adm-profile-dropdown-divider"></div>
                   <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('profile'); setProfileOpen(false); }}>
-                    <FaEdit /> Edit Profile
+                    <FaCog /> Settings
                   </button>
-                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('password'); setProfileOpen(false); }}>
-                    <FaCog /> Settings & Password
+                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('/'); }}>
+                    <FaHome /> Back to Home
                   </button>
                   <div className="adm-profile-dropdown-divider"></div>
                   <button className="adm-profile-dropdown-item adm-profile-dropdown-logout" onClick={handleLogout}>
@@ -1041,7 +1032,7 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-          {tab === 'dashboard' ? (
+          {tab === 'analytics' ? (
             <DashboardView tickets={searchQuery.trim() ? filteredTickets : tickets} user={user} />
           ) : tab === 'tickets' ? (
             <TicketsView tickets={searchQuery.trim() ? filteredTickets : tickets} setTickets={setTickets} />
