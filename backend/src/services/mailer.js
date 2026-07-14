@@ -13,6 +13,11 @@ function baseHtml(content) {
       </div>
       ${content}
       <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0 16px;" />
+      <div style="text-align: center; margin-bottom: 16px;">
+        <p style="color: #f8fafc; font-size: 0.85rem; font-weight: 700; margin: 0 0 6px;">For More Information</p>
+        <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0 0 4px;">Call or WhatsApp: <a href="tel:+250780505948" style="color: #38bdf8; text-decoration: none;">+250 780 505 948</a></p>
+        <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Join our WhatsApp Group: <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" style="color: #38bdf8; text-decoration: none;">Click here to join</a></p>
+      </div>
       <p style="color: #475569; font-size: 0.75rem; text-align: center; margin: 0;">
         CS Hub (iCT) — Computer Support for All Rwandans
       </p>
