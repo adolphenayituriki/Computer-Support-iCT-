@@ -35,11 +35,6 @@ const SIDEBAR_GROUPS = [
       { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
       { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
       { key: 'chat', icon: <FaComments />, label: 'Messages' },
-    ],
-  },
-  {
-    label: 'SUPPORT',
-    items: [
       { key: 'help', icon: <FaBook />, label: 'Help Center' },
     ],
   },
