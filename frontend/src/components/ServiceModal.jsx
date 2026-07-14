@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
+import { useLang } from '../LanguageContext';
 import { FaTimes, FaPaperPlane, FaSpinner, FaCheckCircle, FaPhone, FaWhatsapp, FaTicketAlt, FaComments } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -143,6 +144,7 @@ const SERVICE_DETAILS = {
 export default function ServiceModal({ service, onClose, onLoginClick }) {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useLang();
   const navigate = useNavigate();
   const [helpText, setHelpText] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -207,7 +209,7 @@ export default function ServiceModal({ service, onClose, onLoginClick }) {
           <p className="svc-modal-desc">{details.description}</p>
 
           <div className="svc-modal-features">
-            <h4>What's Included</h4>
+            <h4>{t('serviceModal.whatsIncluded')}</h4>
             <ul>
               {details.features.map((f, i) => (
                 <li key={i}><FaCheckCircle className="svc-feat-icon" /> {f}</li>
@@ -216,49 +218,47 @@ export default function ServiceModal({ service, onClose, onLoginClick }) {
           </div>
 
           <div className="svc-modal-help">
-            <h4>{user ? 'Ask for Quick Help' : 'Sign in to request help'}</h4>
+            <h4>{user ? t('serviceModal.askHelp') : t('serviceModal.signInHelp')}</h4>
             {submitted ? (
               <div className="svc-modal-success">
                 <FaCheckCircle size={36} />
-                <p>Request Submitted Successfully!</p>
-                <span>Your "{service.label}" help request has been created. Here's how to track it:</span>
+                <p>{t('serviceModal.trackTitle')}</p>
+                <span>{t('serviceModal.trackDesc')}</span>
                 <div className="svc-modal-track-steps">
                   <div className="svc-modal-track-step">
                     <span className="svc-modal-track-num">1</span>
                     <div>
-                      <strong>Go to Dashboard → Tickets</strong>
-                      <span>Find your ticket in the tickets list with status "Open"</span>
+                      <strong>{t('serviceModal.step1')}</strong>
+                      <span>{t('serviceModal.step1Sub')}</span>
                     </div>
                   </div>
                   <div className="svc-modal-track-step">
                     <span className="svc-modal-track-num">2</span>
                     <div>
-                      <strong>Click to View & Reply</strong>
-                      <span>Open the ticket to see admin responses and add messages</span>
+                      <strong>{t('serviceModal.step2')}</strong>
+                      <span>{t('serviceModal.step2Sub')}</span>
                     </div>
                   </div>
                   <div className="svc-modal-track-step">
                     <span className="svc-modal-track-num">3</span>
                     <div>
-                      <strong>Track Status Updates</strong>
-                      <span>Watch for status changes: Open → In Progress → Resolved</span>
+                      <strong>{t('serviceModal.step3')}</strong>
+                      <span>{t('serviceModal.step3Sub')}</span>
                     </div>
                   </div>
                 </div>
                 <div className="svc-modal-track-actions">
                   <button className="svc-modal-btn primary" onClick={() => { onClose(); navigate('/dashboard'); }}>
-                    <FaTicketAlt /> Go to My Tickets
+                    <FaTicketAlt /> {t('serviceModal.goTickets')}
                   </button>
-                  <button className="svc-modal-btn" onClick={onClose}>Close</button>
+                  <button className="svc-modal-btn" onClick={onClose}>{t('serviceModal.close')}</button>
                 </div>
               </div>
             ) : (
               <>
                 <textarea
                   rows={4}
-                  placeholder={user
-                    ? `Describe your ${service.label.toLowerCase()} issue briefly...`
-                    : 'Sign in to submit a help request...'}
+                  placeholder={user ? t('serviceModal.placeholder') : t('serviceModal.signInPlaceholder')}
                   value={helpText}
                   onChange={(e) => setHelpText(e.target.value)}
                   disabled={!user}
@@ -269,11 +269,11 @@ export default function ServiceModal({ service, onClose, onLoginClick }) {
                     onClick={handleSubmit}
                     disabled={submitting || !helpText.trim()}
                   >
-                    {submitting ? <><FaSpinner className="spin" /> Submitting...</> : <><FaPaperPlane /> Submit Request</>}
+                    {submitting ? <><FaSpinner className="spin" /> {t('serviceModal.submitting')}</> : <><FaPaperPlane /> {t('serviceModal.submit')}</>}
                   </button>
                   {!user && (
                     <button className="svc-modal-btn" onClick={onLoginClick}>
-                      Sign In to Continue
+                      {t('serviceModal.signInContinue')}
                     </button>
                   )}
                 </div>
@@ -282,7 +282,7 @@ export default function ServiceModal({ service, onClose, onLoginClick }) {
           </div>
 
           <div className="svc-modal-contact">
-            <span>Need immediate help?</span>
+            <span>{t('serviceModal.needHelp')}</span>
             <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="svc-modal-contact-link wa">
               <FaWhatsapp /> WhatsApp
             </a>

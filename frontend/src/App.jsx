@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { SidebarProvider } from './SidebarContext';
 import { ToastProvider } from './ToastContext';
+import { LanguageProvider } from './LanguageContext';
 import { FaWhatsapp } from 'react-icons/fa';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -15,6 +16,7 @@ import About from './components/About';
 import Contact from './components/Contact';
 import News from './components/News';
 import Courses from './components/Courses';
+import AILearning from './components/AILearning';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
@@ -92,6 +94,7 @@ export default function App() {
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/ai-learning" element={<AILearning />} />
           <Route path="/setup-account" element={<SetupAccount />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
@@ -109,11 +112,13 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <SidebarProvider>
-          <ToastProvider>
-            <AppLayout />
-          </ToastProvider>
-        </SidebarProvider>
+        <LanguageProvider>
+          <SidebarProvider>
+            <ToastProvider>
+              <AppLayout />
+            </ToastProvider>
+          </SidebarProvider>
+        </LanguageProvider>
       </AuthProvider>
     </BrowserRouter>
   );

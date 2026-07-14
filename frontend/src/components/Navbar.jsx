@@ -1,15 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { FaUser, FaBell, FaClock, FaShieldAlt, FaHeadset, FaLaptop } from 'react-icons/fa';
+import { useLang } from '../LanguageContext';
+import { FaUser, FaBell, FaClock, FaShieldAlt, FaHeadset, FaLaptop, FaGlobe, FaCaretDown, FaBookOpen, FaRobot } from 'react-icons/fa';
 
 import SettingsModal from './SettingsModal';
 
-const NOTIFY_ITEMS = [
+const NOTIFY_ITEMS_EN = [
   { icon: <FaClock />, text: <>Mon – Fri, 8AM – 5PM | WhatsApp: <strong>+250 780 505 948</strong></> },
   { icon: <FaLaptop />, text: <>Remote support now available — no need to move from your desk</> },
   { icon: <FaShieldAlt />, text: <>Never share your password. Our team will never ask for it.</> },
   { icon: <FaHeadset />, text: <>24/7 Emergency Support — Call <strong>+250 780 505 948</strong></> },
+];
+
+const NOTIFY_ITEMS_RW = [
+  { icon: <FaClock />, text: <>Ku wa mbere – Ku wa gatanu, 8:00 – 17:00 | WhatsApp: <strong>+250 780 505 948</strong></> },
+  { icon: <FaLaptop />, text: <>Ubufasha bwa kure buraboneka — nta kuburimbo bwarakeneye</> },
+  { icon: <FaShieldAlt />, text: <>Ntimugire amakuru y'ibanga. Ikipe yacu ntizababaza.</> },
+  { icon: <FaHeadset />, text: <>Ubufasha bw'akanyuma 24/7 — Fona <strong>+250 780 505 948</strong></> },
 ];
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
@@ -20,15 +28,20 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   const [showSettings, setShowSettings] = useState(false);
   const [notifyIdx, setNotifyIdx] = useState(0);
   const [notifyFading, setNotifyFading] = useState(false);
+  const [coursesOpen, setCoursesOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { lang, t, toggleLang } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
   const menuRef = useRef(null);
   const hideTimer = useRef(null);
+  const coursesTimer = useRef(null);
+
+  const NOTIFY_ITEMS = lang === 'rw' ? NOTIFY_ITEMS_RW : NOTIFY_ITEMS_EN;
 
   const isNews = location.pathname === '/news';
-  const isCourses = location.pathname === '/courses';
+  const isCourses = location.pathname === '/courses' || location.pathname === '/ai-learning';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -91,6 +104,15 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
     hideTimer.current = setTimeout(() => setShowProfileMenu(false), 250);
   };
 
+  const handleCoursesEnter = () => {
+    if (coursesTimer.current) clearTimeout(coursesTimer.current);
+    setCoursesOpen(true);
+  };
+
+  const handleCoursesLeave = () => {
+    coursesTimer.current = setTimeout(() => setCoursesOpen(false), 200);
+  };
+
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   return (
@@ -119,8 +141,8 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
         <ul className={`nav-links${open ? ' active' : ''}`}>
           {isDashboard ? (
             <>
-              <li><a href="/" onClick={() => setOpen(false)}><span style={{ fontSize: '0.85rem' }}>&larr;</span> Back to Home</a></li>
-              <li><a href="/dashboard" onClick={() => setOpen(false)}>Dashboard</a></li>
+              <li><a href="/" onClick={() => setOpen(false)}><span style={{ fontSize: '0.85rem' }}>&larr;</span> {t('nav.backHome')}</a></li>
+              <li><a href="/dashboard" onClick={() => setOpen(false)}>{t('nav.dashboard')}</a></li>
               <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className="nav-avatar" onClick={() => setShowProfileMenu((v) => !v)}>
                   {initials}
@@ -128,22 +150,36 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <div className="nav-profile-name">{user?.name}</div>
-                    <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>Settings</button>
-                    <button onClick={handleLogout}>Logout</button>
+                    <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>{t('nav.settings')}</button>
+                    <button onClick={handleLogout}>{t('nav.logout')}</button>
                   </div>
                 )}
               </li>
-              <li className="nav-mobile-only"><button className="nav-mobile-settings" onClick={() => { setOpen(false); setShowSettings(true); }}>Settings</button></li>
-              <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>Logout</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-settings" onClick={() => { setOpen(false); setShowSettings(true); }}>{t('nav.settings')}</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>{t('nav.logout')}</button></li>
             </>
           ) : user ? (
             <>
-              <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>Home</a></li>
-              <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>Services</a></li>
-              <li><a href="/news" className={active === 'news' ? 'active' : ''} onClick={() => setOpen(false)}>News</a></li>
-              <li><a href="/courses" className={active === 'courses' ? 'active' : ''} onClick={() => setOpen(false)}>Courses</a></li>
-              <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About Us</a></li>
-              <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
+              <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.home')}</a></li>
+              <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.services')}</a></li>
+              <li><a href="/news" className={active === 'news' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.news')}</a></li>
+              <li className={`nav-dropdown${coursesOpen ? ' open' : ''}`} onMouseEnter={handleCoursesEnter} onMouseLeave={handleCoursesLeave}>
+                <button className={`nav-dropdown-trigger${isCourses ? ' active' : ''}`} onClick={() => setCoursesOpen((v) => !v)}>
+                  {t('nav.courses')} <FaCaretDown className="nav-caret" />
+                </button>
+                {coursesOpen && (
+                  <div className="nav-dropdown-menu">
+                    <a href="/courses" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
+                      <FaBookOpen /> {t('navDropdown.knowledgeBase')}
+                    </a>
+                    <a href="/ai-learning" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
+                      <FaRobot /> {t('navDropdown.aiLearning')}
+                    </a>
+                  </div>
+                )}
+              </li>
+              <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.about')}</a></li>
+              <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.contact')}</a></li>
               <li className="nav-profile-wrap" ref={menuRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className="nav-avatar" onClick={() => setShowProfileMenu((v) => !v)}>
                   {initials}
@@ -151,25 +187,42 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <div className="nav-profile-name">{user?.name}</div>
-                    <button onClick={() => { setShowProfileMenu(false); navigate('/dashboard'); }}>Go to Dashboard</button>
-                    <button onClick={handleLogout}>Logout</button>
+                    <button onClick={() => { setShowProfileMenu(false); navigate('/dashboard'); }}>{t('nav.goToDashboard')}</button>
+                    <button onClick={handleLogout}>{t('nav.logout')}</button>
                   </div>
                 )}
               </li>
-              <li className="nav-mobile-only"><button className="nav-mobile-dashboard" onClick={() => { setOpen(false); navigate('/dashboard'); }}>Go to Dashboard</button></li>
-              <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>Logout</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-dashboard" onClick={() => { setOpen(false); navigate('/dashboard'); }}>{t('nav.goToDashboard')}</button></li>
+              <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>{t('nav.logout')}</button></li>
             </>
           ) : (
             <>
-              <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>Home</a></li>
-              <li><a href="/news" className={active === 'news' ? 'active' : ''} onClick={() => setOpen(false)}>News</a></li>
-              <li><a href="/courses" className={active === 'courses' ? 'active' : ''} onClick={() => setOpen(false)}>Courses</a></li>
-              <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>About Us</a></li>
-              <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>Contact</a></li>
-              <li className="nav-cta-wrap"><button className="nav-cta-btn" onClick={() => { setOpen(false); onLoginClick(); }}><FaUser /> Sign In</button></li>
+              <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.home')}</a></li>
+              <li><a href="/news" className={active === 'news' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.news')}</a></li>
+              <li className={`nav-dropdown${coursesOpen ? ' open' : ''}`} onMouseEnter={handleCoursesEnter} onMouseLeave={handleCoursesLeave}>
+                <button className={`nav-dropdown-trigger${isCourses ? ' active' : ''}`} onClick={() => setCoursesOpen((v) => !v)}>
+                  {t('nav.courses')} <FaCaretDown className="nav-caret" />
+                </button>
+                {coursesOpen && (
+                  <div className="nav-dropdown-menu">
+                    <a href="/courses" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
+                      <FaBookOpen /> {t('navDropdown.knowledgeBase')}
+                    </a>
+                    <a href="/ai-learning" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
+                      <FaRobot /> {t('navDropdown.aiLearning')}
+                    </a>
+                  </div>
+                )}
+              </li>
+              <li><a href="/#about" className={active === 'about' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.about')}</a></li>
+              <li><a href="/#contact" className={active === 'contact' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.contact')}</a></li>
+              <li className="nav-cta-wrap"><button className="nav-cta-btn" onClick={() => { setOpen(false); onLoginClick(); }}><FaUser /> {t('nav.signIn')}</button></li>
             </>
           )}
         </ul>
+        <button className="nav-lang-btn" onClick={toggleLang} title={lang === 'en' ? 'Switch to Kinyarwanda' : 'Switch to English'}>
+          <FaGlobe /> {lang === 'en' ? 'RW' : 'EN'}
+        </button>
         <button className={`hamburger${open ? ' open' : ''}`} aria-label="Menu" onClick={() => setOpen((v) => !v)}>
           <span></span>
           <span></span>

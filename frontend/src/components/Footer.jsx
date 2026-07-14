@@ -1,8 +1,10 @@
 import { FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaHeart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useLang } from '../LanguageContext';
 
 export default function Footer() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const goHome = (hash) => {
     if (window.location.pathname === '/') {
       document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
@@ -19,10 +21,10 @@ export default function Footer() {
             <img src="/LOGO IMAGE.png" alt="CS hub (iCT)" className="footer-logo" />
             <div>
               <h4>CS hub <span>(iCT)</span></h4>
-              <p className="footer-tagline">Computer Support</p>
+              <p className="footer-tagline">{t('footer.tagline')}</p>
             </div>
           </div>
-          <p className="footer-desc">Empowering students and teachers with digital skills and computer support.</p>
+          <p className="footer-desc">{t('footer.desc')}</p>
           <div className="footer-social-row">
             <div className="footer-social">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebook /></a>
@@ -37,23 +39,23 @@ export default function Footer() {
         </div>
 
         <div className="footer-col">
-          <h4>Quick Links</h4>
+          <h4>{t('footer.quickLinks')}</h4>
           <div className="footer-links">
-            <button type="button" onClick={() => goHome('#home')}>Home</button>
-            <button type="button" onClick={() => goHome('#services')}>Services</button>
-            <button type="button" onClick={() => goHome('#about')}>About Us</button>
-            <button type="button" onClick={() => goHome('#contact')}>Contact</button>
-            <button type="button" onClick={() => navigate('/news')}>News</button>
-            <button type="button" onClick={() => navigate('/courses')}>Courses</button>
+            <button type="button" onClick={() => goHome('#home')}>{t('nav.home')}</button>
+            <button type="button" onClick={() => goHome('#services')}>{t('nav.services')}</button>
+            <button type="button" onClick={() => goHome('#about')}>{t('nav.about')}</button>
+            <button type="button" onClick={() => goHome('#contact')}>{t('nav.contact')}</button>
+            <button type="button" onClick={() => navigate('/news')}>{t('nav.news')}</button>
+            <button type="button" onClick={() => navigate('/courses')}>{t('nav.courses')}</button>
           </div>
         </div>
 
         <div className="footer-col">
-          <h4>Contact</h4>
+          <h4>{t('footer.contact')}</h4>
           <div className="footer-contact-list">
             <div className="footer-contact-item">
               <FaMapMarkerAlt className="footer-contact-icon" />
-              <span>Anywhere in Rwanda</span>
+              <span>{t('contact.locationVal')}</span>
             </div>
             <div className="footer-contact-item">
               <FaEnvelope className="footer-contact-icon" />
@@ -68,7 +70,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>&copy; 2026 CS hub (iCT). Made with for our community.</p>
+        <p>{t('footer.copyright')}</p>
       </div>
     </footer>
   );

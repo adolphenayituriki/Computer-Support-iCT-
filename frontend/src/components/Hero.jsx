@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { useLang } from '../LanguageContext';
 
 export default function Hero() {
   const canvasRef = useRef(null);
+  const { t } = useLang();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -179,30 +181,30 @@ export default function Hero() {
       <div className="hero-overlay" />
       <div className="hero-content">
         <div className="hero-line"></div>
-        <span className="hero-badge">&#9733; Trusted by 1,200+ Students</span>
+        <span className="hero-badge">{t('hero.badge')}</span>
         <h1>CS hub <span>(iCT)</span></h1>
         <p className="hero-tagline">
-          We help students, teachers, and anyone who needs <strong>digital skills</strong>, <strong>computer repair</strong>, <strong>software installation</strong>, and <strong>ICT support</strong> — whether <strong>on-site</strong> or <strong>remotely</strong> across Rwanda. Founded by students who saw the challenges many face with computers and ICT, we are here for you wherever you are.
+          {t('hero.tagline')}
         </p>
 
         <div className="hero-stats">
           <div className="hero-stat">
             <span className="hero-stat-num">500+</span>
-            <span className="hero-stat-label">Devices Fixed</span>
+            <span className="hero-stat-label">{t('hero.devicesFixed')}</span>
           </div>
           <div className="hero-stat">
             <span className="hero-stat-num">1,200+</span>
-            <span className="hero-stat-label">People Helped</span>
+            <span className="hero-stat-label">{t('hero.peopleHelped')}</span>
           </div>
           <div className="hero-stat">
             <span className="hero-stat-num">98%</span>
-            <span className="hero-stat-label">Satisfaction</span>
+            <span className="hero-stat-label">{t('hero.satisfaction')}</span>
           </div>
         </div>
 
         <div className="hero-btns">
-          <a href="#how-it-works" className="btn">How It Works</a>
-          <a href="#services" className="btn btn-outline">Our Services</a>
+          <a href="#how-it-works" className="btn">{t('hero.howItWorks')}</a>
+          <a href="#services" className="btn btn-outline">{t('hero.ourServices')}</a>
         </div>
       </div>
     </section>
