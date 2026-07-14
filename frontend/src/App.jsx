@@ -15,7 +15,6 @@ import About from './components/About';
 import Contact from './components/Contact';
 import News from './components/News';
 import Courses from './components/Courses';
-import NewsPreview from './components/NewsPreview';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
@@ -55,7 +54,6 @@ function HomePage({ onLoginClick, onRegisterClick, onTeamClick }) {
       <About />
       <FAQ />
       <Testimonials />
-      <NewsPreview />
       <CTA onRegisterClick={onRegisterClick} onTeamClick={onTeamClick} />
       <Contact />
     </main>
