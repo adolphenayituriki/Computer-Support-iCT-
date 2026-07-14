@@ -28,7 +28,7 @@ import TeamApplyModal from './components/TeamApplyModal';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
 import SetupAccount from './components/SetupAccount';
 
-function HomePage({ onRegisterClick, onTeamClick }) {
+function HomePage({ onLoginClick, onRegisterClick, onTeamClick }) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,7 +50,7 @@ function HomePage({ onRegisterClick, onTeamClick }) {
     <main>
       <Hero />
       <HowItWorks />
-      <Services />
+      <Services onLoginClick={onLoginClick} />
       <WhyUs />
       <About />
       <FAQ />
@@ -91,7 +91,7 @@ export default function App() {
       <>
         {!isAdmin && !isDashboard && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
-          <Route path="/" element={<HomePage onRegisterClick={openRegister} onTeamClick={openTeam} />} />
+          <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/setup-account" element={<SetupAccount />} />

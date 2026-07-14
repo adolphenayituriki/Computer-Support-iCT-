@@ -1,5 +1,6 @@
 import { FaWrench, FaLaptop, FaGraduationCap, FaShieldAlt, FaVirus, FaMicrosoft, FaWifi, FaHdd, FaKeyboard, FaSearch, FaEnvelope, FaCloud, FaHeadphones, FaCheckCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 
 const services = [
   {
@@ -53,13 +54,15 @@ const quickLinks = [
   { icon: <FaHeadphones />, label: 'Remote Support', category: 'general' },
 ];
 
-export default function Services() {
+export default function Services({ onLoginClick }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleQuickAccess = (category) => {
-    const token = localStorage.getItem('cshub_token');
-    if (token) {
+  const handleQuickAccess = () => {
+    if (user) {
       navigate('/dashboard');
+    } else if (onLoginClick) {
+      onLoginClick();
     } else {
       navigate('/dashboard');
     }
@@ -96,7 +99,7 @@ export default function Services() {
             <button
               key={item.label}
               className="quick-access-btn"
-              onClick={() => handleQuickAccess(item.category)}
+              onClick={handleQuickAccess}
             >
               <span className="quick-access-btn-icon">{item.icon}</span>
               <span className="quick-access-btn-label">{item.label}</span>
