@@ -1356,9 +1356,60 @@ header.dash-header .hamburger span {
 }
 
 .svc-modal-success svg { color: #10b981; margin-bottom: 0.5rem; }
-.svc-modal-success p { margin: 0; color: #fff; font-weight: 600; font-size: 0.95rem; }
-.svc-modal-success span { color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; display: block; margin-top: 0.3rem; }
-.svc-modal-success .svc-modal-btn { margin-top: 0.8rem; }
+.svc-modal-success p { margin: 0; color: #fff; font-weight: 700; font-size: 1rem; }
+.svc-modal-success > span { color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; display: block; margin-top: 0.3rem; line-height: 1.5; }
+
+.svc-modal-track-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.svc-modal-track-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.svc-modal-track-num {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #5694F7;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.svc-modal-track-step strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #fff;
+  margin-bottom: 0.1rem;
+}
+
+.svc-modal-track-step span {
+  font-size: 0.73rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.svc-modal-track-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
 
 .svc-modal-contact {
   display: flex;

@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTimes, FaPaperPlane, FaSpinner, FaCheckCircle, FaPhone, FaWhatsapp } from 'react-icons/fa';
+import { FaTimes, FaPaperPlane, FaSpinner, FaCheckCircle, FaPhone, FaWhatsapp, FaTicketAlt, FaComments } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -142,6 +143,7 @@ const SERVICE_DETAILS = {
 export default function ServiceModal({ service, onClose, onLoginClick }) {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [helpText, setHelpText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -211,10 +213,38 @@ export default function ServiceModal({ service, onClose, onLoginClick }) {
             <h4>{user ? 'Ask for Quick Help' : 'Sign in to request help'}</h4>
             {submitted ? (
               <div className="svc-modal-success">
-                <FaCheckCircle size={32} />
-                <p>Your request has been submitted!</p>
-                <span>Our team will review and respond through your dashboard.</span>
-                <button className="svc-modal-btn" onClick={onClose}>Close</button>
+                <FaCheckCircle size={36} />
+                <p>Request Submitted Successfully!</p>
+                <span>Your "{service.label}" help request has been created. Here's how to track it:</span>
+                <div className="svc-modal-track-steps">
+                  <div className="svc-modal-track-step">
+                    <span className="svc-modal-track-num">1</span>
+                    <div>
+                      <strong>Go to Dashboard → Tickets</strong>
+                      <span>Find your ticket in the tickets list with status "Open"</span>
+                    </div>
+                  </div>
+                  <div className="svc-modal-track-step">
+                    <span className="svc-modal-track-num">2</span>
+                    <div>
+                      <strong>Click to View & Reply</strong>
+                      <span>Open the ticket to see admin responses and add messages</span>
+                    </div>
+                  </div>
+                  <div className="svc-modal-track-step">
+                    <span className="svc-modal-track-num">3</span>
+                    <div>
+                      <strong>Track Status Updates</strong>
+                      <span>Watch for status changes: Open → In Progress → Resolved</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="svc-modal-track-actions">
+                  <button className="svc-modal-btn primary" onClick={() => { onClose(); navigate('/dashboard'); }}>
+                    <FaTicketAlt /> Go to My Tickets
+                  </button>
+                  <button className="svc-modal-btn" onClick={onClose}>Close</button>
+                </div>
               </div>
             ) : (
               <>
