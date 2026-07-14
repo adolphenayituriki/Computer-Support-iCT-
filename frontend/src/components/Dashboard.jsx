@@ -10,7 +10,7 @@ import {
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
   FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome,
   FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
-  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt
+  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
