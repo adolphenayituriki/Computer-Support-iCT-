@@ -403,6 +403,17 @@ export async function submitQuiz(req, res) {
   }
 }
 
+export async function getQuizById(req, res) {
+  try {
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ error: 'Quiz not found.' });
+    if (quiz.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not your quiz.' });
+    res.json(quiz);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 export async function getQuizHistory(req, res) {
   try {
     const quizzes = await Quiz.find({ userId: req.user.id, completed: true }).sort({ createdAt: -1 }).limit(20);

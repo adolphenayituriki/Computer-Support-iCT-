@@ -10238,6 +10238,52 @@ header.scrolled .nav-dropdown-item-btn:hover {
   .ai-auth-roles {
     grid-template-columns: 1fr;
   }
+
+  .ai-quiz-history-left {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .ai-quiz-history-date {
+    margin-left: 0;
+  }
+
+  .ai-quiz-history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .ai-quiz-history-review-btn {
+    align-self: flex-end;
+  }
+
+  .ai-quiz-review-summary {
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+
+  .ai-quiz-review-stats {
+    justify-content: center;
+  }
+
+  .ai-quiz-review-q {
+    padding: 1rem;
+  }
+
+  .ai-quiz-review-opt {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .ai-quiz-review-explanation {
+    font-size: 0.78rem;
+  }
+
+  .ai-quiz-review-actions {
+    flex-direction: column;
+  }
 }
 
 .ai-dash-feature-coming {
@@ -10653,12 +10699,21 @@ header.scrolled .nav-dropdown-item-btn:hover {
 .ai-quiz-history-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.65rem 1rem;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 0.82rem;
+}
+
+.ai-quiz-history-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .ai-quiz-history-subject {
@@ -10675,6 +10730,294 @@ header.scrolled .nav-dropdown-item-btn:hover {
 .ai-quiz-history-date {
   color: #9ca3af;
   margin-left: auto;
+}
+
+.ai-quiz-history-review-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border: 1.5px solid #5694F7;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #5694F7;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.ai-quiz-history-review-btn:hover:not(:disabled) {
+  background: #5694F7;
+  color: #fff;
+}
+
+.ai-quiz-history-review-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── REVIEW VIEW ────────────────────────────── */
+
+.ai-quiz-review {
+  animation: fadeUp 0.3s ease;
+}
+
+.ai-quiz-review-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ai-quiz-review-subject {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  background: #eff6ff;
+  color: #3b82f6;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ai-quiz-review-date {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  margin-left: auto;
+}
+
+.ai-quiz-review-summary {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.75rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  margin-bottom: 1.5rem;
+}
+
+.ai-quiz-review-score-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.ai-quiz-review-ring {
+  width: 100%;
+  height: 100%;
+}
+
+.ai-quiz-review-score-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-quiz-review-score-text strong {
+  font-size: 1.8rem;
+  color: #111827;
+  line-height: 1;
+}
+
+.ai-quiz-review-score-text span {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.ai-quiz-review-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ai-quiz-review-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ai-quiz-review-stat-val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ai-quiz-review-stat-label {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-top: 0.2rem;
+}
+
+.ai-quiz-review-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ai-quiz-review-q {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border-left: 4px solid #e5e7eb;
+}
+
+.ai-quiz-review-q.correct {
+  border-left-color: #10b981;
+}
+
+.ai-quiz-review-q.wrong {
+  border-left-color: #ef4444;
+}
+
+.ai-quiz-review-q-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.ai-quiz-review-q-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.ai-quiz-review-q-badge.correct {
+  background: #f0fdf4;
+  color: #10b981;
+}
+
+.ai-quiz-review-q-badge.wrong {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.ai-quiz-review-q-num {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.ai-quiz-review-q-points {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+.ai-quiz-review-q.wrong .ai-quiz-review-q-points {
+  color: #ef4444;
+}
+
+.ai-quiz-review-q.correct .ai-quiz-review-q-points {
+  color: #10b981;
+}
+
+.ai-quiz-review-q-text {
+  font-size: 0.95rem;
+  color: #111827;
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+}
+
+.ai-quiz-review-q-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.ai-quiz-review-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.ai-quiz-review-opt.correct {
+  border-color: #10b981;
+  background: #f0fdf4;
+  color: #065f46;
+}
+
+.ai-quiz-review-opt.wrong {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.ai-quiz-review-opt-letter {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-quiz-review-opt.correct .ai-quiz-review-opt-letter {
+  background: #10b981;
+  color: #fff;
+}
+
+.ai-quiz-review-opt.wrong .ai-quiz-review-opt-letter {
+  background: #ef4444;
+  color: #fff;
+}
+
+.ai-quiz-review-opt-check {
+  margin-left: auto;
+  color: #10b981;
+  font-size: 0.85rem;
+}
+
+.ai-quiz-review-opt-x {
+  margin-left: auto;
+  color: #ef4444;
+  font-size: 0.85rem;
+}
+
+.ai-quiz-review-explanation {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.82rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.ai-quiz-review-explanation strong {
+  color: #78350f;
+}
+
+.ai-quiz-review-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
 .ai-quiz-play-header {
