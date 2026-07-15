@@ -5,6 +5,7 @@ import { useLang } from '../LanguageContext';
 import { FaUser, FaBell, FaClock, FaShieldAlt, FaHeadset, FaLaptop, FaGlobe, FaCaretDown, FaBookOpen, FaRobot } from 'react-icons/fa';
 
 import SettingsModal from './SettingsModal';
+import AILearningModal from './AILearningModal';
 
 const NOTIFY_ITEMS_EN = [
   { icon: <FaClock />, text: <>Mon – Fri, 8AM – 5PM | WhatsApp: <strong>+250 780 505 948</strong></> },
@@ -26,6 +27,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   const [active, setActive] = useState('home');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAILearning, setShowAILearning] = useState(false);
   const [notifyIdx, setNotifyIdx] = useState(0);
   const [notifyFading, setNotifyFading] = useState(false);
   const [coursesOpen, setCoursesOpen] = useState(false);
@@ -172,9 +174,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                     <a href="/courses" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
                       <FaBookOpen /> {t('navDropdown.knowledgeBase')}
                     </a>
-                    <a href="/ai-learning" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
+                    <button className="nav-dropdown-item-btn" onClick={() => { setOpen(false); setCoursesOpen(false); setShowAILearning(true); }}>
                       <FaRobot /> {t('navDropdown.aiLearning')}
-                    </a>
+                    </button>
                   </div>
                 )}
               </li>
@@ -208,9 +210,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                     <a href="/courses" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
                       <FaBookOpen /> {t('navDropdown.knowledgeBase')}
                     </a>
-                    <a href="/ai-learning" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
+                    <button className="nav-dropdown-item-btn" onClick={() => { setOpen(false); setCoursesOpen(false); setShowAILearning(true); }}>
                       <FaRobot /> {t('navDropdown.aiLearning')}
-                    </a>
+                    </button>
                   </div>
                 )}
               </li>
@@ -231,6 +233,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
         {open && <div className="nav-overlay" onClick={() => setOpen(false)} />}
       </nav>
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      <AILearningModal open={showAILearning} onClose={() => setShowAILearning(false)} />
     </header>
   );
 }

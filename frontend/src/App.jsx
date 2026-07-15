@@ -17,6 +17,7 @@ import Contact from './components/Contact';
 import News from './components/News';
 import Courses from './components/Courses';
 import AILearning from './components/AILearning';
+import AILearningDashboard from './components/AILearningDashboard';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
@@ -75,7 +76,7 @@ export default function App() {
 
   function AppLayout() {
     const location = useLocation();
-    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/setup-account';
+    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/setup-account' || location.pathname === '/ai-dashboard';
     const isAdmin = location.pathname === '/admin';
     const [waVisible, setWaVisible] = useState(false);
 
@@ -95,6 +96,7 @@ export default function App() {
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/ai-learning" element={<AILearning />} />
+          <Route path="/ai-dashboard" element={<ProtectedRoute><AILearningDashboard /></ProtectedRoute>} />
           <Route path="/setup-account" element={<SetupAccount />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />

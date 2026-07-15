@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../LanguageContext';
 import { useAuth } from '../AuthContext';
+import AILearningAuthModal from './AILearningAuthModal';
 import {
   FaRobot, FaImage, FaVideo, FaHeadphones, FaFlask, FaQuestionCircle,
   FaPuzzlePiece, FaChartLine, FaRoute, FaLanguage, FaMicroscope,
@@ -50,11 +52,21 @@ export default function AILearning() {
   const { t } = useLang();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [slide, setSlide] = useState(0);
+  const [showAuth, setShowAuth] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => setSlide((p) => (p + 1) % 2), 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
+    <>
     <div className="ai-page">
       {/* Hero */}
       <section className="ai-hero">
+        <div className={`ai-hero-slide${slide === 0 ? ' active' : ''}`} style={{ backgroundImage: "url('/Seconadry students.jpg')" }}></div>
+        <div className={`ai-hero-slide${slide === 1 ? ' active' : ''}`} style={{ backgroundImage: "url('/primary students.jpg')" }}></div>
         <div className="container ai-hero-content">
           <span className="ai-hero-badge">
             <FaStar /> {t('aiLearning.heroBadge')}
@@ -66,7 +78,7 @@ export default function AILearning() {
             <a href="#ai-features" className="btn">
               <FaSearch style={{ marginRight: '0.5rem' }} /> {t('aiLearning.heroCta')}
             </a>
-            <button className="btn btn-outline" onClick={() => user ? navigate('/dashboard') : navigate('/')}>
+            <button className="btn btn-outline" onClick={() => user ? navigate('/ai-dashboard') : setShowAuth(true)}>
               <FaArrowRight style={{ marginRight: '0.5rem' }} /> {t('aiLearning.heroSecondary')}
             </button>
           </div>
@@ -191,7 +203,7 @@ export default function AILearning() {
           <h2>{t('aiLearning.ctaTitle')}</h2>
           <p>{t('aiLearning.ctaDesc')}</p>
           <div className="ai-cta-btns">
-            <button className="btn" onClick={() => user ? navigate('/dashboard') : navigate('/')}>
+            <button className="btn" onClick={() => user ? navigate('/ai-dashboard') : setShowAuth(true)}>
               {t('aiLearning.ctaBtn')}
             </button>
             <a href="/#contact" className="btn btn-outline">
@@ -201,5 +213,7 @@ export default function AILearning() {
         </div>
       </section>
     </div>
+    <AILearningAuthModal open={showAuth} onClose={() => setShowAuth(false)} />
+    </>
   );
 }

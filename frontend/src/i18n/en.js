@@ -274,5 +274,18 @@ export default {
     "ctaDesc": "Join CS Hub AI Learning Platform and experience the future of education today.",
     "ctaBtn": "Get Started",
     "ctaSecondary": "Contact Us"
+  },
+  "aiModal": {
+    "title": "AI Learning Platform",
+    "subtitle": "Choose your learning level",
+    "primaryTitle": "Secondary & Primary",
+    "primaryDesc": "Interactive AI learning for primary and secondary school students",
+    "primaryTag": "Coming Soon",
+    "universityTitle": "University",
+    "primaryBtn": "Explore",
+    "universityDesc": "AI-powered tools for university students and researchers",
+    "universityTag": "Coming Soon",
+    "universityBtn": "Explore",
+    "close": "Close"
   }
 }

@@ -4,18 +4,18 @@ export default {
     "services": "Ibikorwa",
     "news": "Amakuru",
     "courses": "Amasomo",
-    "about": "Iwacu",
+    "about": "Ibitwerekeye",
     "contact": "Tuvugishe",
     "dashboard": "Ikibaho",
     "backHome": "Subira Ahabanza",
     "signIn": "Injira",
-    "menu": "Ibikoresho",
-    "settings": "Amategeko",
+    "menu": "Menu",
+    "settings": "Setting",
     "logout": "Sohoka",
     "goToDashboard": "Jya ku Ikibaho"
   },
   "hero": {
-    "badge": "★ Abizerwaho n'Abanyeshuri 1,200+",
+    "badge": "★ Byizewe n'abanyeshuri 1,200+",
     "tagline": "Dufasha abanyeshuri, abarimu, n'abandi bakeneye ubufasha bw'ikoranabuhanga, ukurikirana ikibazo cy'ibikoresho, kubika software, n'ubufasha bw'ikiyaboro — ku bwato cyangwa hejuru y'ubusaga mu Rwanda. Twatangiye n'abanyeshuri babonye ibibazo benshi bakenera ibikoresho, turi hano ku bwawe aho uri.",
     "devicesFixed": "Ibikoresho Byashyizweho",
     "peopleHelped": "Abantu Bafashijwe",
@@ -25,17 +25,17 @@ export default {
   },
   "howItWorks": {
     "title": "Uko system Ikora",
-    "subtitle": "Kubona ubufasha biroroshe nka 1-2-3",
-    "step1Title": "Tuveho Ikiyo Kibazo",
-    "step1Desc": "Sobanura ikibazo cy'ibikoresho cyawe binyuze mu mugaragaro wa raporo. Ibikoresho, software, uburambe bw'ikoranabuhanga — tubikemura byose.",
-    "step2Title": "Dukemura & Turatanya",
+    "subtitle": "Bona ubufasha muburyo bworoshe nka 1-2-3",
+    "step1Title": "Tubwire ikibazo ufite",
+    "step1Desc": "Sobanura byimbitse ikibazo machine yawe yaba ifite mufi form yo kwaka ubufasha. Ibikoresho, software, uburambe bw'ikoranabuhanga — tubikemura byose.",
+    "step2Title": "Dukemura & Dusana",
     "step2Desc": "Ikipe yacu y'abanyeshuri irabireba. Turatanya, turungana, turindika software, cyangwa tukugira inama ku burambe bushyashya.",
     "step3Title": "Gukusanya & Kwiyongera",
     "step3Desc": "Gukusanya ibikoresho byawe biri nka bishya. Tugenzura noneho uri ubona intangiriro kugira ngo wiyizere ku buryo bw'ikoranabuhanga."
   },
   "services": {
     "title": "Ibikorwa Byacu",
-    "subtitle": "Ibintu byose ukeneye kugira ibikoresho byawe biri neza",
+    "subtitle": "Ibintu byose ukeneye kugirango ibikoresho byawe bikomeze gukora neza",
     "quickAccess": "Kugera Vuba",
     "quickAccessSub": "Jya ku bikorwa ukeneye",
     "repair": "Kurungana & Gukemura",
@@ -76,7 +76,7 @@ export default {
   },
   "whyUs": {
     "title": "Kubera iki CS hub (iCT)",
-    "subtitle": "Twatangiye mu bibazo nyayo, tukubaha ibisubizo byo kwemeza",
+    "subtitle": "Twatangriyeiye mu bibazo byanyabyo, tukubaha ibisubizo byo bya nyabyo",
     "nationwide": "Ubufasha mu Gihugu",
     "nationwideDesc": "Tugizemo ibibanza byose bya Rwanda — amashuri yose, amashuri y'ubumenyi, abacuruzi, abakozi, n'abo bakeneye ubufasha bw'ibikoresho n'uburambe bw'ikiyaboro.",
     "forStudents": "Ku Banyeshuri n'Abarimu",
@@ -88,8 +88,8 @@ export default {
   },
   "about": {
     "title": "Inkuru Yacu",
-    "p1": "CS hub (iCT) yatangiye mu buryo bwa nyayo: abanyeshuri benshi bari mu kibazo cyo gushyiraho ibikoresho, bari burambe buke bw'ikoranabuhanga, kandi bari batabonye ubumenyi bwa igitangaro bwinjije mu masomo n'akazi ka bo.",
-    "p2": "Abatangijwe bacu babonye ko ubu bufatanye bw'ikoranabuhanga buziba abanyeshuri n'abarimu b'agaciro mu guhangana mu isi. Babonye ko igitangaro ari ubwoko bushya bw'amahano y'abantu bose — abanyeshuri, abarimu, n'abakozi — gukoresha imirimo yabo kandi bazere amategeko y'isi.",
+    "p1": "CS hub (iCT) yatangiye mu buryo bwa bwanyabwo: kubera abanyeshuri benshi bahura n'kibazo cyo gukoresha no gufata neza mudasobwa zabo, ubumenyi buke bw'ikoranabuhanga, ndetse no kubura ubumenyi bw'ibanze mumasomo yabo ndetse no m'umwuga wabo.",
+    "p2": "Abatangije igi gahunda babonye ko ubu bufatanye bw'ikoranabuhanga busubiza abanyeshuri n'abarimu ku isoko mpuzamahanga. Babonye ko igitangaro ari ubwoko bushya bw'amahano y'abantu bose — abanyeshuri, abarimu, n'abakozi — gukoresha imirimo yabo kandi bazere amategeko y'isi.",
     "p3": "Uyu munsi duhariwe n'abanyeshuri bakeneye gutanga uburambe bw'ikoranabuhanga ku bwose. Nta magambo, nta cyubahiro — ubufasha bw'nyabwo buvuye mu bantu bumva ikibazo."
   },
   "faq": {
@@ -274,5 +274,18 @@ export default {
     "ctaDesc": "Iyungishe Urubuga rw'Amasomo n'Ikoranabuhanga rwa CS Hub kandi urabe amaherezo y'amasomo.",
     "ctaBtn": "Tangura",
     "ctaSecondary": "Tuvugishe"
+  },
+  "aiModal": {
+    "title": "Urubuga rw'Amasomo n'Ikoranabuhanga",
+    "subtitle": "Hitamwo urwego rw'amasomo",
+    "primaryTitle": "Amashuri Yisumbuye n'Amashuri Y'Intangiriro",
+    "primaryDesc": "Amasomo y'Imbonankubwenge ku banyeshuri y'ishuri y'intangiriro n'isumbuye",
+    "primaryTag": "Biraza",
+    "universityTitle": "Yunivesite",
+    "primaryBtn": "Raba",
+    "universityDesc": "Ibikoresho by'Imbonankubwenge ku banyeshuri y'univesite",
+    "universityTag": "Biraza",
+    "universityBtn": "Raba",
+    "close": "Fungura"
   }
 }
