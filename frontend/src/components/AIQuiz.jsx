@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../LanguageContext';
-import API_BASE from '../api';
+import API_BASE, { AI_API_BASE } from '../api';
 import {
   FaQuestionCircle, FaCheckCircle, FaTimesCircle, FaSpinner, FaRedo,
   FaTrophy, FaClock, FaArrowRight, FaListOl, FaEye, FaHome
@@ -40,7 +40,7 @@ export default function AIQuiz() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/ai/quizzes/history`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/quizzes/history`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) {
@@ -54,7 +54,7 @@ export default function AIQuiz() {
     setSubject(sel);
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/ai/quizzes/generate`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/quizzes/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ subject: sel, level: 'secondary', count: 5 }),
@@ -75,7 +75,7 @@ export default function AIQuiz() {
   const startReview = async (quiz) => {
     setReviewLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/ai/quizzes/${quiz._id}`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/quizzes/${quiz._id}`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) {
@@ -108,7 +108,7 @@ export default function AIQuiz() {
   const submitQuiz = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/ai/quizzes/submit`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/quizzes/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({

@@ -10,7 +10,6 @@ import courseRoutes from './courses.js';
 import beneficiaryRoutes from './beneficiaries.js';
 import testimonialRoutes from './testimonials.js';
 import adminRoutes from './admin.js';
-import aiRoutes from './ai.js';
 
 const router = Router();
 
@@ -25,6 +24,5 @@ router.use('/courses', courseRoutes);
 router.use('/beneficiaries', beneficiaryRoutes);
 router.use('/testimonials', testimonialRoutes);
 router.use('/admin', adminRoutes);
-router.use('/ai', aiRoutes);
 
 export default router;

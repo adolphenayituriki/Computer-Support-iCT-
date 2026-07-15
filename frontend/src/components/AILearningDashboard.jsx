@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../LanguageContext';
-import API_BASE from '../api';
+import API_BASE, { AI_API_BASE } from '../api';
 import AITutor from './AITutor';
 import AIQuiz from './AIQuiz';
 import AITopicWorkspace from './AITopicWorkspace';
@@ -85,7 +85,7 @@ export default function AILearningDashboard() {
 
   const fetchProgress = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/ai/progress`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/progress`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) setProgressData(await res.json());
@@ -94,7 +94,7 @@ export default function AILearningDashboard() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/ai/notifications`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/notifications`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) {
@@ -107,7 +107,7 @@ export default function AILearningDashboard() {
 
   const markAllRead = async () => {
     try {
-      await fetch(`${API_BASE}/api/ai/notifications/read`, {
+      await fetch(`${AI_API_BASE}/api/ai/notifications/read`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token()}` },
       });
@@ -118,7 +118,7 @@ export default function AILearningDashboard() {
 
   const deleteNotification = async (id) => {
     try {
-      await fetch(`${API_BASE}/api/ai/notifications/${id}`, {
+      await fetch(`${AI_API_BASE}/api/ai/notifications/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token()}` },
       });

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../LanguageContext';
-import API_BASE from '../api';
+import API_BASE, { AI_API_BASE } from '../api';
 import {
   FaRobot, FaUser, FaPaperPlane, FaSpinner, FaComments, FaArrowLeft, FaBookOpen
 } from 'react-icons/fa';
@@ -38,7 +38,7 @@ export default function AITutor() {
 
   const fetchSessions = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/ai/sessions`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/sessions`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) {
@@ -57,7 +57,7 @@ export default function AITutor() {
 
   const loadSession = async (session) => {
     try {
-      const res = await fetch(`${API_BASE}/api/ai/sessions/${session._id}`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/sessions/${session._id}`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (res.ok) {
@@ -78,7 +78,7 @@ export default function AITutor() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/ai/tutor`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/tutor`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({

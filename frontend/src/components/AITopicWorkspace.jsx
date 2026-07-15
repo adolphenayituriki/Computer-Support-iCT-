@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import API_BASE from '../api';
+import API_BASE, { AI_API_BASE } from '../api';
 import { useAuth } from '../AuthContext';
 
 export default function AITopicWorkspace({ onBack }) {
@@ -21,7 +21,7 @@ export default function AITopicWorkspace({ onBack }) {
 
   async function loadHistory() {
     try {
-      const res = await fetch(`${API_BASE}/api/ai/topics`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/topics`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('cshub_token')}` },
       });
       if (res.ok) setHistory(await res.json());
@@ -38,7 +38,7 @@ export default function AITopicWorkspace({ onBack }) {
     setFlashcardIdx(0);
     setFlashcardFlipped(false);
     try {
-      const res = await fetch(`${API_BASE}/api/ai/topics/process`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/topics/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
