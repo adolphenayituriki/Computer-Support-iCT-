@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../AuthContext';
 import { AI_API_BASE } from '../api';
 import {
   FaBook, FaLink, FaUpload, FaPlus, FaTrash, FaFilePdf, FaGlobe,
   FaRobot, FaQuestionCircle, FaBrain, FaFileAlt, FaComments,
   FaSpinner, FaTimes, FaArrowLeft, FaSearch, FaExclamationTriangle,
-  FaCheckCircle, FaStar, FaLightbulb, FaCopy, FaChevronLeft, FaChevronRight, FaUser
+  FaCheckCircle, FaStar, FaLightbulb, FaCopy, FaChevronLeft, FaChevronRight, FaUser, FaShieldAlt
 } from 'react-icons/fa';
 
 const SUBJECTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'English', 'Geography', 'History', 'General'];
 
 export default function AIResources({ onBack }) {
+  const { user } = useAuth();
+  const isAdmin = user?.isAdmin || false;
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -311,12 +314,14 @@ export default function AIResources({ onBack }) {
             {selectedResource.type === 'book' ? <FaFilePdf /> : <FaGlobe />}
             <div>
               <h2>{selectedResource.title}</h2>
-              <span className="ai-resource-detail-meta">{selectedResource.subject} · {selectedResource.type === 'book' ? 'Book/PDF' : 'Web Link'}</span>
+              <span className="ai-resource-detail-meta">{selectedResource.subject} · {selectedResource.type === 'book' ? 'Book/PDF' : 'Web Link'} · {isAdmin ? 'Admin-managed' : 'Learning material'}</span>
             </div>
           </div>
-          <button className="ai-resource-delete-btn" onClick={() => handleDelete(selectedResource._id)}>
-            <FaTrash /> Delete
-          </button>
+          {isAdmin && (
+            <button className="ai-resource-delete-btn" onClick={() => handleDelete(selectedResource._id)}>
+              <FaTrash /> Delete
+            </button>
+          )}
         </div>
 
         <div className="ai-resource-detail-tools">
@@ -504,11 +509,13 @@ export default function AIResources({ onBack }) {
       <div className="ai-resources-header">
         <div>
           <h2><FaBook /> Resource Library</h2>
-          <p>Upload books (PDF) or add web links. AI guides you based on the content and generates quizzes, flashcards, and more.</p>
+          <p>{isAdmin ? 'Manage books, links, and learning materials for all students.' : 'Browse learning materials. AI guides you based on the content — generate quizzes, flashcards, summaries, and more.'}</p>
         </div>
-        <button className="ai-resource-add-btn" onClick={() => setShowAdd(true)}>
-          <FaPlus /> Add Resource
-        </button>
+        {isAdmin && (
+          <button className="ai-resource-add-btn" onClick={() => setShowAdd(true)}>
+            <FaPlus /> Add Resource
+          </button>
+        )}
       </div>
 
       {showAdd && (
@@ -609,8 +616,14 @@ export default function AIResources({ onBack }) {
         <div className="ai-resource-empty">
           <FaBook size={48} />
           <h3>No resources yet</h3>
-          <p>Upload a PDF book or add a web link to get started. AI will guide you based on the content!</p>
-          <button className="ai-resource-add-btn" onClick={() => setShowAdd(true)}><FaPlus /> Add Your First Resource</button>
+          {isAdmin ? (
+            <>
+              <p>Upload a PDF book or add a web link to build the knowledge base for all students.</p>
+              <button className="ai-resource-add-btn" onClick={() => setShowAdd(true)}><FaPlus /> Add Your First Resource</button>
+            </>
+          ) : (
+            <p>No learning materials have been added yet. Check back soon — admin is preparing resources for you!</p>
+          )}
         </div>
       ) : (
         <div className="ai-resource-grid">
@@ -633,7 +646,7 @@ export default function AIResources({ onBack }) {
                 <button onClick={() => openResource(r)}><FaRobot /> Open</button>
                 <button onClick={() => { setSelectedResource(r); generateResourceQuiz(); }}><FaQuestionCircle /></button>
                 <button onClick={() => { setSelectedResource(r); generateResourceFlashcards(); }}><FaBrain /></button>
-                <button onClick={() => handleDelete(r._id)}><FaTrash /></button>
+                {isAdmin && <button onClick={() => handleDelete(r._id)}><FaTrash /></button>}
               </div>
               <small className="ai-resource-card-date">{new Date(r.createdAt).toLocaleDateString()}</small>
             </div>

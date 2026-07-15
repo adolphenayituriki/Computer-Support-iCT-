@@ -272,7 +272,17 @@ export async function tutorChat(req, res) {
     if (!message) return res.status(400).json({ error: 'Message is required.' });
 
     const subject = reqSubject || detectSubject(message) || 'general';
-    const reply = getAIResponse(message);
+    let reply = getAIResponse(message);
+
+    const relevantResources = await findRelevantResources(message, subject, 2);
+    if (relevantResources.length > 0) {
+      const resourceRefs = relevantResources.map((r) => `"${r.title}" (${r.subject})`).join(', ');
+      const contentSnippets = relevantResources.map((r) => {
+        const snippet = r.content.substring(0, 600);
+        return `\n\n📖 From "${r.title}":\n${snippet}...`;
+      }).join('');
+      reply += `\n\n📚 Related resources available: ${resourceRefs}${contentSnippets}\n\n💡 Check the Resource Library for these materials to study further!`;
+    }
 
     let session;
     if (sessionId) {
@@ -301,7 +311,7 @@ export async function tutorChat(req, res) {
       { new: true, upsert: true }
     );
 
-    res.json({ reply, sessionId: session._id, subject, progress });
+    res.json({ reply, sessionId: session._id, subject, progress, resourcesReferenced: relevantResources.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -750,7 +760,7 @@ export async function deleteNotification(req, res) {
 
 export { SUBJECTS };
 
-// ─── RESOURCES (BOOKS & LINKS) ──────────────────────────────────
+// ─── RESOURCES (BOOKS & LINKS) — GLOBAL KNOWLEDGE BASE ──────────
 
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -781,13 +791,31 @@ function extractTextFromContent(content, maxLen = 8000) {
   return cleaned.length > maxLen ? cleaned.substring(0, maxLen) : cleaned;
 }
 
+async function findRelevantResources(query, subject, limit = 3) {
+  const filter = { status: 'ready', content: { $ne: '' } };
+  if (subject && subject !== 'general') filter.subject = subject;
+  const resources = await Resource.find(filter).sort({ createdAt: -1 }).limit(20);
+  if (resources.length === 0) return [];
+  const lower = (query || '').toLowerCase();
+  const scored = resources.map((r) => {
+    const contentLower = (r.content || '').toLowerCase();
+    const titleLower = (r.title || '').toLowerCase();
+    let score = 0;
+    const words = lower.split(/\s+/).filter((w) => w.length > 2);
+    for (const w of words) {
+      if (titleLower.includes(w)) score += 3;
+      const regex = new RegExp(w, 'gi');
+      const matches = contentLower.match(regex);
+      if (matches) score += matches.length;
+    }
+    return { resource: r, score };
+  });
+  return scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).slice(0, limit).map((s) => s.resource);
+}
+
 function generateQuestionsFromContent(content, subject, count = 5) {
-  const text = content.toLowerCase();
   const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 10);
   const questions = [];
-
-  const keyTerms = text.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g) || [];
-  const uniqueTerms = [...new Set(keyTerms)].slice(0, 20);
 
   const templates = [
     { q: 'Based on the material, what is a key concept discussed?', opts: ['Definition and explanation', 'Historical background', 'Mathematical proof', 'Visual diagram'] },
@@ -838,7 +866,6 @@ function generateQuestionsFromContent(content, subject, count = 5) {
       explanation: `Based on the resource content about ${subject || 'this topic'}. Review the material for a detailed explanation.`,
     });
   }
-
   return questions;
 }
 
@@ -846,7 +873,6 @@ function generateFlashcardsFromContent(content, subject) {
   const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 15);
   const flashcards = [];
   const count = Math.min(6, Math.max(3, Math.floor(sentences.length / 3)));
-
   for (let i = 0; i < count; i++) {
     const sentence = sentences[i]?.trim() || `Key concept ${i + 1} from ${subject}`;
     const words = sentence.split(' ');
@@ -862,247 +888,170 @@ function generateFlashcardsFromContent(content, subject) {
 function generateSummaryFromContent(content, title) {
   const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 10);
   const topSentences = sentences.slice(0, Math.min(8, sentences.length));
-  const summary = topSentences.join('. ').trim();
   return {
     title: `Summary: ${title}`,
-    overview: summary.substring(0, 500) || `This resource covers important topics. Review the full content for detailed understanding.`,
+    overview: topSentences.join('. ').trim().substring(0, 500) || 'This resource covers important topics. Review the full content for detailed understanding.',
     keyPoints: topSentences.slice(0, 4).map((s) => s.trim().substring(0, 150)),
   };
 }
 
+// ─── ADMIN: Upload PDF (admin only) ──────────────────────────
 export async function uploadResource(req, res) {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-
     const { title, subject, description } = req.body;
     let content = '';
-
     try {
       const pdfParse = (await import('pdf-parse')).default;
       const pdfData = await pdfParse(req.file.buffer);
       content = extractTextFromContent(pdfData.text, 10000);
-    } catch (parseErr) {
-      content = `[PDF uploaded: ${req.file.originalname}. Text extraction available after processing.]`;
-    }
+    } catch { content = `[PDF uploaded: ${req.file.originalname}.]`; }
 
     const detectedSubject = subject || detectSubjectFromText(content + ' ' + (title || ''));
-
     const resource = await Resource.create({
-      userId: req.user.id,
       title: title || req.file.originalname.replace(/\.pdf$/i, ''),
-      type: 'book',
-      subject: detectedSubject,
-      description: description || '',
-      filePath: req.file.path,
-      fileOriginalName: req.file.originalname,
-      content,
-      contentLength: content.length,
-      status: 'ready',
+      type: 'book', subject: detectedSubject, description: description || '',
+      filePath: req.file.path, fileOriginalName: req.file.originalname,
+      content, contentLength: content.length, status: 'ready',
+      addedBy: req.user.id,
     });
-
-    await Notification.create({
-      userId: req.user.id,
-      title: 'Book Uploaded',
-      message: `"${resource.title}" has been added to your library.`,
-      type: 'resource',
-    });
-
     res.json(resource);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
+// ─── ADMIN: Add Link (admin only) ──────────────────────────
 export async function addLinkResource(req, res) {
   try {
     const { url, title, subject, description } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required.' });
-
     let content = '';
     let extractedTitle = title;
-
     try {
       const axiosMod = (await import('axios')).default;
       const cheerio = await import('cheerio');
       const response = await axiosMod.get(url, { timeout: 10000, headers: { 'User-Agent': 'CSHubBot/1.0' } });
       const $ = cheerio.load(response.data);
-
       $('script, style, nav, footer, header, .ad, .ads, .sidebar, .menu, .navigation, .cookie, .popup, .modal').remove();
-
-      if (!title) {
-        extractedTitle = $('title').text().trim() || $('h1').first().text().trim() || url;
-      }
-
+      if (!title) extractedTitle = $('title').text().trim() || $('h1').first().text().trim() || url;
       const paragraphs = [];
       $('p, h1, h2, h3, h4, li, td, th, blockquote, article, section, main').each((_, el) => {
         const text = $(el).text().trim();
         if (text.length > 10) paragraphs.push(text);
       });
-
       content = extractTextFromContent(paragraphs.join(' '), 10000);
-    } catch (fetchErr) {
-      content = `[Linked resource: ${url}. Content will be processed.]`;
-    }
+    } catch { content = `[Linked resource: ${url}.]`; }
 
     const detectedSubject = subject || detectSubjectFromText(content + ' ' + (extractedTitle || ''));
-
     const resource = await Resource.create({
-      userId: req.user.id,
       title: extractedTitle || 'Untitled Link',
-      type: 'link',
-      subject: detectedSubject,
-      description: description || '',
-      linkUrl: url,
-      content,
-      contentLength: content.length,
-      status: 'ready',
+      type: 'link', subject: detectedSubject, description: description || '',
+      linkUrl: url, content, contentLength: content.length, status: 'ready',
+      addedBy: req.user.id,
     });
-
-    await Notification.create({
-      userId: req.user.id,
-      title: 'Link Added',
-      message: `"${resource.title}" has been added to your library.`,
-      type: 'resource',
-    });
-
     res.json(resource);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
+// ─── ADMIN: Delete resource (admin only) ──────────────────────
+export async function deleteResource(req, res) {
+  try {
+    const resource = await Resource.findByIdAndDelete(req.params.id);
+    if (!resource) return res.status(404).json({ error: 'Resource not found.' });
+    if (resource.filePath) { try { fs.unlinkSync(resource.filePath); } catch {} }
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+}
+
+// ─── STUDENT: List all resources (global) ──────────────────────
 export async function getResources(req, res) {
   try {
-    const resources = await Resource.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const resources = await Resource.find({ status: 'ready' }).sort({ createdAt: -1 });
     res.json(resources);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
+// ─── STUDENT: Get resource by ID ────────────────────────────
 export async function getResourceById(req, res) {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    if (resource.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not authorized.' });
     res.json(resource);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
-export async function deleteResource(req, res) {
-  try {
-    const resource = await Resource.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-    if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    if (resource.filePath) {
-      try { fs.unlinkSync(resource.filePath); } catch {}
-    }
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-
+// ─── STUDENT: Generate quiz from resource ────────────────────
 export async function generateQuizFromResource(req, res) {
   try {
     const { count = 5 } = req.body;
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    if (resource.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not authorized.' });
-
     const questions = generateQuestionsFromContent(resource.content, resource.subject, count);
-
     const quiz = await Quiz.create({
-      userId: req.user.id,
-      subject: resource.subject,
-      level: 'secondary',
-      questions,
-      totalQuestions: questions.length,
-      resourceId: resource._id,
+      userId: req.user.id, subject: resource.subject, level: 'secondary',
+      questions, totalQuestions: questions.length, resourceId: resource._id,
     });
-
     resource.quizzesGenerated += 1;
     await resource.save();
-
-    const safeQuestions = quiz.questions.map((q) => ({
-      text: q.text,
-      options: q.options,
-    }));
-
-    res.json({ quizId: quiz._id, questions: safeQuestions, subject: resource.subject, totalQuestions: quiz.totalQuestions, resourceTitle: resource.title });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    res.json({ quizId: quiz._id, questions: quiz.questions.map((q) => ({ text: q.text, options: q.options })), subject: resource.subject, totalQuestions: quiz.totalQuestions, resourceTitle: resource.title });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
+// ─── STUDENT: Generate flashcards from resource ──────────────
 export async function generateFlashcardsFromResource(req, res) {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    if (resource.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not authorized.' });
-
     const flashcards = generateFlashcardsFromContent(resource.content, resource.subject);
-
     resource.flashcardsGenerated += 1;
     await resource.save();
-
     res.json({ flashcards, resourceTitle: resource.title, subject: resource.subject });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
+// ─── STUDENT: Generate summary from resource ─────────────────
 export async function generateSummaryFromResource(req, res) {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    if (resource.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not authorized.' });
-
     const summary = generateSummaryFromContent(resource.content, resource.title);
     res.json({ ...summary, resourceTitle: resource.title, subject: resource.subject });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
+// ─── STUDENT: Chat about a resource ──────────────────────────
 export async function chatAboutResource(req, res) {
   try {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: 'Message is required.' });
-
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    if (resource.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not authorized.' });
 
     const contentSnippet = resource.content.substring(0, 2000);
     const lower = message.toLowerCase();
-
     let reply;
     if (lower.match(/\b(summary|summarize|overview|main point|key point)\b/)) {
       const summary = generateSummaryFromContent(resource.content, resource.title);
       reply = `Here's a summary of "${resource.title}":\n\n${summary.overview}\n\nKey Points:\n${summary.keyPoints.map((p, i) => `${i + 1}. ${p}`).join('\n')}`;
-    } else if (lower.match(/\b(quiz|test|question|assess)\b/)) {
-      reply = `I can generate a quiz from "${resource.title}"! Go to the Resource Library and click the Quiz button on this resource to generate questions based on its content.`;
     } else if (lower.match(/\b(explain|tell me about|what is|what are|describe)\b/)) {
       const relevantSentences = contentSnippet.split(/[.!?]+/).filter((s) => {
         const words = s.toLowerCase().split(' ');
         const queryWords = lower.split(' ').filter((w) => w.length > 3);
         return queryWords.some((qw) => words.some((w) => w.includes(qw)));
       });
-      if (relevantSentences.length > 0) {
-        reply = `Based on "${resource.title}":\n\n${relevantSentences.slice(0, 3).join('. ').trim()}.\n\nWould you like me to explain any specific part in more detail?`;
-      } else {
-        reply = `The resource "${resource.title}" covers ${resource.subject} topics. The content includes:\n\n${contentSnippet.substring(0, 500)}...\n\nCould you ask about a specific topic from this resource?`;
-      }
-    } else if (lower.match(/\b(quiz|generate|flashcard|flash card)\b/)) {
-      reply = `You can generate study materials from "${resource.title}":\n\n1. **Quiz** — Click the Quiz button to generate questions\n2. **Flashcards** — Click the Flashcards button to create study cards\n3. **Summary** — Click the Summary button for a quick overview\n\nAll of these are generated from the actual content of your resource!`;
+      reply = relevantSentences.length > 0
+        ? `Based on "${resource.title}":\n\n${relevantSentences.slice(0, 3).join('. ').trim()}.\n\nWould you like me to explain any specific part?`
+        : `The resource "${resource.title}" covers ${resource.subject} topics:\n\n${contentSnippet.substring(0, 500)}...\n\nAsk about a specific topic!`;
     } else {
-      reply = `I can help you with "${resource.title}" (${resource.subject}). Here's what I know from the content:\n\n${contentSnippet.substring(0, 400)}...\n\nAsk me to explain specific concepts, generate a summary, or create quiz questions!`;
+      reply = `I can help you with "${resource.title}" (${resource.subject}). Here's what I know:\n\n${contentSnippet.substring(0, 400)}...\n\nAsk me to explain concepts, summarize, or create quiz questions!`;
     }
-
     res.json({ reply, resourceTitle: resource.title, subject: resource.subject });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
+}
+
+// ─── ADMIN: Get all resources (including non-ready) ──────────
+export async function adminGetResources(req, res) {
+  try {
+    const resources = await Resource.find({}).sort({ createdAt: -1 });
+    res.json(resources);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 }

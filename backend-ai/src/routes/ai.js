@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, adminOnly } from '../middleware/auth.js';
 import {
   getProfile, updateProfile, tutorChat, generateQuiz, submitQuiz,
   getQuizHistory, getQuizById, getProgress, getSessions, getSession,
   processTopic, getTopicHistory, getTopicById,
   getNotifications, markNotificationsRead, deleteNotification,
   uploadResource, addLinkResource, getResources, getResourceById, deleteResource,
+  adminGetResources,
   generateQuizFromResource, generateFlashcardsFromResource, generateSummaryFromResource,
   chatAboutResource,
   SUBJECTS
@@ -39,11 +40,16 @@ router.get('/notifications', authenticate, getNotifications);
 router.post('/notifications/read', authenticate, markNotificationsRead);
 router.delete('/notifications/:id', authenticate, deleteNotification);
 
-router.post('/resources/upload', authenticate, upload.single('file'), uploadResource);
-router.post('/resources/link', authenticate, addLinkResource);
+// ─── RESOURCES ───
+// Admin: full CRUD
+router.post('/resources/upload', authenticate, adminOnly, upload.single('file'), uploadResource);
+router.post('/resources/link', authenticate, adminOnly, addLinkResource);
+router.delete('/resources/:id', authenticate, adminOnly, deleteResource);
+router.get('/resources/admin/all', authenticate, adminOnly, adminGetResources);
+
+// Students: read-only + study tools
 router.get('/resources', authenticate, getResources);
 router.get('/resources/:id', authenticate, getResourceById);
-router.delete('/resources/:id', authenticate, deleteResource);
 router.post('/resources/:id/quiz', authenticate, generateQuizFromResource);
 router.post('/resources/:id/flashcards', authenticate, generateFlashcardsFromResource);
 router.post('/resources/:id/summary', authenticate, generateSummaryFromResource);
