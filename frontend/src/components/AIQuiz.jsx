@@ -4,7 +4,7 @@ import { useLang } from '../LanguageContext';
 import API_BASE, { AI_API_BASE } from '../api';
 import {
   FaQuestionCircle, FaCheckCircle, FaTimesCircle, FaSpinner, FaRedo,
-  FaTrophy, FaClock, FaArrowRight, FaListOl, FaEye, FaHome
+  FaTrophy, FaClock, FaArrowRight, FaListOl, FaEye, FaHome, FaExclamationTriangle
 } from 'react-icons/fa';
 
 const SUBJECTS = [
@@ -28,6 +28,7 @@ export default function AIQuiz() {
   const [answers, setAnswers] = useState([]);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [history, setHistory] = useState([]);
   const [startTime, setStartTime] = useState(0);
   const [reviewData, setReviewData] = useState(null);
@@ -47,28 +48,37 @@ export default function AIQuiz() {
         const data = await res.json();
         setHistory(data);
       }
-    } catch {}
+    } catch (err) {
+      console.error('Quiz history fetch error:', err);
+    }
   };
 
   const startQuiz = async (sel) => {
     setSubject(sel);
     setLoading(true);
+    setError('');
     try {
       const res = await fetch(`${AI_API_BASE}/api/ai/quizzes/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ subject: sel, level: 'secondary', count: 5 }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setQuestions(data.questions);
-        setQuizId(data.quizId);
-        setAnswers(new Array(data.questions.length).fill(-1));
-        setCurrentQ(0);
-        setStartTime(Date.now());
-        setView('quiz');
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Failed to generate quiz. Please try again.');
+        setLoading(false);
+        return;
       }
-    } catch {}
+      setQuestions(data.questions);
+      setQuizId(data.quizId);
+      setAnswers(new Array(data.questions.length).fill(-1));
+      setCurrentQ(0);
+      setStartTime(Date.now());
+      setView('quiz');
+    } catch (err) {
+      console.error('Quiz generate error:', err);
+      setError('Could not connect to AI backend. Make sure the AI server is running on port 3002.');
+    }
     setLoading(false);
   };
 
@@ -83,7 +93,9 @@ export default function AIQuiz() {
         setReviewData(data);
         setView('review');
       }
-    } catch {}
+    } catch (err) {
+      console.error('Quiz review error:', err);
+    }
     setReviewLoading(false);
   };
 
@@ -94,36 +106,35 @@ export default function AIQuiz() {
   };
 
   const nextQuestion = () => {
-    if (currentQ < questions.length - 1) {
-      setCurrentQ(currentQ + 1);
-    }
+    if (currentQ < questions.length - 1) setCurrentQ(currentQ + 1);
   };
 
   const prevQuestion = () => {
-    if (currentQ > 0) {
-      setCurrentQ(currentQ - 1);
-    }
+    if (currentQ > 0) setCurrentQ(currentQ - 1);
   };
 
   const submitQuiz = async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await fetch(`${AI_API_BASE}/api/ai/quizzes/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-        body: JSON.stringify({
-          quizId,
-          answers,
-          timeTaken: Math.round((Date.now() - startTime) / 1000),
-        }),
+        body: JSON.stringify({ quizId, answers, timeTaken: Math.round((Date.now() - startTime) / 1000) }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data);
-        setView('results');
-        fetchHistory();
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Failed to submit quiz.');
+        setLoading(false);
+        return;
       }
-    } catch {}
+      setResults(data);
+      setView('results');
+      fetchHistory();
+    } catch (err) {
+      console.error('Quiz submit error:', err);
+      setError('Could not submit quiz. Connection error.');
+    }
     setLoading(false);
   };
 
@@ -134,6 +145,7 @@ export default function AIQuiz() {
     setAnswers([]);
     setCurrentQ(0);
     setReviewData(null);
+    setError('');
   };
 
   // ─── REVIEW VIEW ──────────────────────────────
@@ -151,18 +163,11 @@ export default function AIQuiz() {
             <span className="ai-quiz-review-subject">{reviewData.subject}</span>
             <span className="ai-quiz-review-date">{new Date(reviewData.createdAt).toLocaleDateString()}</span>
           </div>
-
           <div className="ai-quiz-review-summary">
             <div className="ai-quiz-review-score-ring">
               <svg viewBox="0 0 120 120" className="ai-quiz-review-ring">
                 <circle cx="60" cy="60" r="52" fill="none" stroke="#e5e7eb" strokeWidth="8" />
-                <circle cx="60" cy="60" r="52" fill="none"
-                  stroke={pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444'}
-                  strokeWidth="8"
-                  strokeDasharray={`${(pct / 100) * 327} 327`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 60 60)"
-                />
+                <circle cx="60" cy="60" r="52" fill="none" stroke={pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444'} strokeWidth="8" strokeDasharray={`${(pct / 100) * 327} 327`} strokeLinecap="round" transform="rotate(-90 60 60)" />
               </svg>
               <div className="ai-quiz-review-score-text">
                 <strong>{reviewData.score}</strong>
@@ -170,27 +175,12 @@ export default function AIQuiz() {
               </div>
             </div>
             <div className="ai-quiz-review-stats">
-              <div className="ai-quiz-review-stat">
-                <span className="ai-quiz-review-stat-val" style={{ color: '#10b981' }}>{correct}</span>
-                <span className="ai-quiz-review-stat-label">Correct</span>
-              </div>
-              <div className="ai-quiz-review-stat">
-                <span className="ai-quiz-review-stat-val" style={{ color: '#ef4444' }}>{wrong}</span>
-                <span className="ai-quiz-review-stat-label">Wrong</span>
-              </div>
-              <div className="ai-quiz-review-stat">
-                <span className="ai-quiz-review-stat-val" style={{ color: '#5694F7' }}>{pct}%</span>
-                <span className="ai-quiz-review-stat-label">Score</span>
-              </div>
-              {reviewData.timeTaken > 0 && (
-                <div className="ai-quiz-review-stat">
-                  <span className="ai-quiz-review-stat-val" style={{ color: '#8b5cf6' }}>{Math.floor(reviewData.timeTaken / 60)}m {reviewData.timeTaken % 60}s</span>
-                  <span className="ai-quiz-review-stat-label">Time</span>
-                </div>
-              )}
+              <div className="ai-quiz-review-stat"><span className="ai-quiz-review-stat-val" style={{ color: '#10b981' }}>{correct}</span><span className="ai-quiz-review-stat-label">Correct</span></div>
+              <div className="ai-quiz-review-stat"><span className="ai-quiz-review-stat-val" style={{ color: '#ef4444' }}>{wrong}</span><span className="ai-quiz-review-stat-label">Wrong</span></div>
+              <div className="ai-quiz-review-stat"><span className="ai-quiz-review-stat-val" style={{ color: '#5694F7' }}>{pct}%</span><span className="ai-quiz-review-stat-label">Score</span></div>
+              {reviewData.timeTaken > 0 && <div className="ai-quiz-review-stat"><span className="ai-quiz-review-stat-val" style={{ color: '#8b5cf6' }}>{Math.floor(reviewData.timeTaken / 60)}m {reviewData.timeTaken % 60}s</span><span className="ai-quiz-review-stat-label">Time</span></div>}
             </div>
           </div>
-
           <div className="ai-quiz-review-questions">
             {reviewData.questions.map((q, i) => {
               const userAns = reviewData.answers?.[i];
@@ -198,43 +188,36 @@ export default function AIQuiz() {
               return (
                 <div key={i} className={`ai-quiz-review-q ${isCorrect ? 'correct' : 'wrong'}`}>
                   <div className="ai-quiz-review-q-header">
-                    <span className={`ai-quiz-review-q-badge ${isCorrect ? 'correct' : 'wrong'}`}>
-                      {isCorrect ? <FaCheckCircle /> : <FaTimesCircle />}
-                    </span>
+                    <span className={`ai-quiz-review-q-badge ${isCorrect ? 'correct' : 'wrong'}`}>{isCorrect ? <FaCheckCircle /> : <FaTimesCircle />}</span>
                     <span className="ai-quiz-review-q-num">Q{i + 1}</span>
                     <span className="ai-quiz-review-q-points">{isCorrect ? '+10 pts' : '0 pts'}</span>
                   </div>
                   <p className="ai-quiz-review-q-text">{q.text}</p>
                   <div className="ai-quiz-review-q-options">
                     {q.options.map((opt, oi) => {
-                      const isThisUserAnswer = oi === userAns;
-                      const isThisCorrect = oi === q.correctIndex;
+                      const isUA = oi === userAns;
+                      const isC = oi === q.correctIndex;
                       let cls = 'ai-quiz-review-opt';
-                      if (isThisCorrect) cls += ' correct';
-                      if (isThisUserAnswer && !isThisCorrect) cls += ' wrong';
+                      if (isC) cls += ' correct';
+                      if (isUA && !isC) cls += ' wrong';
                       return (
                         <div key={oi} className={cls}>
                           <span className="ai-quiz-review-opt-letter">{String.fromCharCode(65 + oi)}</span>
                           <span>{opt}</span>
-                          {isThisCorrect && <span className="ai-quiz-review-opt-check"><FaCheckCircle /></span>}
-                          {isThisUserAnswer && !isThisCorrect && <span className="ai-quiz-review-opt-x"><FaTimesCircle /></span>}
+                          {isC && <span className="ai-quiz-review-opt-check"><FaCheckCircle /></span>}
+                          {isUA && !isC && <span className="ai-quiz-review-opt-x"><FaTimesCircle /></span>}
                         </div>
                       );
                     })}
                   </div>
-                  {q.explanation && (
-                    <div className="ai-quiz-review-explanation">
-                      <strong>💡 Explanation:</strong> {q.explanation}
-                    </div>
-                  )}
+                  {q.explanation && <div className="ai-quiz-review-explanation"><strong>Explanation:</strong> {q.explanation}</div>}
                 </div>
               );
             })}
           </div>
-
           <div className="ai-quiz-review-actions">
-            <button className="btn" onClick={goHome}><FaHome /> Back to Quizzes</button>
-            <button className="btn btn-outline" onClick={() => startQuiz(reviewData.subject)}><FaRedo /> Retake Quiz</button>
+            <button className="btn" onClick={goHome}><FaHome /> Back</button>
+            <button className="btn btn-outline" onClick={() => startQuiz(reviewData.subject)}><FaRedo /> Retake</button>
           </div>
         </div>
       </div>
@@ -251,6 +234,11 @@ export default function AIQuiz() {
           <h3>Quiz Generator</h3>
         </div>
         <p className="ai-quiz-sub">Choose a subject to start a quiz</p>
+        {error && (
+          <div className="ai-quiz-error">
+            <FaExclamationTriangle /> {error}
+          </div>
+        )}
         <div className="ai-quiz-subjects">
           {SUBJECTS.map((s) => (
             <button key={s.key} className="ai-quiz-subject-btn" onClick={() => startQuiz(s.key)} disabled={loading}>
@@ -272,11 +260,7 @@ export default function AIQuiz() {
                       <span className="ai-quiz-history-score">{h.score}/{h.totalQuestions} ({pct}%)</span>
                       <span className="ai-quiz-history-date">{new Date(h.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <button
-                      className="ai-quiz-history-review-btn"
-                      onClick={() => startReview(h)}
-                      disabled={reviewLoading}
-                    >
+                    <button className="ai-quiz-history-review-btn" onClick={() => startReview(h)} disabled={reviewLoading}>
                       <FaEye /> Review
                     </button>
                   </div>
@@ -305,16 +289,10 @@ export default function AIQuiz() {
           <div className="ai-quiz-results-breakdown">
             {results.results.map((r, i) => (
               <div key={i} className={`ai-quiz-result-item ${r.correct ? 'correct' : 'wrong'}`}>
-                <div className="ai-quiz-result-icon">
-                  {r.correct ? <FaCheckCircle /> : <FaTimesCircle />}
-                </div>
+                <div className="ai-quiz-result-icon">{r.correct ? <FaCheckCircle /> : <FaTimesCircle />}</div>
                 <div>
                   <strong>Q{i + 1}: {r.text}</strong>
-                  {!r.correct && (
-                    <p className="ai-quiz-result-answer">
-                      Your answer: {r.options[r.userAnswer]} — Correct: {r.options[r.correctIndex]}
-                    </p>
-                  )}
+                  {!r.correct && <p className="ai-quiz-result-answer">Your answer: {r.options[r.userAnswer]} — Correct: {r.options[r.correctIndex]}</p>}
                   {r.explanation && <p className="ai-quiz-result-explanation">{r.explanation}</p>}
                 </div>
               </div>
@@ -337,6 +315,7 @@ export default function AIQuiz() {
 
   return (
     <div className="ai-quiz">
+      {error && <div className="ai-quiz-error"><FaExclamationTriangle /> {error}</div>}
       <div className="ai-quiz-play-header">
         <button className="ai-quiz-back-btn" onClick={goHome}>← Back</button>
         <span className="ai-quiz-progress-text">Question {currentQ + 1} of {questions.length}</span>
@@ -349,11 +328,7 @@ export default function AIQuiz() {
         <h3>Q{currentQ + 1}. {q.text}</h3>
         <div className="ai-quiz-options">
           {q.options.map((opt, i) => (
-            <button
-              key={i}
-              className={`ai-quiz-option${answers[currentQ] === i ? ' selected' : ''}`}
-              onClick={() => selectAnswer(i)}
-            >
+            <button key={i} className={`ai-quiz-option${answers[currentQ] === i ? ' selected' : ''}`} onClick={() => selectAnswer(i)}>
               <span className="ai-quiz-option-letter">{String.fromCharCode(65 + i)}</span>
               <span>{opt}</span>
             </button>

@@ -10643,6 +10643,20 @@ header.scrolled .nav-dropdown-item-btn:hover {
   margin: 0;
 }
 
+.ai-quiz-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
 .ai-quiz-subjects {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -12712,4 +12726,296 @@ header.scrolled .nav-dropdown-item-btn:hover {
 @keyframes dropIn {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COMPREHENSIVE MOBILE RESPONSIVE — AI DASHBOARD
+   ════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ─── Sidebar ─── */
+  .ai-dash-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+  .ai-dash-sidebar.open { transform: translateX(0); }
+  .ai-dash-sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; }
+  .ai-dash-sidebar-close { display: flex; }
+
+  /* ─── Main ─── */
+  .ai-dash-main { margin-left: 0; }
+
+  /* ─── Topbar ─── */
+  .ai-dash-topbar { padding: 0 0.75rem; gap: 0.5rem; height: 56px; }
+  .ai-dash-topbar-left h1 { font-size: 0.95rem; }
+  .ai-dash-topbar-right { gap: 0.35rem; }
+  .ai-dash-topbar-btn { width: 34px; height: 34px; font-size: 0.85rem; }
+  .ai-dash-avatar { width: 32px; height: 32px; font-size: 0.7rem; }
+
+  /* ─── Search ─── */
+  .ai-dash-search { max-width: none; flex: 1; }
+  .ai-dash-search-input { padding: 0.45rem 2rem 0.45rem 2rem; font-size: 0.8rem; }
+
+  /* ─── Content ─── */
+  .ai-dash-content { padding: 1rem; }
+
+  /* ─── Welcome ─── */
+  .ai-dash-welcome { flex-direction: column; align-items: flex-start; padding: 1rem; gap: 0.75rem; border-radius: 12px; }
+  .ai-dash-welcome h2 { font-size: 1rem; }
+  .ai-dash-welcome p { font-size: 0.78rem; }
+  .ai-dash-welcome .btn { width: 100%; justify-content: center; padding: 0.6rem; font-size: 0.82rem; }
+
+  /* ─── Stats ─── */
+  .ai-dash-stats { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .ai-dash-stat-card { padding: 0.85rem; border-radius: 10px; }
+  .ai-dash-stat-icon { width: 32px; height: 32px; font-size: 0.85rem; }
+  .ai-dash-stat-info strong { font-size: 1.1rem; }
+  .ai-dash-stat-info span { font-size: 0.68rem; }
+
+  /* ─── Quick Grid ─── */
+  .ai-dash-quick-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .ai-dash-quick-card { padding: 0.75rem 0.6rem; font-size: 0.72rem; gap: 0.5rem; border-radius: 10px; }
+  .ai-dash-quick-icon { width: 30px; height: 30px; font-size: 0.85rem; }
+
+  /* ─── Section ─── */
+  .ai-dash-section { margin-bottom: 1.25rem; }
+  .ai-dash-section h3 { font-size: 0.88rem; gap: 0.4rem; }
+  .ai-dash-section h2 { font-size: 1.1rem; }
+
+  /* ─── Activity ─── */
+  .ai-dash-activity-item { padding: 0.6rem 0.75rem; gap: 0.6rem; }
+  .ai-dash-activity-icon { width: 28px; height: 28px; font-size: 0.75rem; }
+  .ai-dash-activity-info span { font-size: 0.75rem; }
+  .ai-dash-activity-info small { font-size: 0.65rem; }
+
+  /* ─── Features ─── */
+  .ai-dash-features-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+  .ai-dash-feature-card { padding: 1rem; }
+  .ai-dash-feature-icon { width: 36px; height: 36px; font-size: 1rem; }
+  .ai-dash-feature-card h3 { font-size: 0.88rem; }
+  .ai-dash-feature-card p { font-size: 0.78rem; }
+  .ai-dash-features-sub { font-size: 0.82rem; }
+
+  /* ─── Progress ─── */
+  .ai-dash-progress-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+  .ai-dash-progress-card { padding: 1rem; }
+  .ai-dash-progress-header { gap: 0.6rem; margin-bottom: 0.5rem; }
+  .ai-dash-progress-header span { font-size: 0.85rem; }
+  .ai-dash-progress-bar { height: 6px; }
+  .ai-dash-progress-card small { font-size: 0.7rem; }
+
+  /* ─── Settings ─── */
+  .ai-dash-settings-card { padding: 1rem; }
+  .ai-dash-settings-row { padding: 0.7rem 0; gap: 0.75rem; font-size: 0.82rem; }
+  .ai-dash-settings-row svg { font-size: 1rem; }
+  .ai-dash-settings-row strong { font-size: 0.8rem; }
+  .ai-dash-settings-row span { font-size: 0.75rem; }
+
+  /* ─── Notifications ─── */
+  .ai-dash-notif-dropdown { position: fixed; top: 56px; left: 0.5rem; right: 0.5rem; width: auto; max-height: 60vh; }
+  .ai-dash-notif-header { padding: 0.75rem 1rem 0.5rem; }
+  .ai-dash-notif-header h3 { font-size: 0.88rem; }
+  .ai-dash-notif-item { padding: 0.65rem 1rem; gap: 0.6rem; }
+  .ai-dash-notif-icon { width: 28px; height: 28px; font-size: 0.7rem; }
+  .ai-dash-notif-content strong { font-size: 0.75rem; }
+  .ai-dash-notif-content p { font-size: 0.7rem; }
+  .ai-dash-notif-content small { font-size: 0.62rem; }
+  .ai-dash-notif-delete { width: 24px; height: 24px; font-size: 0.65rem; }
+
+  /* ─── Profile ─── */
+  .ai-dash-profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .ai-dash-profile-avatar { width: 56px; height: 56px; font-size: 1.2rem; }
+  .ai-dash-profile-header h3 { font-size: 1rem; }
+  .ai-dash-profile-header p { font-size: 0.8rem; }
+  .ai-dash-profile-stats { gap: 0.6rem; flex-wrap: wrap; }
+  .ai-dash-profile-stats span { font-size: 0.72rem; }
+  .ai-dash-profile-form { gap: 0.75rem; }
+  .ai-dash-form-group label { font-size: 0.75rem; }
+  .ai-dash-form-group input { padding: 0.55rem 0.75rem; font-size: 0.82rem; }
+  .ai-dash-form-btn { width: 100%; padding: 0.6rem; font-size: 0.85rem; }
+
+  /* ─── AI Tutor ─── */
+  .ai-tutor { height: calc(100vh - 56px - 2rem); border-radius: 10px; }
+  .ai-tutor-header { padding: 0.75rem; gap: 0.6rem; }
+  .ai-tutor-header h3 { font-size: 0.9rem; }
+  .ai-tutor-session-list { padding: 0.5rem; }
+  .ai-tutor-session-item { padding: 0.6rem 0.75rem; font-size: 0.78rem; gap: 0.5rem; }
+  .ai-tutor-chat-header { padding: 0.6rem 0.75rem; }
+  .ai-tutor-chat-header h4 { font-size: 0.85rem; }
+  .ai-tutor-back { font-size: 0.78rem; padding: 0.3rem 0.6rem; }
+  .ai-tutor-messages { padding: 0.75rem; }
+  .ai-tutor-welcome { padding: 1.5rem 1rem; }
+  .ai-tutor-welcome h3 { font-size: 1.1rem; }
+  .ai-tutor-welcome p { font-size: 0.82rem; }
+  .ai-tutor-msg { max-width: 88%; padding: 0.65rem 0.85rem; font-size: 0.82rem; border-radius: 14px; }
+  .ai-tutor-msg.user { border-bottom-right-radius: 4px; }
+  .ai-tutor-msg.assistant { border-bottom-left-radius: 4px; }
+  .ai-tutor-msg-content { font-size: 0.82rem; line-height: 1.5; }
+  .ai-tutor-msg-icon { width: 26px; height: 26px; font-size: 0.7rem; }
+  .ai-tutor-quick-topics { gap: 0.3rem; padding: 0.5rem 0.75rem; flex-wrap: wrap; }
+  .ai-tutor-quick-btn { font-size: 0.68rem; padding: 0.3rem 0.6rem; border-radius: 12px; }
+  .ai-tutor-input-area { padding: 0.5rem 0.75rem; gap: 0.4rem; }
+  .ai-tutor-input-area input { padding: 0.55rem 0.75rem; font-size: 0.82rem; border-radius: 20px; }
+  .ai-tutor-send { width: 36px; height: 36px; font-size: 0.85rem; border-radius: 50%; }
+  .ai-tutor-typing { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+
+  /* ─── AI Quiz ─── */
+  .ai-quiz { padding: 0; }
+  .ai-quiz-header { gap: 0.5rem; margin-bottom: 0.75rem; }
+  .ai-quiz-header h3 { font-size: 1rem; }
+  .ai-quiz-sub { font-size: 0.8rem; }
+  .ai-quiz-subjects { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .ai-quiz-subject-btn { padding: 0.75rem 0.6rem; font-size: 0.75rem; gap: 0.4rem; border-radius: 10px; }
+  .ai-quiz-subject-icon { width: 30px; height: 30px; font-size: 0.85rem; }
+  .ai-quiz-history { margin-top: 1.25rem; }
+  .ai-quiz-history h4 { font-size: 0.88rem; }
+  .ai-quiz-history-list { gap: 0.4rem; }
+  .ai-quiz-history-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.7rem; }
+  .ai-quiz-history-left { flex-wrap: wrap; gap: 0.4rem; }
+  .ai-quiz-history-subject { min-width: auto; font-size: 0.78rem; }
+  .ai-quiz-history-score { font-size: 0.75rem; }
+  .ai-quiz-history-date { margin-left: 0; font-size: 0.7rem; }
+  .ai-quiz-history-review-btn { align-self: flex-end; font-size: 0.7rem; padding: 0.35rem 0.7rem; }
+
+  /* Quiz Play */
+  .ai-quiz-play-header { flex-wrap: wrap; gap: 0.5rem; }
+  .ai-quiz-back-btn { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+  .ai-quiz-progress-text { font-size: 0.78rem; }
+  .ai-quiz-subject-badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+  .ai-quiz-progress-bar { height: 5px; margin-bottom: 1rem; }
+  .ai-quiz-question-card { padding: 1rem; border-radius: 12px; }
+  .ai-quiz-question-card h3 { font-size: 0.9rem; line-height: 1.4; margin-bottom: 0.75rem; }
+  .ai-quiz-option { padding: 0.65rem 0.75rem; font-size: 0.8rem; gap: 0.5rem; border-radius: 10px; }
+  .ai-quiz-option-letter { width: 24px; height: 24px; font-size: 0.7rem; }
+  .ai-quiz-nav { gap: 0.5rem; }
+  .ai-quiz-nav .btn { padding: 0.5rem 1rem; font-size: 0.78rem; }
+  .ai-quiz-dots { gap: 0.3rem; }
+  .ai-quiz-dot { width: 8px; height: 8px; }
+
+  /* Quiz Results */
+  .ai-quiz-results { padding: 1rem; }
+  .ai-quiz-results h3 { font-size: 1.1rem; }
+  .ai-quiz-results-icon { font-size: 2.5rem; }
+  .ai-quiz-results-score { gap: 0.75rem; }
+  .ai-quiz-results-score strong { font-size: 1.5rem; }
+  .ai-quiz-results-score span { font-size: 1rem; }
+  .ai-quiz-results-breakdown { gap: 0.5rem; }
+  .ai-quiz-result-item { padding: 0.7rem; gap: 0.5rem; border-radius: 8px; }
+  .ai-quiz-result-item strong { font-size: 0.78rem; }
+  .ai-quiz-result-item p { font-size: 0.72rem; }
+  .ai-quiz-result-icon { font-size: 0.85rem; }
+  .ai-quiz-results-btns { flex-direction: column; gap: 0.5rem; }
+  .ai-quiz-results-btns .btn { width: 100%; justify-content: center; }
+
+  /* Quiz Review */
+  .ai-quiz-review-header { flex-wrap: wrap; gap: 0.5rem; }
+  .ai-quiz-review-header .ai-quiz-back-btn { font-size: 0.75rem; }
+  .ai-quiz-review-date { margin-left: 0; font-size: 0.75rem; }
+  .ai-quiz-review-summary { flex-direction: column; align-items: center; gap: 1rem; padding: 1.25rem; }
+  .ai-quiz-review-score-ring { width: 100px; height: 100px; }
+  .ai-quiz-review-score-text strong { font-size: 1.4rem; }
+  .ai-quiz-review-stats { justify-content: center; gap: 1rem; }
+  .ai-quiz-review-stat-val { font-size: 1.1rem; }
+  .ai-quiz-review-q { padding: 1rem; }
+  .ai-quiz-review-q-text { font-size: 0.88rem; }
+  .ai-quiz-review-opt { padding: 0.5rem 0.7rem; font-size: 0.8rem; }
+  .ai-quiz-review-opt-letter { width: 22px; height: 22px; font-size: 0.68rem; }
+  .ai-quiz-review-explanation { padding: 0.6rem 0.75rem; font-size: 0.78rem; }
+  .ai-quiz-review-actions { flex-direction: column; gap: 0.5rem; }
+  .ai-quiz-review-actions .btn { width: 100%; justify-content: center; }
+
+  /* ─── Topic Workspace ─── */
+  .topic-workspace-header { gap: 0.75rem; margin-bottom: 1rem; }
+  .topic-workspace-header h2 { font-size: 1.1rem; }
+  .topic-back-btn { font-size: 0.78rem; padding: 0.35rem 0.7rem; }
+  .topic-search-bar { padding: 0.3rem; border-radius: 12px; }
+  .topic-search-icon { padding: 0 0.4rem 0 0.6rem; font-size: 0.95rem; }
+  .topic-search-input { font-size: 0.88rem; padding: 0.5rem 0.4rem; }
+  .topic-search-btn { padding: 0.5rem 1rem; font-size: 1rem; border-radius: 8px; }
+  .topic-search-hint { font-size: 0.72rem; }
+  .topic-loading { padding: 2.5rem 1rem; }
+  .topic-loading p { font-size: 0.88rem; }
+  .topic-loading-spinner { width: 40px; height: 40px; }
+  .topic-loading-step { font-size: 0.78rem; }
+  .topic-result-header h2 { font-size: 1.15rem; }
+  .topic-tools-tabs { gap: 0.3rem; padding-bottom: 0.2rem; }
+  .topic-tool-tab { padding: 0.5rem 0.7rem; font-size: 0.72rem; gap: 0.25rem; }
+  .topic-tool-tab span:first-child { font-size: 0.85rem; }
+  .topic-tool-content { padding: 1rem; border-radius: 12px; }
+  .topic-tool-content h3 { font-size: 1rem; }
+  .topic-lesson-summary { padding: 1rem; }
+  .topic-lesson-summary h3 { font-size: 0.88rem; }
+  .topic-lesson-summary p { font-size: 0.82rem; }
+  .topic-lesson-section { padding: 0.75rem 0; }
+  .topic-lesson-section h4 { font-size: 0.85rem; }
+  .topic-lesson-section p { font-size: 0.8rem; }
+  .topic-image-prompt { font-size: 0.75rem; }
+  .topic-image-actions { flex-direction: column; }
+  .topic-action-btn { width: 100%; justify-content: center; font-size: 0.78rem; }
+  .topic-video-placeholder { border-radius: 10px; }
+  .topic-video-play { width: 50px; height: 50px; font-size: 1.2rem; }
+  .topic-video-placeholder p { font-size: 0.88rem; }
+  .topic-video-note { font-size: 0.75rem; }
+  .topic-audio-player { flex-direction: column; gap: 0.75rem; padding: 1rem; }
+  .topic-audio-visual { height: 30px; }
+  .topic-audio-bar { width: 3px; }
+  .topic-audio-transcript { padding: 0.85rem; max-height: 150px; }
+  .topic-audio-transcript h4 { font-size: 0.8rem; }
+  .topic-audio-transcript p { font-size: 0.78rem; }
+  .topic-quiz-question { padding: 0.85rem 0; }
+  .topic-quiz-question > p { font-size: 0.85rem; }
+  .topic-quiz-opt { padding: 0.55rem 0.7rem; font-size: 0.8rem; }
+  .topic-quiz-letter { width: 22px; height: 22px; font-size: 0.68rem; }
+  .topic-quiz-explanation { font-size: 0.75rem; padding: 0.5rem 0.7rem; }
+  .topic-flashcard { max-width: 100%; margin: 0.75rem auto; }
+  .topic-flashcard-inner { min-height: 180px; }
+  .topic-flashcard-front, .topic-flashcard-back { padding: 1.25rem; }
+  .topic-flashcard-front p, .topic-flashcard-back p { font-size: 0.92rem; }
+  .topic-flashcard-nav { gap: 0.75rem; margin-top: 0.75rem; }
+  .topic-flashcard-btn { font-size: 0.78rem; padding: 0.4rem 0.8rem; }
+  .topic-history h4 { font-size: 0.88rem; }
+  .topic-history-item { padding: 0.7rem; gap: 0.6rem; }
+  .topic-history-icon { width: 32px; height: 32px; font-size: 1rem; }
+  .topic-history-item strong { font-size: 0.82rem; }
+  .topic-history-item span { font-size: 0.7rem; }
+  .topic-empty { padding: 2.5rem 1rem; }
+  .topic-empty-icon { font-size: 2.5rem; }
+  .topic-empty h3 { font-size: 1.1rem; }
+  .topic-empty p { font-size: 0.85rem; }
+  .topic-suggestion-btn { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
+
+  /* ─── Auth Modal ─── */
+  .ai-auth-modal { padding: 1.5rem 1.25rem; border-radius: 20px; max-width: 95vw; }
+  .ai-auth-logo { margin-bottom: 0.5rem; }
+  .ai-auth-logo .logo-cs, .ai-auth-logo .logo-ct { font-size: 1.1rem; }
+  .ai-auth-modal h2 { font-size: 1.1rem; }
+  .ai-auth-sub { font-size: 0.78rem; margin-bottom: 1rem; }
+  .ai-auth-roles { gap: 0.5rem; margin-bottom: 1rem; }
+  .ai-auth-role { padding: 0.75rem 0.5rem; gap: 0.25rem; }
+  .ai-auth-role strong { font-size: 0.78rem; }
+  .ai-auth-role span { font-size: 0.6rem; }
+  .ai-auth-tabs { margin-bottom: 0.75rem; }
+  .ai-auth-tab { font-size: 0.8rem; }
+  .ai-auth-modal form { gap: 0.5rem; }
+  .ai-auth-modal input { padding: 0.6rem 0.85rem; font-size: 0.82rem; }
+  .ai-auth-submit { padding: 0.6rem; font-size: 0.85rem; }
+  .ai-auth-footer { font-size: 0.78rem; padding-top: 0.75rem; }
+}
+
+@media (max-width: 380px) {
+  .ai-dash-stats { grid-template-columns: 1fr; }
+  .ai-dash-quick-grid { grid-template-columns: 1fr; }
+  .ai-quiz-subjects { grid-template-columns: 1fr; }
+  .ai-auth-roles { grid-template-columns: 1fr; }
+  .ai-dash-topbar-left h1 { font-size: 0.85rem; }
+  .ai-quiz-question-card h3 { font-size: 0.85rem; }
+  .ai-quiz-option { font-size: 0.75rem; padding: 0.55rem 0.65rem; }
+  .topic-search-input { font-size: 0.82rem; }
 }
