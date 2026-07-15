@@ -6,6 +6,7 @@ import API_BASE, { AI_API_BASE } from '../api';
 import AITutor from './AITutor';
 import AIQuiz from './AIQuiz';
 import AITopicWorkspace from './AITopicWorkspace';
+import AIResources from './AIResources';
 import {
   FaRobot, FaImage, FaVideo, FaHeadphones, FaFlask, FaQuestionCircle,
   FaPuzzlePiece, FaChartLine, FaRoute, FaLanguage, FaMicroscope,
@@ -38,6 +39,7 @@ const SIDEBAR = [
   { key: 'topic', icon: <FaTools />, labelEn: 'AI Tools', labelRw: 'Ibikoresho bya AI' },
   { key: 'tutor', icon: <FaComments />, labelEn: 'AI Tutor', labelRw: 'Uwigisha wa AI' },
   { key: 'quiz', icon: <FaQuestionCircle />, labelEn: 'Quizzes', labelRw: 'Ibibazo' },
+  { key: 'resources', icon: <FaBookOpen />, labelEn: 'Resources', labelRw: 'Inkwando' },
   { key: 'progress', icon: <FaChartLine />, labelEn: 'My Progress', labelRw: 'Ibikorwa byanje' },
   { key: 'profile', icon: <FaUser />, labelEn: 'Profile', labelRw: 'Umwirondoro' },
   { key: 'settings', icon: <FaCog />, labelEn: 'Settings', labelRw: 'Amategeko' },
@@ -191,7 +193,7 @@ export default function AILearningDashboard() {
 
   const tabTitles = {
     overview: 'Overview', topic: 'AI Tools', tutor: 'AI Tutor', quiz: 'Quizzes',
-    progress: 'My Progress', profile: 'Profile', settings: 'Settings',
+    resources: 'Resources', progress: 'My Progress', profile: 'Profile', settings: 'Settings',
   };
 
   return (
@@ -350,6 +352,10 @@ export default function AILearningDashboard() {
                     <div className="ai-dash-quick-icon" style={{ color: '#8b5cf6' }}><FaUser /></div>
                     <span>My Profile</span>
                   </button>
+                  <button className="ai-dash-quick-card" onClick={() => handleNav('resources')}>
+                    <div className="ai-dash-quick-icon" style={{ color: '#06b6d4' }}><FaBookOpen /></div>
+                    <span>Resources</span>
+                  </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('topic')}>
                     <div className="ai-dash-quick-icon" style={{ color: '#6366f1' }}><FaImage /></div>
                     <span>AI Image Gen</span>
@@ -381,6 +387,8 @@ export default function AILearningDashboard() {
           {tab === 'tutor' && <AITutor />}
 
           {tab === 'quiz' && <AIQuiz />}
+
+          {tab === 'resources' && <AIResources onBack={() => setTab('overview')} />}
 
           {tab === 'features' && (
             <div className="ai-dash-features">
