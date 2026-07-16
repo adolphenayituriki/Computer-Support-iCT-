@@ -94,6 +94,7 @@ export default function App() {
         {!isAdmin && !isDashboard && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
+          <Route path="/contact" element={<main><Contact /></main>} />
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/ai-learning" element={<AILearning />} />
