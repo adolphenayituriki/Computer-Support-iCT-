@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLang } from '../LanguageContext';
+import { FaTicketAlt, FaGraduationCap, FaComments } from 'react-icons/fa';
 
 export default function Hero() {
   const canvasRef = useRef(null);
@@ -180,6 +181,11 @@ export default function Hero() {
       <canvas ref={canvasRef} className="hero-canvas" />
       <div className="hero-overlay" />
       <div className="hero-content">
+        <div className="hero-quick-links">
+          <a href="/dashboard" className="hero-quick-link"><FaTicketAlt /> Submit Request</a>
+          <a href="/ai-learning" className="hero-quick-link hero-quick-link-primary"><FaGraduationCap /> Start Learning</a>
+          <a href="#contact" className="hero-quick-link"><FaComments /> Get In Touch</a>
+        </div>
         <div className="hero-line"></div>
         <span className="hero-badge">{t('hero.badge')}</span>
         <h1>CS hub <span>(iCT)</span></h1>

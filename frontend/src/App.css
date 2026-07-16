@@ -837,6 +837,49 @@ header.dash-header .hamburger span {
   text-transform: uppercase;
 }
 
+.hero-quick-links {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+
+.hero-quick-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hero-quick-link-primary {
+  background: rgba(255, 206, 8, 0.2);
+  border-color: rgba(255, 206, 8, 0.4);
+  color: #FFCE08;
+}
+
+.hero-quick-link-primary:hover {
+  background: rgba(255, 206, 8, 0.35);
+  color: #FFCE08;
+}
+
 .hero-btns {
   display: flex;
   gap: 1rem;
