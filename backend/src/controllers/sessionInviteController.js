@@ -1,5 +1,5 @@
 import SessionInvite from '../models/SessionInvite.js';
-import { sendSessionInviteConfirmation, sendSessionInviteAdminNotification } from '../services/mailer.js';
+import { sendSessionInviteConfirmation, sendSessionInviteAdminNotification, sendSessionStatusUpdate } from '../services/mailer.js';
 
 export async function createSessionInvite(req, res) {
   try {
@@ -74,6 +74,15 @@ export async function updateSessionInviteStatus(req, res) {
     }
     const invite = await SessionInvite.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!invite) return res.status(404).json({ error: 'Invite not found.' });
+
+    if (status !== 'new') {
+      try {
+        await sendSessionStatusUpdate(invite.email, invite.name, status, invite.suggestion || '');
+      } catch (emailErr) {
+        console.error('Session status email error:', emailErr.message);
+      }
+    }
+
     res.json(invite);
   } catch (err) {
     res.status(500).json({ error: err.message });

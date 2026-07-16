@@ -271,3 +271,31 @@ export async function sendSessionInviteAdminNotification(invite) {
     `Name: ${invite.name}\nEmail: ${invite.email}\nPhone: ${invite.phone || 'N/A'}\nLevel: ${invite.level}${invite.suggestion ? '\nTopic: ' + invite.suggestion : ''}`
   );
 }
+
+export async function sendSessionStatusUpdate(toEmail, name, status, suggestion) {
+  const statusMap = {
+    contacted: { title: 'We\'ve Reached Out!', color: '#3b82f6', message: 'Our team has reviewed your registration and is ready to connect with you. Expect a call or message soon to discuss your session details.' },
+    confirmed: { title: 'Session Confirmed!', color: '#10b981', message: 'Your learning session has been confirmed! We\'ll send you the date, time, and meeting details shortly.' },
+  };
+  const info = statusMap[status];
+  if (!info) return;
+
+  await send({
+    to: toEmail,
+    subject: `${info.title} — CS Hub ICT Session`,
+    html: baseHtml(`
+      <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">${info.title}</h2>
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
+        Hi <strong style="color:#f8fafc;">${name}</strong>, ${info.message}
+      </p>
+      <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px; text-align: center;">
+        <p style="margin: 0 0 6px; color: #94a3b8; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px;">Status</p>
+        <span style="display: inline-block; padding: 6px 20px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; background: ${info.color}20; color: ${info.color}; text-transform: uppercase;">${status}</span>
+        ${suggestion ? `<p style="margin: 12px 0 0; color: #cbd5e1; font-size: 0.85rem;">Your topic: <strong style="color:#ffce08;">${suggestion}</strong></p>` : ''}
+      </div>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin: 0;">
+        Questions? <a href="https://computer-support-ict.vercel.app/contact" style="color: #38bdf8;">Contact us</a> or reply to this email.
+      </p>
+    `),
+  });
+}
