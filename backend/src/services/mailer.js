@@ -207,3 +207,43 @@ export async function sendAdminNotification(subject, body) {
     `),
   });
 }
+
+export async function sendSessionInviteConfirmation(toEmail, name, interests) {
+  const interestList = interests.length > 0 ? interests.join(', ') : 'General ICT';
+  await send({
+    to: toEmail,
+    subject: 'You\'re Registered! — CS Hub ICT Session',
+    html: baseHtml(`
+      <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">You're Registered!</h2>
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
+        Hi <strong style="color:#f8fafc;">${name}</strong>, thank you for registering for our ICT Learning Session!
+      </p>
+      <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+        <p style="margin: 0 0 8px; color: #94a3b8; font-size: 0.82rem;">Here's what you signed up for:</p>
+        <p style="margin: 0 0 4px; color: #f8fafc; font-weight: 700; font-size: 0.95rem;">Interests: ${interestList}</p>
+      </div>
+      <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+        <p style="margin: 0 0 6px; color: #94a3b8; font-size: 0.82rem;">What we'll teach:</p>
+        <ul style="color: #cbd5e1; margin: 0; padding-left: 1.2rem; line-height: 1.8;">
+          <li>Computer Hardware & Maintenance</li>
+          <li>Software Installation & Troubleshooting</li>
+          <li>Networking & Internet Skills</li>
+          <li>Programming Fundamentals</li>
+          <li>Web Development Basics</li>
+          <li>Microsoft Office & Productivity</li>
+          <li>Digital Literacy & Safety</li>
+        </ul>
+      </div>
+      <p style="color: #6ee7b7; font-size: 0.9rem; text-align: center; margin: 0 0 8px; font-weight: 600;">
+        We'll contact you soon with session details!
+      </p>
+    `),
+  });
+}
+
+export async function sendSessionInviteAdminNotification(invite) {
+  const interestList = invite.interests.length > 0 ? invite.interests.join(', ') : 'General ICT';
+  await sendAdminNotification('New Session Registration',
+    `Name: ${invite.name}\nEmail: ${invite.email}\nPhone: ${invite.phone || 'N/A'}\nLevel: ${invite.level}\nInterests: ${interestList}${invite.suggestion ? '\nSuggestion: ' + invite.suggestion : ''}`
+  );
+}

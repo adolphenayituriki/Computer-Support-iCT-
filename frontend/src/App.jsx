@@ -18,6 +18,8 @@ import News from './components/News';
 import Courses from './components/Courses';
 import AILearning from './components/AILearning';
 import AILearningDashboard from './components/AILearningDashboard';
+import SessionInvite from './components/SessionInvite';
+import EmergencyButton from './components/EmergencyButton';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
@@ -96,12 +98,14 @@ export default function App() {
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/ai-learning" element={<AILearning />} />
+          <Route path="/session" element={<SessionInvite />} />
           <Route path="/ai-dashboard" element={<ProtectedRoute><AILearningDashboard /></ProtectedRoute>} />
           <Route path="/setup-account" element={<SetupAccount />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
         </Routes>
         {!isDashboard && !isAdmin && <Footer />}
+        {!isDashboard && !isAdmin && <EmergencyButton />}
         {!isDashboard && !isAdmin && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>

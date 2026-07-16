@@ -4,7 +4,7 @@ import AdminChatView from './AdminChatView';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield, FaCalendarAlt, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
@@ -1519,6 +1519,122 @@ function AnalyticsView({ stats, ticketChart, appChart, onNavigate }) {
   );
 }
 
+function AdminInvites() {
+  const [invites, setInvites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const fetchInvites = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/session-invites`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (!res.ok) throw new Error('Failed to load invites');
+      const data = await res.json();
+      setInvites(Array.isArray(data) ? data : []);
+    } catch (e) { setError(e.message); }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchInvites(); }, []);
+
+  const updateStatus = async (id, status) => {
+    setUpdatingId(id);
+    try {
+      await fetch(`${API_BASE}/api/session-invites/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ status }),
+      });
+      setInvites((prev) => prev.map((inv) => inv._id === id ? { ...inv, status } : inv));
+    } catch { }
+    setUpdatingId(null);
+  };
+
+  const deleteInvite = async (id) => {
+    if (!confirm('Delete this registration?')) return;
+    try {
+      await fetch(`${API_BASE}/api/session-invites/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token()}` },
+      });
+      setInvites((prev) => prev.filter((inv) => inv._id !== id));
+    } catch { }
+  };
+
+  const filtered = statusFilter === 'all' ? invites : invites.filter((inv) => inv.status === statusFilter);
+  const counts = { all: invites.length, pending: invites.filter((i) => i.status === 'pending').length, confirmed: invites.filter((i) => i.status === 'confirmed').length, rejected: invites.filter((i) => i.status === 'rejected').length };
+
+  const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const statusColors = { pending: '#f59e0b', confirmed: '#10b981', rejected: '#ef4444' };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+        {['all', 'pending', 'confirmed', 'rejected'].map((s) => (
+          <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: statusFilter === s ? '2px solid #5694F7' : '2px solid #e2e8f0', background: statusFilter === s ? '#5694F7' : '#fff', color: statusFilter === s ? '#fff' : '#64748b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}>
+            {s.charAt(0).toUpperCase() + s.slice(1)} ({counts[s] || 0})
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}><FaSpinner className="spin" style={{ fontSize: '1.5rem' }} /></div>
+      ) : error ? (
+        <div style={{ padding: '1.5rem', background: '#fef2f2', borderRadius: '10px', color: '#dc2626' }}><FaExclamationTriangle /> {error}</div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>No registrations found.</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {filtered.map((inv) => (
+            <div key={inv._id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                    <strong style={{ color: '#0f172a' }}>{inv.name}</strong>
+                    <span style={{ display: 'inline-block', padding: '0.15rem 0.55rem', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 600, background: `${statusColors[inv.status]}15`, color: statusColors[inv.status], border: `1px solid ${statusColors[inv.status]}30` }}>
+                      {inv.status}
+                    </span>
+                    {inv.emailSent && <span style={{ fontSize: '0.68rem', color: '#10b981' }}>📧 sent</span>}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#64748b', display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                    <span>📧 {inv.email}</span>
+                    {inv.phone && <span>📱 {inv.phone}</span>}
+                    <span>📅 {formatDate(inv.createdAt)}</span>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.35rem' }}>
+                    Level: <strong style={{ color: '#475569' }}>{inv.level || '—'}</strong>
+                    {inv.heardFrom && <> · Heard via: <strong style={{ color: '#475569' }}>{inv.heardFrom}</strong></>}
+                  </div>
+                  {inv.interests?.length > 0 && (
+                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
+                      {inv.interests.map((i) => (
+                        <span key={i} style={{ padding: '0.15rem 0.5rem', borderRadius: '50px', fontSize: '0.68rem', background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0' }}>{i}</span>
+                      ))}
+                    </div>
+                  )}
+                  {inv.suggestion && <div style={{ fontSize: '0.8rem', color: '#475569', marginTop: '0.4rem', fontStyle: 'italic' }}>"{inv.suggestion}"</div>}
+                </div>
+                <div style={{ display: 'flex', gap: '0.3rem', flexShrink: 0 }}>
+                  {inv.status === 'pending' && (
+                    <>
+                      <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'confirmed')} title="Confirm" style={{ padding: '0.4rem', background: '#10b98115', border: '1px solid #10b98140', borderRadius: '8px', color: '#10b981', cursor: 'pointer' }}><FaCheck /></button>
+                      <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'rejected')} title="Reject" style={{ padding: '0.4rem', background: '#ef444415', border: '1px solid #ef444440', borderRadius: '8px', color: '#ef4444', cursor: 'pointer' }}><FaBan /></button>
+                    </>
+                  )}
+                  <button onClick={() => deleteInvite(inv._id)} title="Delete" style={{ padding: '0.4rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', cursor: 'pointer' }}><FaTrash /></button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Loading() {
   return (
     <div className="page-loader" style={{ minHeight: '60vh' }}>
@@ -1544,6 +1660,7 @@ const SIDEBAR_GROUPS = [
     { key: 'courses', icon: <FaBookOpen />, label: 'Courses' },
     { key: 'beneficiaries', icon: <FaUserTie />, label: 'Beneficiaries' },
     { key: 'testimonials', icon: <FaStar />, label: 'Testimonials' },
+    { key: 'invites', icon: <FaCalendarAlt />, label: 'Session Invites' },
   ]},
 ];
 
@@ -1714,6 +1831,7 @@ export default function AdminDashboard() {
     courses: { title: 'Courses', sub: 'Manage courses and learning materials' },
     beneficiaries: { title: 'Beneficiaries', sub: 'Track and manage beneficiaries' },
     testimonials: { title: 'Testimonials', sub: 'Review and approve testimonials' },
+    invites: { title: 'Session Invites', sub: 'Manage session registrations' },
   };
 
   const currentPage = pageTitles[tab] || pageTitles.analytics;
@@ -1736,6 +1854,7 @@ export default function AdminDashboard() {
     if (tab === 'news') return <AdminNews />;
     if (tab === 'courses') return <AdminCourses />;
     if (tab === 'testimonials') return <AdminTestimonials />;
+    if (tab === 'invites') return <AdminInvites />;
     return null;
   };
 
