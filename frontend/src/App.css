@@ -13578,122 +13578,39 @@ header.scrolled .nav-dropdown-item-btn:hover {
 .spin { animation: spin 1s linear infinite; }
 
 /* ════════════════════════════════════════════════════════════════
-   EMERGENCY CALL BUTTON
+   SESSION REGISTER BUTTON (floating FAB)
    ════════════════════════════════════════════════════════════════ */
 
-.emergency-btn-wrapper {
+.emergency-btn-fab {
   position: fixed;
   bottom: 90px;
   right: 24px;
   z-index: 999;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.75rem;
-}
-
-.emergency-btn-fab {
-  display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.15rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #5694F7, #3b82f6);
   color: #fff;
   border: none;
   border-radius: 50px;
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 20px rgba(86, 148, 247, 0.4);
   transition: all 0.3s;
-  animation: emergencyPulse 2s infinite;
 }
 
 .emergency-btn-fab:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 28px rgba(16, 185, 129, 0.5);
-}
-
-@keyframes emergencyPulse {
-  0%, 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); }
-  50% { box-shadow: 0 4px 30px rgba(16, 185, 129, 0.7); }
+  box-shadow: 0 6px 28px rgba(86, 148, 247, 0.55);
 }
 
 .emergency-btn-label {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   white-space: nowrap;
 }
-
-.emergency-btn-panel {
-  background: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 1.25rem;
-  width: 280px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.emergency-btn-panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.emergency-btn-panel-header strong {
-  color: #10b981;
-  font-size: 0.9rem;
-}
-
-.emergency-btn-panel-header button {
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.emergency-btn-panel p {
-  color: #94a3b8;
-  font-size: 0.8rem;
-  margin: 0 0 1rem;
-  line-height: 1.4;
-}
-
-.emergency-btn-call {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.65rem;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-  transition: all 0.2s;
-}
-
-.emergency-btn-call:hover { opacity: 0.9; }
-
-.emergency-btn-wa {
-  display: block;
-  text-align: center;
-  padding: 0.55rem;
-  background: rgba(37, 211, 102, 0.1);
-  border: 1px solid rgba(37, 211, 102, 0.3);
-  color: #25d366;
-  border-radius: 10px;
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.emergency-btn-wa:hover { background: rgba(37, 211, 102, 0.15); }
 
 /* ════════════════════════════════════════════════════════════════
    SESSION INVITE PAGE
@@ -14407,10 +14324,8 @@ header.scrolled .nav-dropdown-item-btn:hover {
   .session-interests { grid-template-columns: repeat(2, 1fr); }
   .session-form-section { padding: 1.25rem; }
 
-  /* Emergency button */
-  .emergency-btn-wrapper { bottom: 80px; right: 16px; }
-  .emergency-btn-panel { width: 250px; padding: 1rem; }
-  .emergency-btn-fab { padding: 0.65rem 1rem; font-size: 0.9rem; }
+  /* Register button */
+  .emergency-btn-fab { bottom: 80px; right: 16px; padding: 0.65rem 1rem; font-size: 0.85rem; }
 }
 
 @media (max-width: 380px) {
@@ -14434,9 +14349,7 @@ header.scrolled .nav-dropdown-item-btn:hover {
   .session-levels { flex-direction: column; }
   .session-form-section { padding: 1rem; }
 
-  /* Emergency button */
-  .emergency-btn-wrapper { bottom: 70px; right: 12px; }
-  .emergency-btn-panel { width: 220px; }
-  .emergency-btn-fab { padding: 0.55rem 0.85rem; }
+  /* Register button */
+  .emergency-btn-fab { bottom: 70px; right: 12px; padding: 0.55rem 0.85rem; }
   .emergency-btn-label { font-size: 0.7rem; }
 }
