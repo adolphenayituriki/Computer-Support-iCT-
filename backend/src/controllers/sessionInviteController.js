@@ -97,3 +97,22 @@ export async function deleteSessionInvite(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
+export async function resendSessionEmail(req, res) {
+  try {
+    const invite = await SessionInvite.findById(req.params.id);
+    if (!invite) return res.status(404).json({ error: 'Invite not found.' });
+
+    if (invite.status === 'new') {
+      await sendSessionInviteConfirmation(invite.email, invite.name, invite.level, invite.suggestion || '');
+    } else {
+      await sendSessionStatusUpdate(invite.email, invite.name, invite.status, invite.suggestion || '');
+    }
+
+    invite.emailSent = true;
+    await invite.save();
+    res.json({ success: true, message: 'Email sent.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

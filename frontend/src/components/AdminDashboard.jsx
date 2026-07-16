@@ -1563,6 +1563,18 @@ function AdminInvites() {
     } catch { }
   };
 
+  const resendEmail = async (id) => {
+    setUpdatingId(id);
+    try {
+      await fetch(`${API_BASE}/api/session-invites/${id}/resend-email`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token()}` },
+      });
+      setInvites((prev) => prev.map((inv) => inv._id === id ? { ...inv, emailSent: true } : inv));
+    } catch { }
+    setUpdatingId(null);
+  };
+
   const filtered = statusFilter === 'all' ? invites : invites.filter((inv) => inv.status === statusFilter);
   const counts = { all: invites.length, new: invites.filter((i) => i.status === 'new').length, contacted: invites.filter((i) => i.status === 'contacted').length, confirmed: invites.filter((i) => i.status === 'confirmed').length };
 
@@ -1624,6 +1636,7 @@ function AdminInvites() {
                   {inv.status === 'contacted' && (
                     <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'confirmed')} title="Confirm" style={{ padding: '0.4rem', background: '#10b98115', border: '1px solid #10b98140', borderRadius: '8px', color: '#10b981', cursor: 'pointer' }}><FaCheck /></button>
                   )}
+                  <button disabled={updatingId === inv._id} onClick={() => resendEmail(inv._id)} title="Resend Email" style={{ padding: '0.4rem', background: '#f59e0b15', border: '1px solid #f59e0b40', borderRadius: '8px', color: '#f59e0b', cursor: 'pointer' }}><FaEnvelope /></button>
                   <button onClick={() => deleteInvite(inv._id)} title="Delete" style={{ padding: '0.4rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', cursor: 'pointer' }}><FaTrash /></button>
                 </div>
               </div>
