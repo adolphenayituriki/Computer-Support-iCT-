@@ -1,7 +1,7 @@
 import { useLang } from '../LanguageContext';
 import { FaTicketAlt, FaGraduationCap, FaComments } from 'react-icons/fa';
 
-export default function HowItWorks() {
+export default function HowItWorks({ onLoginClick }) {
   const { t } = useLang();
   const loggedIn = !!localStorage.getItem('cshub_token');
   const steps = [
@@ -14,7 +14,11 @@ export default function HowItWorks() {
     <section id="how-it-works" className="how section-alt section-reveal">
       <div className="container">
         <div className="how-quick-links">
-          <a href={loggedIn ? '/dashboard' : '/login'} className="how-quick-link"><FaTicketAlt /> Submit Request</a>
+          {loggedIn ? (
+            <a href="/dashboard" className="how-quick-link"><FaTicketAlt /> Submit Request</a>
+          ) : (
+            <button type="button" className="how-quick-link" onClick={onLoginClick}><FaTicketAlt /> Submit Request</button>
+          )}
           <a href="/ai-learning" className="how-quick-link"><FaGraduationCap /> Start Learning</a>
           <a href="#contact" className="how-quick-link"><FaComments /> Get In Touch</a>
         </div>

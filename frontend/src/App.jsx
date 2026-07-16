@@ -52,7 +52,7 @@ function HomePage({ onLoginClick, onRegisterClick, onTeamClick }) {
   return (
     <main>
       <Hero />
-      <HowItWorks />
+      <HowItWorks onLoginClick={onLoginClick} />
       <Services onLoginClick={onLoginClick} />
       <WhyUs />
       <About />

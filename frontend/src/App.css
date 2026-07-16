@@ -858,6 +858,8 @@ header.dash-header .hamburger span {
   text-decoration: none;
   transition: all 0.25s;
   background: transparent;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .how-quick-link:hover {
