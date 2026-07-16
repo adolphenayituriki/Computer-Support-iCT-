@@ -255,15 +255,6 @@ export async function sendSessionInviteConfirmation(toEmail, name, level, sugges
         </ul>
       </div>
 
-      <div style="background: linear-gradient(135deg, #1e293b, #312e81); border-radius: 10px; padding: 16px; margin-bottom: 16px; text-align: center;">
-        <p style="margin: 0 0 8px; color: #ffce08; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Our Services</p>
-        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
-          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">MS Office Installation & Activation</span>
-          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Computer Repair</span>
-          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Other ICT Services</span>
-        </div>
-      </div>
-
       <div style="text-align: center; margin-bottom: 8px;">
         <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" style="display: inline-block; background: #25d366; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">Join WhatsApp Group</a>
       </div>
