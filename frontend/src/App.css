@@ -2464,7 +2464,7 @@ header.dash-header .hamburger span {
 .team-form .auth-sub { text-align: center; }
 
 .team-form form {
-  background: rgba(255, 255, 255, 0.03);
+  background: #0f172a;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 

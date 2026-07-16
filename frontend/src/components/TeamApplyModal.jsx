@@ -107,7 +107,7 @@ export default function TeamApplyModal({ onClose }) {
       <form onSubmit={handleSubmit} style={{ padding: '1.5rem' }}>
         {step === 1 && (
           <>
-            <h3 style={{ margin: '0 0 1rem', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 1rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaUser style={{ color: '#FFCE08' }} /> Personal Information
             </h3>
             <div className="form-row">
@@ -131,7 +131,7 @@ export default function TeamApplyModal({ onClose }) {
               </div>
             </div>
 
-            <h3 style={{ margin: '1.5rem 0 0.75rem', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '1.5rem 0 0.75rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaGraduationCap style={{ color: '#FFCE08' }} /> Background
             </h3>
             <div className="form-row">
@@ -175,10 +175,10 @@ export default function TeamApplyModal({ onClose }) {
 
         {step === 2 && (
           <>
-            <h3 style={{ margin: '0 0 0.5rem', color: '#e2e8f0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaLaptopCode style={{ color: '#FFCE08' }} /> Your ICT Skills
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.75rem' }}>Select all that apply — don't worry if you're just starting out!</p>
+            <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.75rem' }}>Select all that apply — don't worry if you're just starting out!</p>
             <div className="skills-grid" style={{ marginBottom: '1.5rem' }}>
               {skillOptions.map((skill) => (
                 <label key={skill} className={`skill-chip${form.skills.includes(skill) ? ' selected' : ''}`}>
@@ -188,7 +188,7 @@ export default function TeamApplyModal({ onClose }) {
               ))}
             </div>
 
-            <h3 style={{ margin: '0 0 0.75rem', color: '#e2e8f0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaHandshake style={{ color: '#FFCE08' }} /> How You Want to Contribute
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -220,10 +220,10 @@ export default function TeamApplyModal({ onClose }) {
 
         {step === 3 && (
           <>
-            <h3 style={{ margin: '0 0 0.5rem', color: '#e2e8f0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaStar style={{ color: '#FFCE08' }} /> Why Join Us?
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.75rem' }}>
+            <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
               Tell us about yourself, your motivation, and what you hope to bring to the team.
             </p>
             <textarea rows="5" placeholder="Why do you want to join or partner with us? Share your story... *" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required style={{ marginBottom: '1rem' }} />
