@@ -1532,7 +1532,7 @@ function AdminInvites() {
       const res = await fetch(`${API_BASE}/api/session-invites`, { headers: { Authorization: `Bearer ${token()}` } });
       if (!res.ok) throw new Error('Failed to load invites');
       const data = await res.json();
-      setInvites(Array.isArray(data) ? data : []);
+      setInvites(Array.isArray(data?.invites) ? data.invites : Array.isArray(data) ? data : []);
     } catch (e) { setError(e.message); }
     setLoading(false);
   };
@@ -1564,16 +1564,16 @@ function AdminInvites() {
   };
 
   const filtered = statusFilter === 'all' ? invites : invites.filter((inv) => inv.status === statusFilter);
-  const counts = { all: invites.length, pending: invites.filter((i) => i.status === 'pending').length, confirmed: invites.filter((i) => i.status === 'confirmed').length, rejected: invites.filter((i) => i.status === 'rejected').length };
+  const counts = { all: invites.length, new: invites.filter((i) => i.status === 'new').length, contacted: invites.filter((i) => i.status === 'contacted').length, confirmed: invites.filter((i) => i.status === 'confirmed').length };
 
   const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-  const statusColors = { pending: '#f59e0b', confirmed: '#10b981', rejected: '#ef4444' };
+  const statusColors = { new: '#f59e0b', contacted: '#3b82f6', confirmed: '#10b981' };
 
   return (
     <div>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-        {['all', 'pending', 'confirmed', 'rejected'].map((s) => (
+        {['all', 'new', 'contacted', 'confirmed'].map((s) => (
           <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: statusFilter === s ? '2px solid #5694F7' : '2px solid #e2e8f0', background: statusFilter === s ? '#5694F7' : '#fff', color: statusFilter === s ? '#fff' : '#64748b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}>
             {s.charAt(0).toUpperCase() + s.slice(1)} ({counts[s] || 0})
           </button>
@@ -1618,11 +1618,11 @@ function AdminInvites() {
                   {inv.suggestion && <div style={{ fontSize: '0.8rem', color: '#475569', marginTop: '0.4rem', fontStyle: 'italic' }}>"{inv.suggestion}"</div>}
                 </div>
                 <div style={{ display: 'flex', gap: '0.3rem', flexShrink: 0 }}>
-                  {inv.status === 'pending' && (
-                    <>
-                      <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'confirmed')} title="Confirm" style={{ padding: '0.4rem', background: '#10b98115', border: '1px solid #10b98140', borderRadius: '8px', color: '#10b981', cursor: 'pointer' }}><FaCheck /></button>
-                      <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'rejected')} title="Reject" style={{ padding: '0.4rem', background: '#ef444415', border: '1px solid #ef444440', borderRadius: '8px', color: '#ef4444', cursor: 'pointer' }}><FaBan /></button>
-                    </>
+                  {inv.status === 'new' && (
+                    <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'contacted')} title="Mark as Contacted" style={{ padding: '0.4rem', background: '#3b82f615', border: '1px solid #3b82f640', borderRadius: '8px', color: '#3b82f6', cursor: 'pointer' }}><FaCheck /></button>
+                  )}
+                  {inv.status === 'contacted' && (
+                    <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'confirmed')} title="Confirm" style={{ padding: '0.4rem', background: '#10b98115', border: '1px solid #10b98140', borderRadius: '8px', color: '#10b981', cursor: 'pointer' }}><FaCheck /></button>
                   )}
                   <button onClick={() => deleteInvite(inv._id)} title="Delete" style={{ padding: '0.4rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', cursor: 'pointer' }}><FaTrash /></button>
                 </div>
