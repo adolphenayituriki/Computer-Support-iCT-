@@ -155,12 +155,12 @@ export default function TeamApplyModal({ onClose }) {
                 return (
                   <button key={t.value} type="button" onClick={() => setForm({ ...form, applicantType: t.value })}
                     style={{
-                      flex: 1, minWidth: '100px', padding: '0.6rem 0.5rem', borderRadius: '10px', border: selected ? '2px solid #FFCE08' : '2px solid #e5e7eb',
-                      background: selected ? '#fffbeb' : 'white', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
-                      fontSize: '0.78rem', fontWeight: selected ? 600 : 400, color: selected ? '#92400e' : '#4b5563',
+                      flex: 1, minWidth: '100px', padding: '0.6rem 0.5rem', borderRadius: '10px', border: selected ? '1.5px solid #FFCE08' : '1px solid rgba(255,255,255,0.12)',
+                      background: selected ? 'rgba(255,206,8,0.12)' : 'rgba(255,255,255,0.04)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
+                      fontSize: '0.78rem', fontWeight: selected ? 600 : 400, color: selected ? '#FFCE08' : '#94a3b8',
                     }}
                   >
-                    <Icon size={20} style={{ display: 'block', margin: '0 auto 0.25rem', color: selected ? '#FFCE08' : '#9ca3af' }} />
+                    <Icon size={20} style={{ display: 'block', margin: '0 auto 0.25rem', color: selected ? '#FFCE08' : '#64748b' }} />
                     {t.label}
                   </button>
                 );
@@ -175,10 +175,10 @@ export default function TeamApplyModal({ onClose }) {
 
         {step === 2 && (
           <>
-            <h3 style={{ margin: '0 0 0.5rem', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.5rem', color: '#e2e8f0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaLaptopCode style={{ color: '#FFCE08' }} /> Your ICT Skills
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '0.75rem' }}>Select all that apply — don't worry if you're just starting out!</p>
+            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.75rem' }}>Select all that apply — don't worry if you're just starting out!</p>
             <div className="skills-grid" style={{ marginBottom: '1.5rem' }}>
               {skillOptions.map((skill) => (
                 <label key={skill} className={`skill-chip${form.skills.includes(skill) ? ' selected' : ''}`}>
@@ -188,7 +188,7 @@ export default function TeamApplyModal({ onClose }) {
               ))}
             </div>
 
-            <h3 style={{ margin: '0 0 0.75rem', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem', color: '#e2e8f0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaHandshake style={{ color: '#FFCE08' }} /> How You Want to Contribute
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -198,13 +198,13 @@ export default function TeamApplyModal({ onClose }) {
                 return (
                   <label key={t.value} style={{
                     display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
-                    borderRadius: '10px', border: selected ? '2px solid #FFCE08' : '2px solid #e5e7eb',
-                    background: selected ? '#fffbeb' : 'white', cursor: 'pointer', transition: 'all 0.2s',
+                    borderRadius: '10px', border: selected ? '1.5px solid #FFCE08' : '1px solid rgba(255,255,255,0.12)',
+                    background: selected ? 'rgba(255,206,8,0.12)' : 'rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'all 0.2s',
                   }}>
                     <input type="radio" name="involvement" value={t.value} checked={selected} onChange={(e) => setForm({ ...form, involvement: e.target.value })} style={{ accentColor: '#FFCE08' }} />
-                    <Icon size={18} style={{ color: selected ? '#FFCE08' : '#9ca3af' }} />
+                    <Icon size={18} style={{ color: selected ? '#FFCE08' : '#64748b' }} />
                     <div>
-                      <div style={{ fontWeight: selected ? 600 : 400, fontSize: '0.9rem', color: selected ? '#92400e' : '#1e293b' }}>{t.label}</div>
+                      <div style={{ fontWeight: selected ? 600 : 400, fontSize: '0.9rem', color: selected ? '#FFCE08' : '#e2e8f0' }}>{t.label}</div>
                     </div>
                   </label>
                 );
@@ -220,16 +220,16 @@ export default function TeamApplyModal({ onClose }) {
 
         {step === 3 && (
           <>
-            <h3 style={{ margin: '0 0 0.5rem', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.5rem', color: '#e2e8f0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaStar style={{ color: '#FFCE08' }} /> Why Join Us?
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.75rem' }}>
               Tell us about yourself, your motivation, and what you hope to bring to the team.
             </p>
             <textarea rows="5" placeholder="Why do you want to join or partner with us? Share your story... *" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required style={{ marginBottom: '1rem' }} />
 
-            <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', fontSize: '0.82rem', color: '#475569', lineHeight: '1.7' }}>
-              <strong style={{ color: '#1e293b' }}>Summary</strong>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', fontSize: '0.82rem', color: '#94a3b8', lineHeight: '1.7' }}>
+              <strong style={{ color: '#e2e8f0' }}>Summary</strong>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem 1rem', marginTop: '0.5rem' }}>
                 <span>Name: {form.name || '—'}</span>
                 <span>Email: {form.email || '—'}</span>

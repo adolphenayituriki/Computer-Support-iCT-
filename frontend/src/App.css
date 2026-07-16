@@ -2463,15 +2463,27 @@ header.dash-header .hamburger span {
 .team-form h2 { text-align: center; }
 .team-form .auth-sub { text-align: center; }
 
+.team-form form {
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .team-form select {
   padding: 0.7rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   font-size: 0.9rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+  appearance: auto;
+}
+
+.team-form select option {
+  background: #1e293b;
+  color: #e2e8f0;
 }
 
 .team-form select:focus {
@@ -2485,7 +2497,7 @@ header.dash-header .hamburger span {
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #1e1b4b;
+  color: #e2e8f0;
   margin-bottom: 0.6rem;
 }
 
@@ -2499,21 +2511,21 @@ header.dash-header .hamburger span {
   display: inline-flex;
   align-items: center;
   padding: 0.3rem 0.6rem;
-  border: 1.5px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50px;
   font-size: 0.72rem;
-  color: #6b7280;
+  color: #94a3b8;
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
 }
 
-.skill-chip:hover { border-color: #94a3b8; }
+.skill-chip:hover { border-color: #64748b; color: #e2e8f0; }
 
 .skill-chip.selected {
-  background: #fef9c3;
+  background: rgba(255, 206, 8, 0.15);
   border-color: #FFCE08;
-  color: #1e1b4b;
+  color: #FFCE08;
   font-weight: 600;
 }
 
