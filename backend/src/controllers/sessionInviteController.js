@@ -116,3 +116,30 @@ export async function resendSessionEmail(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
+export async function resendAllSessionEmails(req, res) {
+  try {
+    const invites = await SessionInvite.find({});
+    let sent = 0;
+    let failed = 0;
+
+    for (const invite of invites) {
+      try {
+        if (invite.status === 'new') {
+          await sendSessionInviteConfirmation(invite.email, invite.name, invite.level, invite.suggestion || '');
+        } else {
+          await sendSessionStatusUpdate(invite.email, invite.name, invite.status, invite.suggestion || '');
+        }
+        invite.emailSent = true;
+        await invite.save();
+        sent++;
+      } catch {
+        failed++;
+      }
+    }
+
+    res.json({ success: true, sent, failed, total: invites.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

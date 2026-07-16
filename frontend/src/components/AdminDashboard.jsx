@@ -1575,6 +1575,21 @@ function AdminInvites() {
     setUpdatingId(null);
   };
 
+  const resendAllEmails = async () => {
+    if (!confirm(`Send emails to all ${invites.length} registrations?`)) return;
+    setUpdatingId('all');
+    try {
+      const res = await fetch(`${API_BASE}/api/session-invites/resend-all`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token()}` },
+      });
+      const data = await res.json();
+      alert(`Done! Sent: ${data.sent}, Failed: ${data.failed}`);
+      fetchInvites();
+    } catch { }
+    setUpdatingId(null);
+  };
+
   const filtered = statusFilter === 'all' ? invites : invites.filter((inv) => inv.status === statusFilter);
   const counts = { all: invites.length, new: invites.filter((i) => i.status === 'new').length, contacted: invites.filter((i) => i.status === 'contacted').length, confirmed: invites.filter((i) => i.status === 'confirmed').length };
 
@@ -1584,7 +1599,10 @@ function AdminInvites() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <button disabled={updatingId === 'all' || invites.length === 0} onClick={resendAllEmails} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: '2px solid #FFCE08', background: updatingId === 'all' ? '#fef3c7' : '#FFCE08', color: '#1e293b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          {updatingId === 'all' ? <><FaSpinner className="spin" /> Sending...</> : <><FaEnvelope /> Send All Emails</>}
+        </button>
         {['all', 'new', 'contacted', 'confirmed'].map((s) => (
           <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: statusFilter === s ? '2px solid #5694F7' : '2px solid #e2e8f0', background: statusFilter === s ? '#5694F7' : '#fff', color: statusFilter === s ? '#fff' : '#64748b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}>
             {s.charAt(0).toUpperCase() + s.slice(1)} ({counts[s] || 0})
