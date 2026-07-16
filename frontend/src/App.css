@@ -837,52 +837,33 @@ header.dash-header .hamburger span {
   text-transform: uppercase;
 }
 
-.hero-quick-links,
 .how-quick-links {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.5rem;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
   flex-wrap: wrap;
 }
 
-.hero-quick-link,
 .how-quick-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid #e2e8f0;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #cbd5e1;
   border-radius: 50px;
-  color: #475569;
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 500;
   text-decoration: none;
   transition: all 0.25s;
+  background: transparent;
 }
 
-.hero-quick-link:hover,
 .how-quick-link:hover {
-  background: #FFCE08;
-  color: #1e293b;
-  border-color: #FFCE08;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255, 206, 8, 0.3);
-}
-
-.how-quick-link-primary {
-  background: #FFCE08;
   border-color: #FFCE08;
   color: #1e293b;
-}
-
-.how-quick-link-primary:hover {
-  background: #e6b800;
-  border-color: #e6b800;
-  box-shadow: 0 4px 16px rgba(255, 206, 8, 0.4);
+  transform: translateY(-1px);
 }
 
 .hero-btns {
