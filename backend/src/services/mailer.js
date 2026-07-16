@@ -256,16 +256,11 @@ export async function sendSessionInviteConfirmation(toEmail, name, level, sugges
       </div>
 
       <div style="background: linear-gradient(135deg, #1e293b, #312e81); border-radius: 10px; padding: 16px; margin-bottom: 16px; text-align: center;">
-        <p style="margin: 0 0 8px; color: #ffce08; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Topics We Cover</p>
+        <p style="margin: 0 0 8px; color: #ffce08; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Our Services</p>
         <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
-          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Computer Hardware</span>
-          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Software</span>
-          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Networking</span>
-          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Programming</span>
-          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Web Dev</span>
-          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">MS Office</span>
-          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Digital Safety</span>
-          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Graphic Design</span>
+          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">MS Office Installation & Activation</span>
+          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Computer Repair</span>
+          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Other ICT Services</span>
         </div>
       </div>
 
