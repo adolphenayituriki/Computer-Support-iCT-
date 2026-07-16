@@ -85,10 +85,11 @@ export default function SessionInvite({ onClose }) {
               <FaRocket /> Free Session
             </div>
             <button className="session-share-btn" title="Share this" onClick={() => {
+              const shareUrl = window.location.origin + '/?session=true';
               if (navigator.share) {
-                navigator.share({ title: 'Free ICT Session', text: 'Check out this free learning session!', url: window.location.href });
+                navigator.share({ title: 'Free ICT Session', text: 'Register for a free ICT learning session!', url: shareUrl });
               } else {
-                navigator.clipboard.writeText(window.location.href);
+                navigator.clipboard.writeText(shareUrl);
               }
             }}><FaShareAlt /></button>
           </div>
