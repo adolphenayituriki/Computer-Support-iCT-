@@ -837,7 +837,8 @@ header.dash-header .hamburger span {
   text-transform: uppercase;
 }
 
-.hero-quick-links {
+.hero-quick-links,
+.how-quick-links {
   display: flex;
   gap: 0.6rem;
   justify-content: center;
@@ -845,39 +846,43 @@ header.dash-header .hamburger span {
   flex-wrap: wrap;
 }
 
-.hero-quick-link {
+.hero-quick-link,
+.how-quick-link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid #e2e8f0;
   border-radius: 50px;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.78rem;
+  color: #475569;
+  font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.25s;
 }
 
-.hero-quick-link:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.3);
+.hero-quick-link:hover,
+.how-quick-link:hover {
+  background: #FFCE08;
+  color: #1e293b;
+  border-color: #FFCE08;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 206, 8, 0.3);
 }
 
-.hero-quick-link-primary {
-  background: rgba(255, 206, 8, 0.2);
-  border-color: rgba(255, 206, 8, 0.4);
-  color: #FFCE08;
+.how-quick-link-primary {
+  background: #FFCE08;
+  border-color: #FFCE08;
+  color: #1e293b;
 }
 
-.hero-quick-link-primary:hover {
-  background: rgba(255, 206, 8, 0.35);
-  color: #FFCE08;
+.how-quick-link-primary:hover {
+  background: #e6b800;
+  border-color: #e6b800;
+  box-shadow: 0 4px 16px rgba(255, 206, 8, 0.4);
 }
 
 .hero-btns {

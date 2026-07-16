@@ -1,4 +1,5 @@
 import { useLang } from '../LanguageContext';
+import { FaTicketAlt, FaGraduationCap, FaComments } from 'react-icons/fa';
 
 export default function HowItWorks() {
   const { t } = useLang();
@@ -11,6 +12,11 @@ export default function HowItWorks() {
   return (
     <section id="how-it-works" className="how section-alt section-reveal">
       <div className="container">
+        <div className="how-quick-links">
+          <a href="/dashboard" className="how-quick-link"><FaTicketAlt /> Submit Request</a>
+          <a href="/ai-learning" className="how-quick-link how-quick-link-primary"><FaGraduationCap /> Start Learning</a>
+          <a href="#contact" className="how-quick-link"><FaComments /> Get In Touch</a>
+        </div>
         <h2 className="section-title">{t('howItWorks.title')}</h2>
         <p className="section-sub">{t('howItWorks.subtitle')}</p>
         <div className="steps">
