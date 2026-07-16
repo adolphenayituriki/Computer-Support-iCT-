@@ -1,46 +1,28 @@
 import { useState } from 'react';
 import API_BASE from '../api';
-import {
-  FaUser, FaEnvelope, FaPhone, FaGraduationCap, FaCheckCircle,
-  FaLightbulb, FaSpinner, FaExclamationTriangle, FaRocket,
-  FaDesktop, FaCog, FaWifi, FaCode, FaGlobe, FaMicrosoft,
-  FaShieldAlt, FaBookOpen, FaTimes
-} from 'react-icons/fa';
-
-const INTERESTS = [
-  { id: 'hardware', label: 'Computer Hardware', icon: <FaDesktop />, color: '#ef4444' },
-  { id: 'software', label: 'Software & Installation', icon: <FaCog />, color: '#5694F7' },
-  { id: 'networking', label: 'Networking & Internet', icon: <FaWifi />, color: '#10b981' },
-  { id: 'programming', label: 'Programming', icon: <FaCode />, color: '#8b5cf6' },
-  { id: 'webdev', label: 'Web Development', icon: <FaGlobe />, color: '#f59e0b' },
-  { id: 'office', label: 'Microsoft Office', icon: <FaMicrosoft />, color: '#06b6d4' },
-  { id: 'security', label: 'Digital Safety & Security', icon: <FaShieldAlt />, color: '#ec4899' },
-  { id: 'literacy', label: 'Digital Literacy', icon: <FaBookOpen />, color: '#14b8a6' },
-];
+import { FaUser, FaEnvelope, FaPhone, FaGraduationCap, FaPenFancy, FaCheckCircle, FaSpinner, FaExclamationTriangle, FaRocket, FaTimes, FaLaptopCode, FaWifi, FaPaintBrush, FaChartLine, FaCog, FaLightbulb, FaShareAlt } from 'react-icons/fa';
 
 const LEVELS = [
-  { id: 'beginner', label: 'Beginner', desc: 'New to computers' },
-  { id: 'student', label: 'Student', desc: 'Currently studying' },
-  { id: 'professional', label: 'Professional', desc: 'Working professional' },
+  { id: 'beginner', label: 'Beginner', emoji: '🌱', desc: 'Just getting started' },
+  { id: 'student', label: 'Student', emoji: '📚', desc: 'Building skills' },
+  { id: 'professional', label: 'Professional', emoji: '💼', desc: 'Leveling up' },
 ];
 
-const HEAR_OPTIONS = ['Friend', 'Social Media', 'University/School', 'WhatsApp Group', 'Poster/Flyer', 'Other'];
+const SUGGESTIONS = [
+  { icon: FaLaptopCode, text: 'Build a website' },
+  { icon: FaPaintBrush, text: 'Graphic design' },
+  { icon: FaChartLine, text: 'Excel mastery' },
+  { icon: FaWifi, text: 'Google suits tools' },
+  { icon: FaCog, text: 'Ms. Offices' },
+  { icon: FaLightbulb, text: 'Digital marketing' },
+];
 
 export default function SessionInvite({ onClose }) {
-  const [form, setForm] = useState({
-    name: '', email: '', phone: '', level: '', interests: [], suggestion: '', heardFrom: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', level: '', topic: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [emailSent, setEmailSent] = useState(false);
-
-  const toggleInterest = (id) => {
-    setForm((prev) => ({
-      ...prev,
-      interests: prev.interests.includes(id) ? prev.interests.filter((i) => i !== id) : [...prev.interests, id],
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,14 +36,10 @@ export default function SessionInvite({ onClose }) {
       const res = await fetch(`${API_BASE}/api/session-invites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, interests: [], suggestion: form.topic }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Registration failed.');
-        setSubmitting(false);
-        return;
-      }
+      if (!res.ok) { setError(data.error || 'Registration failed.'); setSubmitting(false); return; }
       setEmailSent(data.emailSent || false);
       setSubmitted(true);
     } catch {
@@ -72,25 +50,20 @@ export default function SessionInvite({ onClose }) {
 
   if (submitted) {
     return (
-      <div className="session-modal-body">
-        <button className="session-modal-close" onClick={onClose} title="Close"><FaTimes /></button>
-        <div className="session-success">
-          <div className="session-success-icon"><FaCheckCircle /></div>
-          <h2>You're Registered!</h2>
-          <p>Thank you, <strong>{form.name}</strong>! You've been registered for our ICT Learning Session.</p>
-          {emailSent && <p className="session-success-email">A confirmation email has been sent to <strong>{form.email}</strong>.</p>}
-          <div className="session-success-next">
-            <h4>What happens next?</h4>
-            <ul>
-              <li>We'll review your interests and level</li>
-              <li>You'll receive session details via email</li>
-              <li>Join our WhatsApp group for updates</li>
-            </ul>
+      <div className="session-modal-body session-modal-thanks">
+        <div className="session-thanks-inner">
+          <div className="session-success">
+            <div className="session-success-anim"><FaCheckCircle /></div>
+            <h2>You're in, {form.name.split(' ')[0]}!</h2>
+            <p>We've got your registration. Expect an email at <strong>{form.email}</strong> with session details soon.</p>
+            <div className="session-success-actions">
+              <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="session-wa-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Join WhatsApp Group
+              </a>
+              <button className="session-done-btn" onClick={onClose}>Done</button>
+            </div>
           </div>
-          <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className="session-success-wa">
-            Join WhatsApp Group
-          </a>
-          <button className="session-success-done" onClick={onClose}>Done</button>
         </div>
       </div>
     );
@@ -101,89 +74,87 @@ export default function SessionInvite({ onClose }) {
       <button className="session-modal-close" onClick={onClose} title="Close"><FaTimes /></button>
 
       <div className="session-modal-header">
-        <div className="session-modal-badge">Free ICT Training</div>
-        <h2>Register for <span>ICT Session</span></h2>
-        <p>Learn computer skills, networking, programming, and more — it takes less than a minute.</p>
-      </div>
-
-      <div className="session-courses">
-        <h3>What You'll Learn</h3>
-        <div className="session-courses-grid">
-          <div className="session-course-card"><FaDesktop /><h4>Hardware</h4></div>
-          <div className="session-course-card"><FaCog /><h4>Software</h4></div>
-          <div className="session-course-card"><FaWifi /><h4>Networking</h4></div>
-          <div className="session-course-card"><FaCode /><h4>Programming</h4></div>
-          <div className="session-course-card"><FaGlobe /><h4>Web Dev</h4></div>
-          <div className="session-course-card"><FaMicrosoft /><h4>MS Office</h4></div>
-          <div className="session-course-card"><FaShieldAlt /><h4>Security</h4></div>
-          <div className="session-course-card"><FaBookOpen /><h4>Literacy</h4></div>
+        <div className="session-header-bg">
+          <div className="session-header-orb session-header-orb-1"></div>
+          <div className="session-header-orb session-header-orb-2"></div>
+          <div className="session-header-dots"></div>
+        </div>
+        <div className="session-header-content">
+          <div className="session-header-top-row">
+            <div className="session-header-badge">
+              <FaRocket /> Free Session
+            </div>
+            <button className="session-share-btn" title="Share this" onClick={() => {
+              if (navigator.share) {
+                navigator.share({ title: 'Free ICT Session', text: 'Check out this free learning session!', url: window.location.href });
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+              }
+            }}><FaShareAlt /></button>
+          </div>
+          <h2>Learn anything ICT — <span>for free</span></h2>
+          <p>Tell us what you want to learn and we'll build a session around it.</p>
         </div>
       </div>
 
       <form className="session-form" onSubmit={handleSubmit}>
         <div className="session-form-row">
           <div className="session-form-group">
-            <label><FaUser /> Full Name *</label>
-            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your full name" />
+            <label><FaUser /> Name *</label>
+            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name" />
           </div>
           <div className="session-form-group">
             <label><FaEnvelope /> Email *</label>
-            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="your@email.com" />
+            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@email.com" />
           </div>
         </div>
 
         <div className="session-form-row">
           <div className="session-form-group">
-            <label><FaPhone /> Phone (optional)</label>
+            <label><FaPhone /> Phone</label>
             <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+250 7XX XXX XXX" />
           </div>
           <div className="session-form-group">
-            <label><FaGraduationCap /> Your Level *</label>
+            <label><FaGraduationCap /> Level *</label>
             <div className="session-levels">
               {LEVELS.map((l) => (
                 <button key={l.id} type="button" className={`session-level-btn ${form.level === l.id ? 'active' : ''}`} onClick={() => setForm({ ...form, level: l.id })}>
-                  <strong>{l.label}</strong>
-                  <span>{l.desc}</span>
+                  <span className="session-level-emoji">{l.emoji}</span>
+                  <span className="session-level-label">{l.label}</span>
+                  <span className="session-level-desc">{l.desc}</span>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="session-form-group">
-          <label>What are you interested in?</label>
-          <div className="session-interests">
-            {INTERESTS.map((i) => (
-              <button key={i.id} type="button" className={`session-interest-btn ${form.interests.includes(i.id) ? 'active' : ''}`} onClick={() => toggleInterest(i.id)} style={{ '--accent': i.color }}>
-                <span className="session-interest-icon">{i.icon}</span>
-                <span>{i.label}</span>
-                {form.interests.includes(i.id) && <FaCheckCircle className="session-interest-check" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="session-form-group">
-          <label><FaLightbulb /> Suggestions (optional)</label>
-          <textarea value={form.suggestion} onChange={(e) => setForm({ ...form, suggestion: e.target.value })} placeholder="What would you like us to teach?" rows={2} />
-        </div>
-
-        <div className="session-form-group">
-          <label>How did you hear about us?</label>
-          <div className="session-heard">
-            {HEAR_OPTIONS.map((h) => (
-              <button key={h} type="button" className={`session-heard-btn ${form.heardFrom === h ? 'active' : ''}`} onClick={() => setForm({ ...form, heardFrom: h })}>
-                {h}
-              </button>
-            ))}
+        <div className="session-form-group session-topic-group">
+          <label><FaPenFancy /> What do you want to learn?</label>
+          <textarea
+            value={form.topic}
+            onChange={(e) => setForm({ ...form, topic: e.target.value })}
+            placeholder="e.g. How to build a website, Excel for accounting, graphic design, etc..."
+            rows={3}
+          />
+          <div className="session-suggestions">
+            <span className="session-suggestions-label">Popular topics:</span>
+            <div className="session-suggestions-list">
+              {SUGGESTIONS.map((s, i) => (
+                <button key={i} type="button" className="session-suggestion-chip" onClick={() => setForm({ ...form, topic: form.topic ? form.topic + ', ' + s.text : s.text })}>
+                  <s.icon /> {s.text}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {error && <p className="session-error"><FaExclamationTriangle /> {error}</p>}
 
         <button type="submit" className="session-submit" disabled={submitting}>
-          {submitting ? <><FaSpinner className="spin" /> Registering...</> : <><FaRocket /> Register for Session</>}
+          {submitting ? <><FaSpinner className="spin" /> Submitting...</> : <><FaRocket /> Register Now</>}
         </button>
+
+        <p className="session-form-footer-note">No spam, no payment — just free learning sessions tailored to you.</p>
       </form>
     </div>
   );

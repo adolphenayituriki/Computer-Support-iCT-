@@ -29,7 +29,7 @@ export async function createSessionInvite(req, res) {
 
     let emailSent = false;
     try {
-      await sendSessionInviteConfirmation(email, name, interests || []);
+      await sendSessionInviteConfirmation(email, name, level, suggestion || '');
       emailSent = true;
       invite.emailSent = true;
       await invite.save();

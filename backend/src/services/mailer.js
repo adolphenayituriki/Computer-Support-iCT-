@@ -208,33 +208,72 @@ export async function sendAdminNotification(subject, body) {
   });
 }
 
-export async function sendSessionInviteConfirmation(toEmail, name, interests) {
-  const interestList = interests.length > 0 ? interests.join(', ') : 'General ICT';
+export async function sendSessionInviteConfirmation(toEmail, name, level, suggestion) {
+  const levelMap = { beginner: 'Beginner', student: 'Student', professional: 'Professional' };
+  const levelLabel = levelMap[level] || level || 'Not specified';
+  const topicText = suggestion && suggestion.trim() ? suggestion.trim() : 'General ICT skills';
+
   await send({
     to: toEmail,
     subject: 'You\'re Registered! — CS Hub ICT Session',
     html: baseHtml(`
       <h2 style="color: #f8fafc; text-align: center; margin: 0 0 8px;">You're Registered!</h2>
       <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
-        Hi <strong style="color:#f8fafc;">${name}</strong>, thank you for registering for our ICT Learning Session!
+        Hi <strong style="color:#f8fafc;">${name}</strong>, thank you for registering for our <strong style="color:#ffce08;">Free ICT Learning Session</strong>!
       </p>
+
       <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-        <p style="margin: 0 0 8px; color: #94a3b8; font-size: 0.82rem;">Here's what you signed up for:</p>
-        <p style="margin: 0 0 4px; color: #f8fafc; font-weight: 700; font-size: 0.95rem;">Interests: ${interestList}</p>
+        <p style="margin: 0 0 10px; color: #94a3b8; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px;">Your Registration Details</p>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Name</td>
+            <td style="padding: 6px 0; color: #f8fafc; font-weight: 700; font-size: 0.9rem; text-align: right;">${name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Email</td>
+            <td style="padding: 6px 0; color: #f8fafc; font-size: 0.9rem; text-align: right;">${toEmail}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Level</td>
+            <td style="padding: 6px 0; text-align: right;">
+              <span style="display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; background: ${level === 'beginner' ? '#065f46' : level === 'student' ? '#1e40af' : '#92400e'}; color: ${level === 'beginner' ? '#6ee7b7' : level === 'student' ? '#93c5fd' : '#fcd34d'};">${levelLabel}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Topic</td>
+            <td style="padding: 6px 0; color: #ffce08; font-weight: 600; font-size: 0.9rem; text-align: right;">${topicText}</td>
+          </tr>
+        </table>
       </div>
+
       <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-        <p style="margin: 0 0 6px; color: #94a3b8; font-size: 0.82rem;">What we'll teach:</p>
-        <ul style="color: #cbd5e1; margin: 0; padding-left: 1.2rem; line-height: 1.8;">
-          <li>Computer Hardware & Maintenance</li>
-          <li>Software Installation & Troubleshooting</li>
-          <li>Networking & Internet Skills</li>
-          <li>Programming Fundamentals</li>
-          <li>Web Development Basics</li>
-          <li>Microsoft Office & Productivity</li>
-          <li>Digital Literacy & Safety</li>
+        <p style="margin: 0 0 8px; color: #94a3b8; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px;">What Happens Next</p>
+        <ul style="color: #cbd5e1; margin: 0; padding-left: 1.2rem; line-height: 2;">
+          <li>We'll review your registration and <strong style="color:#f8fafc;">match you with a session</strong> based on your level and topic.</li>
+          <li>You'll receive a <strong style="color:#ffce08;">session schedule</strong> with date, time, and meeting details.</li>
+          <li>Join our WhatsApp group to <strong style="color:#f8fafc;">connect with other learners</strong> and get updates.</li>
         </ul>
       </div>
-      <p style="color: #6ee7b7; font-size: 0.9rem; text-align: center; margin: 0 0 8px; font-weight: 600;">
+
+      <div style="background: linear-gradient(135deg, #1e293b, #312e81); border-radius: 10px; padding: 16px; margin-bottom: 16px; text-align: center;">
+        <p style="margin: 0 0 8px; color: #ffce08; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Topics We Cover</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Computer Hardware</span>
+          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Software</span>
+          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Networking</span>
+          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Programming</span>
+          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Web Dev</span>
+          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">MS Office</span>
+          <span style="background: rgba(255,206,8,0.12); color: #ffce08; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Digital Safety</span>
+          <span style="background: rgba(59,130,246,0.12); color: #38bdf8; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">Graphic Design</span>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 8px;">
+        <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" style="display: inline-block; background: #25d366; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">Join WhatsApp Group</a>
+      </div>
+
+      <p style="color: #6ee7b7; font-size: 0.9rem; text-align: center; margin: 16px 0 0; font-weight: 600;">
         We'll contact you soon with session details!
       </p>
     `),
@@ -242,8 +281,7 @@ export async function sendSessionInviteConfirmation(toEmail, name, interests) {
 }
 
 export async function sendSessionInviteAdminNotification(invite) {
-  const interestList = invite.interests.length > 0 ? invite.interests.join(', ') : 'General ICT';
   await sendAdminNotification('New Session Registration',
-    `Name: ${invite.name}\nEmail: ${invite.email}\nPhone: ${invite.phone || 'N/A'}\nLevel: ${invite.level}\nInterests: ${interestList}${invite.suggestion ? '\nSuggestion: ' + invite.suggestion : ''}`
+    `Name: ${invite.name}\nEmail: ${invite.email}\nPhone: ${invite.phone || 'N/A'}\nLevel: ${invite.level}${invite.suggestion ? '\nTopic: ' + invite.suggestion : ''}`
   );
 }
