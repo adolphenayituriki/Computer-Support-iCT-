@@ -18,7 +18,6 @@ import News from './components/News';
 import Courses from './components/Courses';
 import AILearning from './components/AILearning';
 import AILearningDashboard from './components/AILearningDashboard';
-import SessionInvite from './components/SessionInvite';
 import EmergencyButton from './components/EmergencyButton';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
@@ -98,7 +97,6 @@ export default function App() {
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/ai-learning" element={<AILearning />} />
-          <Route path="/session" element={<SessionInvite />} />
           <Route path="/ai-dashboard" element={<ProtectedRoute><AILearningDashboard /></ProtectedRoute>} />
           <Route path="/setup-account" element={<SetupAccount />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
