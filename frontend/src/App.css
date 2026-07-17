@@ -2425,6 +2425,29 @@ header.dash-header .hamburger span {
   border-radius: 14px;
 }
 
+.game-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 50px;
+  padding: 0.4rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 0.5rem;
+  transition: all 0.25s;
+}
+
+.game-home-btn:hover {
+  border-color: #1e1b4b;
+  color: #1e1b4b;
+  background: rgba(30, 27, 75, 0.04);
+}
+
 @media (max-width: 480px) {
   .game-cat-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
   .sg-card { padding: 1.2rem 1rem; }

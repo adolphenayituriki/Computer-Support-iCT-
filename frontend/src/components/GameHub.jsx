@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FaLaptop, FaStar, FaGoogle, FaShieldAlt, FaShareAlt, FaGamepad } from 'react-icons/fa';
+import { FaLaptop, FaStar, FaGoogle, FaShieldAlt, FaShareAlt, FaGamepad, FaArrowLeft } from 'react-icons/fa';
 import { useLang } from '../LanguageContext';
 
 const CATEGORIES = [
@@ -38,6 +38,9 @@ export default function GameHub() {
         </div>
         <button className="game-share-section" type="button" onClick={handleShare}>
           <FaShareAlt /> Challenge a friend
+        </button>
+        <button className="game-home-btn" type="button" onClick={() => navigate('/')}>
+          <FaArrowLeft /> Go to Home
         </button>
       </div>
     </div>
