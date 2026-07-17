@@ -71,7 +71,7 @@ export default function GameWithUs() {
                     <span key={tp} className="gcc-topic" style={{ borderColor: `${cat.color}40`, color: cat.color }}>{tp}</span>
                   ))}
                 </div>
-                <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)} style={{ borderColor: cat.color, color: cat.color }}>
+                <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)}>
                   <FaShareAlt /> Challenge a friend
                 </button>
               </div>

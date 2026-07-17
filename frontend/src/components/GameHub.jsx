@@ -51,6 +51,9 @@ export default function GameHub() {
   return (
     <div className="gameplay-wrap">
       <div className="game-hub-standalone">
+        <button className="game-home-btn game-home-btn-top" type="button" onClick={() => navigate('/')}>
+          <FaArrowLeft /> Go to Home
+        </button>
         <div className="game-hub-head">
           <span className="game-hub-badge"><FaGamepad /> {t('gameWithUs.badge')}</span>
           <h3 className="game-hub-title">{t('gameWithUs.title')}</h3>
@@ -72,15 +75,12 @@ export default function GameHub() {
                   <span key={tp} className="gcc-topic" style={{ borderColor: `${cat.color}40`, color: cat.color }}>{tp}</span>
                 ))}
               </div>
-              <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)} style={{ borderColor: cat.color, color: cat.color }}>
+              <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)}>
                 <FaShareAlt /> Challenge a friend
               </button>
             </div>
           ))}
         </div>
-        <button className="game-home-btn" type="button" onClick={() => navigate('/')}>
-          <FaArrowLeft /> Go to Home
-        </button>
       </div>
     </div>
   );
