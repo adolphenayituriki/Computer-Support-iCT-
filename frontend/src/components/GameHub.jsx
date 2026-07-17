@@ -3,20 +3,48 @@ import { FaLaptop, FaStar, FaGoogle, FaShieldAlt, FaShareAlt, FaGamepad, FaArrow
 import { useLang } from '../LanguageContext';
 
 const CATEGORIES = [
-  { id: 'basics', icon: FaLaptop, label: 'Computer Basics', color: '#5694F7' },
-  { id: 'msoffice', icon: FaStar, label: 'MS Office', color: '#25D366' },
-  { id: 'google', icon: FaGoogle, label: 'Google', color: '#EA4335' },
-  { id: 'digital', icon: FaShieldAlt, label: 'Digital Safety', color: '#FFCE08' },
+  {
+    id: 'basics',
+    icon: FaLaptop,
+    label: 'Computer Basics',
+    color: '#5694F7',
+    desc: 'Test your knowledge of hardware, software, CPU, RAM, storage, ports, and how computers work.',
+    topics: ['CPU & RAM', 'Storage (SSD/HDD)', 'Operating Systems', 'Ports & Peripherals'],
+  },
+  {
+    id: 'msoffice',
+    icon: FaStar,
+    label: 'MS Office',
+    color: '#25D366',
+    desc: 'Challenge your skills in Word, Excel, and PowerPoint — shortcuts, formulas, formatting, and more.',
+    topics: ['Word shortcuts', 'Excel formulas', 'PowerPoint design', 'Track Changes'],
+  },
+  {
+    id: 'google',
+    icon: FaGoogle,
+    label: 'Google Workspace',
+    color: '#EA4335',
+    desc: 'See how well you know Gmail, Google Docs, Sheets, Slides, Drive, and collaboration tools.',
+    topics: ['Gmail limits', 'Docs & Sheets', 'Sharing permissions', 'Offline mode'],
+  },
+  {
+    id: 'digital',
+    icon: FaShieldAlt,
+    label: 'Digital Safety',
+    color: '#FFCE08',
+    desc: 'Prove you can stay safe online — passwords, phishing, malware, backups, and internet security.',
+    topics: ['Phishing scams', 'Strong passwords', 'Two-factor auth', 'Malware & viruses'],
+  },
 ];
 
 export default function GameHub() {
   const { t } = useLang();
   const navigate = useNavigate();
 
-  const handleShare = () => {
-    const url = `${window.location.origin}/play`;
-    const text = `Think you're an ICT pro? Prove it! Take the ICT Speed Challenge at CS hub (iCT) and see how high you can score. Can you beat my score? 🔥\n\n${url}`;
-    if (navigator.share) navigator.share({ title: 'CS hub (iCT) — ICT Speed Challenge', text });
+  const handleChallenge = (catId, catLabel) => {
+    const url = `${window.location.origin}/play/${catId}`;
+    const text = `I challenge you to the "${catLabel}" quiz at CS hub (iCT)! Can you beat my score? 🔥\n\n${url}`;
+    if (navigator.share) navigator.share({ title: `CS hub (iCT) — ${catLabel} Challenge`, text });
     else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => alert('Link copied!'));
   };
 
@@ -28,17 +56,28 @@ export default function GameHub() {
           <h3 className="game-hub-title">{t('gameWithUs.title')}</h3>
           <p className="game-hub-sub">{t('gameWithUs.subtitle')}</p>
         </div>
-        <div className="game-cat-row">
+        <div className="game-challenge-list">
           {CATEGORIES.map((cat) => (
-            <a key={cat.id} className="game-cat-pill" href={`/play/${cat.id}`} target="_blank" rel="noopener noreferrer">
-              <cat.icon className="game-cat-icon" style={{ color: cat.color }} />
-              <span>{cat.label}</span>
-            </a>
+            <div key={cat.id} className="game-challenge-card">
+              <div className="gcc-head">
+                <cat.icon className="gcc-icon" style={{ color: cat.color }} />
+                <span className="gcc-label">{cat.label}</span>
+                <button className="gcc-play" type="button" href={`/play/${cat.id}`} onClick={(e) => { e.preventDefault(); window.open(`/play/${cat.id}`, '_blank'); }}>
+                  Play
+                </button>
+              </div>
+              <p className="gcc-desc">{cat.desc}</p>
+              <div className="gcc-topics">
+                {cat.topics.map((tp) => (
+                  <span key={tp} className="gcc-topic" style={{ borderColor: `${cat.color}40`, color: cat.color }}>{tp}</span>
+                ))}
+              </div>
+              <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)} style={{ borderColor: cat.color, color: cat.color }}>
+                <FaShareAlt /> Challenge a friend
+              </button>
+            </div>
           ))}
         </div>
-        <button className="game-share-section" type="button" onClick={handleShare}>
-          <FaShareAlt /> Challenge a friend
-        </button>
         <button className="game-home-btn" type="button" onClick={() => navigate('/')}>
           <FaArrowLeft /> Go to Home
         </button>

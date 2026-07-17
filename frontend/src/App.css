@@ -2062,6 +2062,109 @@ header.dash-header .hamburger span {
   flex-shrink: 0;
 }
 
+/* Challenge Cards */
+.game-challenge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.game-challenge-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s;
+}
+
+.game-challenge-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.gcc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.gcc-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.gcc-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e1b4b;
+  flex: 1;
+}
+
+.gcc-play {
+  padding: 0.25rem 0.7rem;
+  border-radius: 8px;
+  border: 1.5px solid #1e1b4b;
+  background: #1e1b4b;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.gcc-play:hover {
+  background: #312e81;
+  transform: translateY(-1px);
+}
+
+.gcc-desc {
+  font-size: 0.73rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0 0 0.5rem;
+}
+
+.gcc-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.gcc-topic {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.gcc-challenge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 1.5px solid;
+  border-radius: 50px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s;
+}
+
+.gcc-challenge:hover {
+  background: rgba(0, 0, 0, 0.03);
+  transform: translateY(-1px);
+}
+
 .game-share-section {
   display: inline-flex;
   align-items: center;
