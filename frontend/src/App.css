@@ -2150,11 +2150,12 @@ header.dash-header .hamburger span {
   align-items: center;
   gap: 0.3rem;
   background: none;
-  border: 1.5px solid;
+  border: 1.5px solid #5694F7;
   border-radius: 50px;
   padding: 0.3rem 0.75rem;
   font-size: 0.65rem;
   font-weight: 600;
+  color: #5694F7;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.25s;
