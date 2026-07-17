@@ -14,6 +14,8 @@ import FAQ from './components/FAQ';
 import CTA from './components/CTA';
 import About from './components/About';
 import Contact from './components/Contact';
+import GameWithUs from './components/GameWithUs';
+import GamePlay from './components/GamePlay';
 import News from './components/News';
 import Courses from './components/Courses';
 import AILearning from './components/AILearning';
@@ -60,6 +62,7 @@ function HomePage({ onLoginClick, onRegisterClick, onTeamClick }) {
       <Testimonials />
       <CTA onRegisterClick={onRegisterClick} onTeamClick={onTeamClick} />
       <Contact />
+      <GameWithUs />
     </main>
   );
 }
@@ -79,6 +82,7 @@ export default function App() {
     const location = useLocation();
     const isDashboard = location.pathname === '/dashboard' || location.pathname === '/setup-account' || location.pathname === '/ai-dashboard';
     const isAdmin = location.pathname === '/admin';
+    const isGamePlay = location.pathname.startsWith('/play/');
     const [waVisible, setWaVisible] = useState(false);
 
     useEffect(() => {
@@ -91,21 +95,22 @@ export default function App() {
 
     return (
       <>
-        {!isAdmin && !isDashboard && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
+        {!isAdmin && !isDashboard && !isGamePlay && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/contact" element={<main><Contact /></main>} />
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/ai-learning" element={<AILearning />} />
+          <Route path="/play/:category" element={<GamePlay />} />
           <Route path="/ai-dashboard" element={<ProtectedRoute><AILearningDashboard /></ProtectedRoute>} />
           <Route path="/setup-account" element={<SetupAccount />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
         </Routes>
-        {!isDashboard && !isAdmin && <Footer />}
-        {!isDashboard && !isAdmin && <EmergencyButton />}
-        {!isDashboard && !isAdmin && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
+        {!isDashboard && !isAdmin && !isGamePlay && <Footer />}
+        {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}
+        {!isDashboard && !isAdmin && !isGamePlay && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
         <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>

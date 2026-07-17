@@ -275,6 +275,12 @@ export default {
     "ctaBtn": "Tangura",
     "ctaSecondary": "Tuvugishe"
   },
+  "gameWithUs": {
+    "badge": "Igeragezo ry'Ikiyaboro",
+    "title": "Gerageza Ubumenyi Bwawe",
+    "subtitle": "Amasecond 10, ikibazo kimwe imbere. Tanga amaherezo menshi!",
+    "copied": "Igisubizo cyabitswe!"
+  },
   "aiModal": {
     "title": "Urubuga rw'Amasomo n'Ikoranabuhanga",
     "subtitle": "Hitamwo urwego rw'amasomo",

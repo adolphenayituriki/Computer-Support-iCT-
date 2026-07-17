@@ -275,6 +275,12 @@ export default {
     "ctaBtn": "Get Started",
     "ctaSecondary": "Contact Us"
   },
+  "gameWithUs": {
+    "badge": "ICT Speed Challenge",
+    "title": "Test Your Skills",
+    "subtitle": "60 seconds, one question at a time. Score as many points as you can!",
+    "copied": "Result copied to clipboard!"
+  },
   "aiModal": {
     "title": "AI Learning Platform",
     "subtitle": "Choose your learning level",
