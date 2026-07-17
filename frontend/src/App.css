@@ -2401,6 +2401,30 @@ header.dash-header .hamburger span {
   border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
+/* Standalone Game Hub Page */
+.game-hub-standalone {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+}
+
+.game-hub-standalone .game-cat-row {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.game-hub-standalone .game-cat-pill {
+  padding: 0.75rem;
+  font-size: 0.82rem;
+  border-radius: 14px;
+}
+
 @media (max-width: 480px) {
   .game-cat-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
   .sg-card { padding: 1.2rem 1rem; }

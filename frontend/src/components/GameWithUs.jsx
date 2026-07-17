@@ -12,7 +12,7 @@ export default function GameWithUs() {
   const { t } = useLang();
 
   const handleShareSection = () => {
-    const url = window.location.origin;
+    const url = `${window.location.origin}/play`;
     const text = `Think you're an ICT pro? Prove it! Take the ICT Speed Challenge at CS hub (iCT) and see how high you can score. Can you beat my score? 🔥\n\n${url}`;
     if (navigator.share) navigator.share({ title: 'CS hub (iCT) — ICT Speed Challenge', text });
     else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => alert('Link copied!'));

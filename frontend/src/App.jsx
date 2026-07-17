@@ -16,6 +16,7 @@ import About from './components/About';
 import Contact from './components/Contact';
 import GameWithUs from './components/GameWithUs';
 import GamePlay from './components/GamePlay';
+import GameHub from './components/GameHub';
 import News from './components/News';
 import Courses from './components/Courses';
 import AILearning from './components/AILearning';
@@ -82,7 +83,7 @@ export default function App() {
     const location = useLocation();
     const isDashboard = location.pathname === '/dashboard' || location.pathname === '/setup-account' || location.pathname === '/ai-dashboard';
     const isAdmin = location.pathname === '/admin';
-    const isGamePlay = location.pathname.startsWith('/play/');
+    const isGamePlay = location.pathname === '/play' || location.pathname.startsWith('/play/');
     const [waVisible, setWaVisible] = useState(false);
 
     useEffect(() => {
@@ -102,6 +103,7 @@ export default function App() {
           <Route path="/news" element={<News />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/ai-learning" element={<AILearning />} />
+          <Route path="/play" element={<GameHub />} />
           <Route path="/play/:category" element={<GamePlay />} />
           <Route path="/ai-dashboard" element={<ProtectedRoute><AILearningDashboard /></ProtectedRoute>} />
           <Route path="/setup-account" element={<SetupAccount />} />
