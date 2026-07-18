@@ -97,7 +97,7 @@ export default function AITopicWorkspace({ onBack }) {
             <h3>🖼️ AI Generated Image</h3>
             <p className="topic-image-prompt">{topic.image?.prompt}</p>
             {topic.image?.url && (
-              <img src={topic.image.url} alt={topic.image?.alt || topic.title} className="topic-image-img" />
+              <img src={topic.image.url} alt={topic.image?.alt || topic.title} className="topic-image-img" loading="lazy" />
             )}
             <div className="topic-image-actions">
               <button onClick={() => {

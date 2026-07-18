@@ -4,7 +4,7 @@ import AdminChatView from './AdminChatView';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield, FaCalendarAlt, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaPalette, FaFont, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield, FaCalendarAlt, FaSpinner, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import API_BASE from '../api';
@@ -1525,6 +1525,10 @@ function AdminInvites() {
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState(null);
+  const [emailModal, setEmailModal] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [sendingEmails, setSendingEmails] = useState(false);
 
   const fetchInvites = async () => {
     try {
@@ -1590,6 +1594,53 @@ function AdminInvites() {
     setUpdatingId(null);
   };
 
+  const sendCustomEmails = async () => {
+    if (!emailSubject.trim() || !emailMessage.trim()) return;
+    setSendingEmails(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/session-invites/send-custom-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ subject: emailSubject.trim(), message: emailMessage.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send emails');
+      alert(`Done! Sent: ${data.sent}, Failed: ${data.failed}`);
+      setEmailModal(false);
+      setEmailSubject('');
+      setEmailMessage('');
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    }
+    setSendingEmails(false);
+  };
+
+  const exportToExcel = () => {
+    const headers = ['Name', 'Email', 'Phone', 'Level', 'Status', 'Interests', 'Suggestion', 'Heard From', 'Email Sent', 'Registration Date'];
+    const rows = invites.map((inv) => [
+      inv.name,
+      inv.email,
+      inv.phone || '',
+      inv.level || '',
+      inv.status,
+      (inv.interests || []).join('; '),
+      inv.suggestion || '',
+      inv.heardFrom || '',
+      inv.emailSent ? 'Yes' : 'No',
+      new Date(inv.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    ]);
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `session-invites-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const filtered = statusFilter === 'all' ? invites : invites.filter((inv) => inv.status === statusFilter);
   const counts = { all: invites.length, new: invites.filter((i) => i.status === 'new').length, contacted: invites.filter((i) => i.status === 'contacted').length, confirmed: invites.filter((i) => i.status === 'confirmed').length };
 
@@ -1600,8 +1651,11 @@ function AdminInvites() {
   return (
     <div>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <button disabled={updatingId === 'all' || invites.length === 0} onClick={resendAllEmails} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: '2px solid #FFCE08', background: updatingId === 'all' ? '#fef3c7' : '#FFCE08', color: '#1e293b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          {updatingId === 'all' ? <><FaSpinner className="spin" /> Sending...</> : <><FaEnvelope /> Send All Emails</>}
+        <button disabled={invites.length === 0} onClick={() => setEmailModal(true)} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: '2px solid #FFCE08', background: '#FFCE08', color: '#1e293b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <FaEnvelope /> Send All Emails
+        </button>
+        <button disabled={invites.length === 0} onClick={exportToExcel} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: '2px solid #10b981', background: '#10b981', color: '#fff', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <FaDownload /> Export to Excel
         </button>
         {['all', 'new', 'contacted', 'confirmed'].map((s) => (
           <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: statusFilter === s ? '2px solid #5694F7' : '2px solid #e2e8f0', background: statusFilter === s ? '#5694F7' : '#fff', color: statusFilter === s ? '#fff' : '#64748b', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}>
@@ -1662,6 +1716,50 @@ function AdminInvites() {
           ))}
         </div>
       )}
+
+      {emailModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }} onClick={() => !sendingEmails && setEmailModal(false)}>
+          <div style={{ background: '#fff', borderRadius: '14px', padding: '2rem', maxWidth: 520, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1.1rem' }}>Send Email to All Registrations</h3>
+              <button disabled={sendingEmails} onClick={() => setEmailModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '1.2rem' }}><FaTimes /></button>
+            </div>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: '0 0 1rem' }}>
+              This will send your email to all <strong>{invites.length}</strong> registered participants.
+            </p>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Subject</label>
+              <input
+                type="text"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="e.g. Session Schedule Update"
+                disabled={sendingEmails}
+                style={{ width: '100%', padding: '0.6rem 0.8rem', border: '2px solid #e2e8f0', borderRadius: '8px', fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box' }}
+              />
+            </div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>Message</label>
+              <textarea
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                placeholder="Write your message here..."
+                rows={6}
+                disabled={sendingEmails}
+                style={{ width: '100%', padding: '0.6rem 0.8rem', border: '2px solid #e2e8f0', borderRadius: '8px', fontSize: '0.85rem', outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button disabled={sendingEmails} onClick={() => setEmailModal(false)} style={{ padding: '0.5rem 1.2rem', borderRadius: '8px', border: '2px solid #e2e8f0', background: '#fff', color: '#64748b', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+                Cancel
+              </button>
+              <button disabled={sendingEmails || !emailSubject.trim() || !emailMessage.trim()} onClick={sendCustomEmails} style={{ padding: '0.5rem 1.2rem', borderRadius: '8px', border: 'none', background: sendingEmails ? '#fef3c7' : '#FFCE08', color: '#1e293b', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                {sendingEmails ? <><FaSpinner className="spin" /> Sending to {invites.length}...</> : <><FaEnvelope /> Send to All ({invites.length})</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1669,7 +1767,7 @@ function AdminInvites() {
 function Loading() {
   return (
     <div className="page-loader" style={{ minHeight: '60vh' }}>
-      <img src="/LOGO IMAGE.png" alt="CS Hub" className="page-loader-logo" style={{ width: 72, height: 72 }} />
+      <img src="/LOGO IMAGE.png" alt="CS Hub" className="page-loader-logo" style={{ width: 72, height: 72 }} loading="lazy" />
       <div className="page-loader-text" style={{ color: '#6b7280' }}>Loading...</div>
       <div className="loading-spinner-circle" />
     </div>
@@ -1896,7 +1994,7 @@ export default function AdminDashboard() {
       <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="adm-sidebar-header">
           <div className="adm-sidebar-logo">
-            <img src="/LOGO IMAGE.png" alt="CS Hub" />
+            <img src="/LOGO IMAGE.png" alt="CS Hub" loading="lazy" />
             <div>
               <strong>CS Hub</strong>
               <span>Admin Panel</span>

@@ -108,7 +108,7 @@ export default function Testimonials() {
                   <FaQuoteLeft size={18} className="testimonial-quote-icon" />
                   <div className="testimonial-author">
                     {t.avatar ? (
-                      <img src={t.avatar} alt={t.name} className="testimonial-avatar" />
+                      <img src={t.avatar} alt={t.name} className="testimonial-avatar" loading="lazy" />
                     ) : (
                       <div className="testimonial-avatar-fallback">
                         {t.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}

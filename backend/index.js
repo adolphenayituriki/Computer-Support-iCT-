@@ -6,6 +6,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import { connectDB } from './src/config/db.js';
 import swaggerSpec from './src/config/swagger.js';
@@ -15,6 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
+app.use(compression());
 app.use(express.json());
 app.use(express.static('public'));
 

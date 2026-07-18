@@ -28,7 +28,7 @@ export default function NewsPreview() {
             <Link to="/news" key={item._id} className="news-preview-card">
               {item.mediaType === 'image' && item.mediaUrl && (
                 <div className="news-preview-thumb">
-                  <img src={item.mediaUrl} alt={item.title} />
+                  <img src={item.mediaUrl} alt={item.title} loading="lazy" />
                 </div>
               )}
               {item.mediaType === 'video' && (

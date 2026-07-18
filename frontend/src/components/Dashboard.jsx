@@ -992,7 +992,7 @@ export default function Dashboard() {
       <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="adm-sidebar-header">
           <div className="adm-sidebar-logo">
-            <img src="/LOGO IMAGE.png" alt="CS Hub" />
+            <img src="/LOGO IMAGE.png" alt="CS Hub" loading="lazy" />
             <div>
               <strong>CS Hub</strong>
               <span>User Panel</span>

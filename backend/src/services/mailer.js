@@ -266,6 +266,24 @@ export async function sendSessionInviteConfirmation(toEmail, name, level, sugges
   });
 }
 
+export async function sendCustomEmail(toEmail, name, subject, message) {
+  await send({
+    to: toEmail,
+    subject: `${subject} — CS Hub (iCT)`,
+    html: baseHtml(`
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
+        Hi <strong style="color:#f8fafc;">${name}</strong>,
+      </p>
+      <div style="background: #1e293b; border-radius: 10px; padding: 18px; margin-bottom: 16px;">
+        <p style="margin: 0; color: #cbd5e1; line-height: 1.7; white-space: pre-wrap;">${message}</p>
+      </div>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin: 0;">
+        Questions? <a href="https://computer-support-ict.vercel.app/contact" style="color: #38bdf8;">Contact us</a> or reply to this email.
+      </p>
+    `),
+  });
+}
+
 export async function sendSessionInviteAdminNotification(invite) {
   await sendAdminNotification('New Session Registration',
     `Name: ${invite.name}\nEmail: ${invite.email}\nPhone: ${invite.phone || 'N/A'}\nLevel: ${invite.level}${invite.suggestion ? '\nTopic: ' + invite.suggestion : ''}`

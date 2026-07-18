@@ -1,8 +1,8 @@
-import { FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaHeart } from 'react-icons/fa';
+import { FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaHeart, FaNewspaper } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../LanguageContext';
 
-export default function Footer() {
+export default function Footer({ onNewsletterClick }) {
   const navigate = useNavigate();
   const { t } = useLang();
   const goHome = (hash) => {
@@ -18,7 +18,7 @@ export default function Footer() {
       <div className="footer-content">
         <div className="footer-col footer-col-brand">
           <div className="footer-brand-row">
-            <img src="/LOGO IMAGE.png" alt="CS hub (iCT)" className="footer-logo" />
+            <img src="/LOGO IMAGE.png" alt="CS hub (iCT)" className="footer-logo" loading="lazy" />
             <div>
               <h4>CS hub <span>(iCT)</span></h4>
               <p className="footer-tagline">{t('footer.tagline')}</p>
@@ -47,6 +47,7 @@ export default function Footer() {
             <button type="button" onClick={() => goHome('#contact')}>{t('nav.contact')}</button>
             <button type="button" onClick={() => navigate('/news')}>{t('nav.news')}</button>
             <button type="button" onClick={() => navigate('/courses')}>{t('nav.courses')}</button>
+            <button type="button" className="footer-newsletter-btn" onClick={onNewsletterClick}><FaNewspaper /> Newsletter</button>
           </div>
         </div>
 

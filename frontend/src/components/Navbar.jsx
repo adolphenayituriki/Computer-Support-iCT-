@@ -134,7 +134,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
       )}
       <nav>
         <a href="/" className="logo">
-          <img src="/LOGO IMAGE.png" alt="CS hub (iCT)" className="logo-img" />
+          <img src="/LOGO IMAGE.png" alt="CS hub (iCT)" className="logo-img" loading="lazy" />
           <span className="logo-text">
             <span className="logo-cs">CS H</span><span className="logo-ub">ub</span> <span className="logo-paren">(</span><span className="logo-ub">i</span><span className="logo-ct">CT</span><span className="logo-paren">)</span>
             <small>COMPUTER SUPPORT</small>

@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaLaptop, FaStar, FaGoogle, FaShieldAlt, FaShareAlt, FaGamepad, FaArrowLeft } from 'react-icons/fa';
+import { FaLaptop, FaStar, FaGoogle, FaShieldAlt, FaShareAlt, FaGamepad, FaArrowLeft, FaHeart } from 'react-icons/fa';
 import { useLang } from '../LanguageContext';
 
 const CATEGORIES = [
@@ -37,9 +38,22 @@ const CATEGORIES = [
   },
 ];
 
+const getLiked = () => {
+  try { return JSON.parse(localStorage.getItem('cshub_game_likes') || '{}'); } catch { return {}; }
+};
+
 export default function GameHub() {
   const { t } = useLang();
   const navigate = useNavigate();
+  const [likes, setLikes] = useState(getLiked);
+
+  const toggleLike = (catId) => {
+    setLikes((prev) => {
+      const next = { ...prev, [catId]: !prev[catId] };
+      localStorage.setItem('cshub_game_likes', JSON.stringify(next));
+      return next;
+    });
+  };
 
   const handleChallenge = (catId, catLabel) => {
     const url = `${window.location.origin}/play/${catId}`;
@@ -75,9 +89,14 @@ export default function GameHub() {
                   <span key={tp} className="gcc-topic" style={{ borderColor: `${cat.color}40`, color: cat.color }}>{tp}</span>
                 ))}
               </div>
-              <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)}>
-                <FaShareAlt /> Challenge a friend
-              </button>
+              <div className="gcc-actions">
+                <button className={`gcc-like-btn${likes[cat.id] ? ' liked' : ''}`} type="button" onClick={() => toggleLike(cat.id)}>
+                  <FaHeart /> {likes[cat.id] ? 'Liked' : 'Like'}
+                </button>
+                <button className="gcc-challenge" type="button" onClick={() => handleChallenge(cat.id, cat.label)}>
+                  <FaShareAlt /> Challenge a friend
+                </button>
+              </div>
             </div>
           ))}
         </div>

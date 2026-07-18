@@ -29,7 +29,7 @@ export default {
     "step1Title": "Tell Us Your Issue",
     "step1Desc": "Describe your computer problem through our support request form. Hardware, software, digital skills training — we handle it all.",
     "step2Title": "We Diagnose & Fix",
-    "step2Desc": "Our student tech team takes a look. We troubleshoot, repair, install software, or guide you through the skills you need.",
+    "step2Desc": "Our tech team takes a look. We troubleshoot, repair, install software, or guide you through the skills you need.",
     "step3Title": "Pick Up & Level Up",
     "step3Desc": "Collect your device working like new. We also make sure you understand the basics so you grow more confident digitally."
   },

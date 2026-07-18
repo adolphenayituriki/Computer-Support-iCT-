@@ -1,5 +1,5 @@
 import SessionInvite from '../models/SessionInvite.js';
-import { sendSessionInviteConfirmation, sendSessionInviteAdminNotification, sendSessionStatusUpdate } from '../services/mailer.js';
+import { sendSessionInviteConfirmation, sendSessionInviteAdminNotification, sendSessionStatusUpdate, sendCustomEmail } from '../services/mailer.js';
 
 export async function createSessionInvite(req, res) {
   try {
@@ -132,6 +132,31 @@ export async function resendAllSessionEmails(req, res) {
         }
         invite.emailSent = true;
         await invite.save();
+        sent++;
+      } catch {
+        failed++;
+      }
+    }
+
+    res.json({ success: true, sent, failed, total: invites.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function sendCustomEmailToAll(req, res) {
+  try {
+    const { subject, message } = req.body;
+    if (!subject || !message) {
+      return res.status(400).json({ error: 'Subject and message are required.' });
+    }
+    const invites = await SessionInvite.find({});
+    let sent = 0;
+    let failed = 0;
+
+    for (const invite of invites) {
+      try {
+        await sendCustomEmail(invite.email, invite.name, subject, message);
         sent++;
       } catch {
         failed++;

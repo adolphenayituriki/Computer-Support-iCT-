@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { SidebarProvider } from './SidebarContext';
@@ -13,26 +13,36 @@ import WhyUs from './components/WhyUs';
 import FAQ from './components/FAQ';
 import CTA from './components/CTA';
 import About from './components/About';
-import Contact from './components/Contact';
-import GameWithUs from './components/GameWithUs';
-import GamePlay from './components/GamePlay';
-import GameHub from './components/GameHub';
-import News from './components/News';
-import Courses from './components/Courses';
-import AILearning from './components/AILearning';
-import AILearningDashboard from './components/AILearningDashboard';
-import EmergencyButton from './components/EmergencyButton';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
-import Dashboard from './components/Dashboard';
-import AdminDashboard from './components/AdminDashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import EmergencyButton from './components/EmergencyButton';
+import NewsletterPopup from './components/NewsletterPopup';
 import Modal from './components/Modal';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 import TeamApplyModal from './components/TeamApplyModal';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
-import SetupAccount from './components/SetupAccount';
+import ProtectedRoute from './components/ProtectedRoute';
+
+const Contact = lazy(() => import('./components/Contact'));
+const GameWithUs = lazy(() => import('./components/GameWithUs'));
+const GamePlay = lazy(() => import('./components/GamePlay'));
+const GameHub = lazy(() => import('./components/GameHub'));
+const News = lazy(() => import('./components/News'));
+const Courses = lazy(() => import('./components/Courses'));
+const AILearning = lazy(() => import('./components/AILearning'));
+const AILearningDashboard = lazy(() => import('./components/AILearningDashboard'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const SetupAccount = lazy(() => import('./components/SetupAccount'));
+
+function PageSpinner() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="loading-spinner"><div className="loading-spinner-circle" /></div>
+    </div>
+  );
+}
 
 function HomePage({ onLoginClick, onRegisterClick, onTeamClick }) {
   useEffect(() => {
@@ -73,11 +83,12 @@ export default function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
+  const [showNewsletter, setShowNewsletter] = useState(false);
   const openLogin = () => { setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowLogin(true); };
   const openRegister = () => { setShowLogin(false); setShowTeam(false); setShowForgot(false); setShowRegister(true); };
   const openTeam = () => { setShowLogin(false); setShowRegister(false); setShowForgot(false); setShowTeam(true); };
   const openForgot = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(true); };
-  const closeAll = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(false); };
+  const closeAll = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowNewsletter(false); };
 
   function AppLayout() {
     const location = useLocation();
@@ -99,19 +110,20 @@ export default function App() {
         {!isAdmin && !isDashboard && !isGamePlay && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
-          <Route path="/contact" element={<main><Contact /></main>} />
-          <Route path="/news" element={<News />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/ai-learning" element={<AILearning />} />
-          <Route path="/play" element={<GameHub />} />
-          <Route path="/play/:category" element={<GamePlay />} />
-          <Route path="/ai-dashboard" element={<ProtectedRoute><AILearningDashboard /></ProtectedRoute>} />
-          <Route path="/setup-account" element={<SetupAccount />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/contact" element={<Suspense fallback={<PageSpinner />}><main><Contact /></main></Suspense>} />
+          <Route path="/news" element={<Suspense fallback={<PageSpinner />}><News /></Suspense>} />
+          <Route path="/courses" element={<Suspense fallback={<PageSpinner />}><Courses /></Suspense>} />
+          <Route path="/ai-learning" element={<Suspense fallback={<PageSpinner />}><AILearning /></Suspense>} />
+          <Route path="/play" element={<Suspense fallback={<PageSpinner />}><GameHub /></Suspense>} />
+          <Route path="/play/:category" element={<Suspense fallback={<PageSpinner />}><GamePlay /></Suspense>} />
+          <Route path="/ai-dashboard" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><AILearningDashboard /></ProtectedRoute></Suspense>} />
+          <Route path="/setup-account" element={<Suspense fallback={<PageSpinner />}><SetupAccount /></Suspense>} />
+          <Route path="/dashboard" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><Dashboard /></ProtectedRoute></Suspense>} />
+          <Route path="/admin" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute></Suspense>} />
         </Routes>
-        {!isDashboard && !isAdmin && !isGamePlay && <Footer />}
+        {!isDashboard && !isAdmin && !isGamePlay && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
         {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}
+        <NewsletterPopup open={showNewsletter} onClose={() => setShowNewsletter(false)} />
         {!isDashboard && !isAdmin && !isGamePlay && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>

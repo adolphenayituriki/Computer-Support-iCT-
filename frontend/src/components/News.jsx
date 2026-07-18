@@ -174,9 +174,9 @@ export default function News() {
           <article className="news-featured" onClick={() => openModal(featured)}>
             <div className="news-featured-bg">
               {featured.mediaType === 'image' && featured.mediaUrl ? (
-                <img src={featured.mediaUrl} alt={featured.title} />
+                <img src={featured.mediaUrl} alt={featured.title} loading="lazy" />
               ) : featured.mediaType === 'video' && getYouTubeEmbed(featured.mediaUrl) ? (
-                <img src={`https://img.youtube.com/vi/${getYouTubeEmbed(featured.mediaUrl).split('/').pop()}/maxresdefault.jpg`} alt={featured.title} onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src={`https://img.youtube.com/vi/${getYouTubeEmbed(featured.mediaUrl).split('/').pop()}/maxresdefault.jpg`} alt={featured.title} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
               ) : null}
             </div>
             <div className="news-featured-overlay" />
@@ -248,7 +248,7 @@ export default function News() {
                       <article key={item._id} className={`news-grid-card news-grid-card-${item.mediaType}`}>
                         {item.mediaType === 'image' && item.mediaUrl && (
                           <div className="news-grid-card-media" onClick={() => openModal(item)}>
-                            <img src={item.mediaUrl} alt={item.title} />
+                            <img src={item.mediaUrl} alt={item.title} loading="lazy" />
                             <span className="news-grid-card-media-badge"><FaImage /></span>
                           </div>
                         )}
@@ -307,9 +307,9 @@ export default function News() {
                 const likes = localLikes[item._id] || { count: 0, liked: false };
                 return (
                   <article key={item._id} className={`news-grid-card news-grid-card-${item.mediaType}`}>
-                    {item.mediaType === 'image' && item.mediaUrl && (
+                      {item.mediaType === 'image' && item.mediaUrl && (
                       <div className="news-grid-card-media" onClick={() => openModal(item)}>
-                        <img src={item.mediaUrl} alt={item.title} />
+                        <img src={item.mediaUrl} alt={item.title} loading="lazy" />
                         <span className="news-grid-card-media-badge"><FaImage /></span>
                       </div>
                     )}
@@ -388,7 +388,7 @@ export default function News() {
 
               {selected.mediaType === 'image' && selected.mediaUrl && (
                 <div className="news-modal-media">
-                  <img src={selected.mediaUrl} alt={selected.title} />
+                  <img src={selected.mediaUrl} alt={selected.title} loading="lazy" />
                 </div>
               )}
               {selected.mediaType === 'video' && getYouTubeEmbed(selected.mediaUrl) && (
