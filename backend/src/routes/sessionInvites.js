@@ -6,10 +6,10 @@ const router = Router();
 
 router.post('/', createSessionInvite);
 router.get('/', authenticate, adminOnly, getSessionInvites);
-router.put('/:id/status', authenticate, adminOnly, updateSessionInviteStatus);
-router.post('/:id/resend-email', authenticate, adminOnly, resendSessionEmail);
 router.post('/resend-all', authenticate, adminOnly, resendAllSessionEmails);
 router.post('/send-custom-email', authenticate, adminOnly, sendCustomEmailToAll);
+router.put('/:id/status', authenticate, adminOnly, updateSessionInviteStatus);
+router.post('/:id/resend-email', authenticate, adminOnly, resendSessionEmail);
 router.delete('/:id', authenticate, adminOnly, deleteSessionInvite);
 
 export default router;

@@ -1587,7 +1587,9 @@ function AdminInvites() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token()}` },
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('Server returned unexpected response. Please try again.'); }
       alert(`Done! Sent: ${data.sent}, Failed: ${data.failed}`);
       fetchInvites();
     } catch { }
@@ -1603,7 +1605,9 @@ function AdminInvites() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ subject: emailSubject.trim(), message: emailMessage.trim() }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error(`Server returned unexpected response. Please try again.`); }
       if (!res.ok) throw new Error(data.error || 'Failed to send emails');
       alert(`Done! Sent: ${data.sent}, Failed: ${data.failed}`);
       setEmailModal(false);
