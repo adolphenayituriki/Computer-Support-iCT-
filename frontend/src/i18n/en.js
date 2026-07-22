@@ -27,7 +27,7 @@ export default {
     "title": "How It Works",
     "subtitle": "Getting help is as easy as 1-2-3",
     "step1Title": "Tell Us Your Issue",
-    "step1Desc": "Describe your computer problem through our support request form. Hardware, software, digital skills training — we handle it all.",
+    "step1Desc": "Describe your computer problem through our support request form. Hardware, software, digital skills training, we handle it all.",
     "step2Title": "We Diagnose & Fix",
     "step2Desc": "Our tech team takes a look. We troubleshoot, repair, install software, or guide you through the skills you need.",
     "step3Title": "Pick Up & Level Up",
@@ -78,9 +78,9 @@ export default {
     "title": "Why CS hub (iCT)",
     "subtitle": "Born from real challenges, built for real solutions",
     "nationwide": "Nationwide Support",
-    "nationwideDesc": "We serve every corner of Rwanda — all universities, schools, colleges, entrepreneurs, employees, and anyone in need of computer support and ICT skills.",
+    "nationwideDesc": "We serve every corner of Rwanda including all universities, schools, colleges, entrepreneurs, employees, and anyone in need of computer support and ICT skills.",
     "forStudents": "For Students & Teachers",
-    "forStudentsDesc": "We support everyone — students, teachers, and staff — who want to improve their digital skills and apply ICT to their work and studies.",
+    "forStudentsDesc": "We support everyone. Students, teachers, and staff who want to improve their digital skills and apply ICT to their work and studies.",
     "digitalGap": "Closing the Digital Gap",
     "digitalGapDesc": "Low digital skills should not hold anyone back. We provide hands-on training and support to help our community compete globally.",
     "fastFree": "Fast & Free Support",
@@ -89,8 +89,8 @@ export default {
   "about": {
     "title": "Our Story",
     "p1": "CS hub (iCT) was born from a simple observation: many students struggled with setting up their computers, had low digital skills, and lacked the ICT knowledge needed to succeed in their courses and careers.",
-    "p2": "Our founders saw that this digital gap was holding back talented students and teachers from competing globally. They realized that ICT is the most powerful tool to help everyone — students, teachers, and staff — apply their work digitally and reach global standards.",
-    "p3": "Today we are a student-run initiative dedicated to making technology accessible. No jargon, no judgement — just real help from people who understand the struggle."
+    "p2": "Our founders saw that this digital gap was holding back talented students and teachers from competing globally. They realized that ICT is the most powerful tool to help everyone. Students, teachers, and staff apply their work digitally and reach global standards.",
+    "p3": "Today we are a student-run initiative dedicated to making technology accessible. No jargon, no judgement, just real help from people who understand the struggle."
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -161,7 +161,7 @@ export default {
     "desc": "Empowering students and teachers with digital skills and computer support.",
     "quickLinks": "Quick Links",
     "contact": "Contact",
-    "copyright": "© 2026 CS hub (iCT). Made with ❤ for our community."
+    "copyright": "© 2026 CS hub (iCT). Made with  for our community."
   },
   "serviceModal": {
     "whatsIncluded": "What's Included",

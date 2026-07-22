@@ -63,14 +63,22 @@ export default function Services({ onLoginClick }) {
 
   return (
     <section id="services" className="services section-reveal">
-      <h2 className="section-title">{t('services.title')}</h2>
-      <p className="section-sub">{t('services.subtitle')}</p>
+      <div className="services-glass-header">
+        <h2 className="section-title">{t('services.title')}</h2>
+        <p className="section-sub">{t('services.subtitle')}</p>
+      </div>
+
       <div className="cards">
         {services.map((s) => (
-          <div className="card" key={s.title}>
-            <div className="card-icon">{s.icon}</div>
-            <h3>{s.title}</h3>
-            <ul className="card-features">
+          <div className="svc-card" key={s.title}>
+            <div className="svc-card-top">
+              <div className="svc-card-icon">
+                {s.icon}
+              </div>
+              <h3 className="svc-card-title">{s.title}</h3>
+            </div>
+            <div className="svc-card-divider" />
+            <ul className="svc-card-features">
               {s.features.map((f) => (
                 <li key={f}>{f}</li>
               ))}

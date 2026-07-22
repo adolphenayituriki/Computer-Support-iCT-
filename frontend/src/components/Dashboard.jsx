@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
+import GroupChatView from './GroupChatView';
 import HelpModal from './HelpModal';
 import {
   FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
@@ -10,7 +11,7 @@ import {
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
   FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome,
   FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
-  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus
+  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -35,6 +36,7 @@ const SIDEBAR_GROUPS = [
       { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
       { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
       { key: 'chat', icon: <FaComments />, label: 'Messages' },
+      { key: 'group-chat', icon: <FaUsers />, label: 'Group Chat' },
       { key: 'help', icon: <FaBook />, label: 'Help Center' },
     ],
   },
@@ -247,8 +249,8 @@ function TicketsView({ tickets, setTickets }) {
 
       <div className="adm-chart-section" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '1.25rem' }}><FaPlus /> New Support Request</div>
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-          <input type="text" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required style={{ gridColumn: '1 / -1' }} />
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <input type="text" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
             <option value="general">General</option>
             <option value="hardware">Hardware</option>
@@ -257,12 +259,11 @@ function TicketsView({ tickets, setTickets }) {
             <option value="network">Network</option>
             <option value="training">Training</option>
           </select>
-          <div></div>
-          <textarea rows="3" placeholder="Describe your issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required style={{ gridColumn: '1 / -1' }} />
-          <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+          <textarea rows="3" placeholder="Describe your issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button type="submit" className="btn" disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Submitting...</> : <><FaPlus /> Submit Request</>}</button>
           </div>
-          {message && <p className="form-feedback" style={{ gridColumn: '1 / -1' }}>{message}</p>}
+          {message && <p className="form-feedback">{message}</p>}
         </form>
       </div>
 
@@ -278,9 +279,12 @@ function TicketsView({ tickets, setTickets }) {
           </div>
         </div>
         {filteredTickets.length === 0 ? (
-          <div className="empty-state" style={{ padding: '2rem' }}>
-            <FaTicketAlt size={36} style={{ color: '#d1d5db' }} />
-            <p style={{ margin: '0.5rem 0 0', color: '#6b7280' }}>No {filter !== 'all' ? filter : ''} tickets yet.</p>
+          <div className="empty-state" style={{ padding: '2rem 1rem' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+              <FaTicketAlt size={24} style={{ color: '#3b82f6' }} />
+            </div>
+            <p style={{ marginTop: '1rem', fontWeight: 600 }}>No {filter !== 'all' ? filter : ''} tickets yet.</p>
+            <span>Submit a support request above to get started.</span>
           </div>
         ) : (
           <div className="ticket-list">
@@ -347,7 +351,7 @@ function TicketsView({ tickets, setTickets }) {
   );
 }
 
-function SuggestionsView() {
+function SuggestionsView({ onCountChange }) {
   const { showToast } = useToast();
   const [suggestions, setSuggestions] = useState([]);
   const [form, setForm] = useState({ title: '', description: '' });
@@ -372,7 +376,7 @@ function SuggestionsView() {
   useEffect(() => {
     fetch(`${API_BASE}/api/suggestions`, { headers: { Authorization: `Bearer ${token()}` } })
       .then((r) => r.json())
-      .then(setSuggestions)
+      .then((data) => { setSuggestions(data); onCountChange?.(data.length); })
       .catch(() => {});
   }, []);
 
@@ -487,9 +491,11 @@ function SuggestionsView() {
         <div className="sug-list-card">
           <h3>My Suggestions <span className="sug-count">{suggestions.length}</span></h3>
           {suggestions.length === 0 ? (
-            <div className="empty-state">
-              <FaLightbulb size={36} style={{ color: 'rgba(255,255,255,0.12)' }} />
-              <p>No suggestions yet.</p>
+            <div className="empty-state" style={{ padding: '2rem 1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                <FaLightbulb size={24} style={{ color: '#8b5cf6' }} />
+              </div>
+              <p style={{ marginTop: '1rem', fontWeight: 600 }}>No suggestions yet.</p>
               <span>Share your ideas to help us improve.</span>
             </div>
           ) : (
@@ -665,7 +671,7 @@ function TeamView({ teamData, setTeamData }) {
   );
 }
 
-function DashboardView({ tickets, user }) {
+function DashboardView({ tickets, suggestionsCount, user }) {
   const openCount = tickets.filter((t) => t.status === 'open' || t.status === 'in-progress').length;
   const resolvedCount = tickets.filter((t) => t.status === 'resolved' || t.status === 'closed').length;
   const maxTicket = Math.max(tickets.length, 1);
@@ -691,7 +697,7 @@ function DashboardView({ tickets, user }) {
         </div>
         <div className="adm-stat-card">
           <div className="adm-stat-icon" style={{ background: '#f5f3ff', color: '#8b5cf6' }}><FaLightbulb /></div>
-          <div className="adm-stat-info"><strong>0</strong><span>Suggestions</span></div>
+          <div className="adm-stat-info"><strong>{suggestionsCount || 0}</strong><span>Suggestions</span></div>
         </div>
       </div>
 
@@ -719,9 +725,11 @@ function DashboardView({ tickets, user }) {
         <div className="adm-chart-sub-card">
           <h4>Recent Tickets</h4>
           {tickets.length === 0 ? (
-            <div className="empty-state" style={{ padding: '1rem' }}>
-              <FaTicketAlt size={28} style={{ color: '#d1d5db' }} />
-              <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem' }}>No tickets yet.</p>
+            <div className="empty-state" style={{ padding: '1.5rem 1rem' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                <FaTicketAlt size={20} style={{ color: '#3b82f6' }} />
+              </div>
+              <p style={{ marginTop: '0.7rem', fontSize: '0.85rem' }}>No tickets yet.</p>
             </div>
           ) : (
             <div className="adm-chart-sub-items">
@@ -738,9 +746,11 @@ function DashboardView({ tickets, user }) {
         <div className="adm-chart-sub-card">
           <h4>Categories</h4>
           {tickets.length === 0 ? (
-            <div className="empty-state" style={{ padding: '1rem' }}>
-              <FaLightbulb size={28} style={{ color: '#d1d5db' }} />
-              <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem' }}>No data yet.</p>
+            <div className="empty-state" style={{ padding: '1.5rem 1rem' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                <FaLightbulb size={20} style={{ color: '#8b5cf6' }} />
+              </div>
+              <p style={{ marginTop: '0.7rem', fontSize: '0.85rem' }}>No data yet.</p>
             </div>
           ) : (
             <div className="adm-chart-sub-items">
@@ -763,7 +773,7 @@ function DashboardView({ tickets, user }) {
   );
 }
 
-function HelpCenterView() {
+function HelpCenterView({ setTab }) {
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqs = [
@@ -796,13 +806,13 @@ function HelpCenterView() {
         {quickLinks.map((link) => (
           link.href ? (
             <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="dash-hc-card">
-              <div className="dash-hc-card-icon" style={{ background: `${link.color}18`, color: link.color }}>{link.icon}</div>
+              <div className="dash-hc-card-icon" style={{ background: `${link.color}15`, color: link.color }}>{link.icon}</div>
               <span className="dash-hc-card-label">{link.label}</span>
               <FaExternalLinkAlt className="dash-hc-card-ext" />
             </a>
           ) : (
-            <button key={link.label} className="dash-hc-card" onClick={() => document.querySelector(`.adm-sidebar-item`)?.click()}>
-              <div className="dash-hc-card-icon" style={{ background: `${link.color}18`, color: link.color }}>{link.icon}</div>
+            <button key={link.label} className="dash-hc-card" onClick={() => setTab?.('tickets')}>
+              <div className="dash-hc-card-icon" style={{ background: `${link.color}15`, color: link.color }}>{link.icon}</div>
               <span className="dash-hc-card-label">{link.label}</span>
             </button>
           )
@@ -876,6 +886,7 @@ export default function Dashboard() {
   const [tickets, setTickets] = useState([]);
   const [teamData, setTeamData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestionsCount, setSuggestionsCount] = useState(0);
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -1126,15 +1137,17 @@ export default function Dashboard() {
             </div>
           )}
           {tab === 'analytics' ? (
-            <DashboardView tickets={searchQuery.trim() ? filteredTickets : tickets} user={user} />
+            <DashboardView tickets={searchQuery.trim() ? filteredTickets : tickets} suggestionsCount={suggestionsCount} user={user} />
           ) : tab === 'tickets' ? (
             <TicketsView tickets={searchQuery.trim() ? filteredTickets : tickets} setTickets={setTickets} />
           ) : tab === 'suggestions' ? (
-            <SuggestionsView />
+            <SuggestionsView onCountChange={setSuggestionsCount} />
           ) : tab === 'chat' ? (
             <UserChatView />
+          ) : tab === 'group-chat' ? (
+            <GroupChatView />
           ) : tab === 'help' ? (
-            <HelpCenterView />
+            <HelpCenterView setTab={setTab} />
           ) : tab === 'team' && teamData?.isTeamMember ? (
             <TeamView teamData={teamData} setTeamData={setTeamData} />
           ) : (

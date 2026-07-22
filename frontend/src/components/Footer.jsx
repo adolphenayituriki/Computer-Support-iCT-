@@ -40,14 +40,19 @@ export default function Footer({ onNewsletterClick }) {
 
         <div className="footer-col">
           <h4>{t('footer.quickLinks')}</h4>
-          <div className="footer-links">
-            <button type="button" onClick={() => goHome('#home')}>{t('nav.home')}</button>
-            <button type="button" onClick={() => goHome('#services')}>{t('nav.services')}</button>
-            <button type="button" onClick={() => goHome('#about')}>{t('nav.about')}</button>
-            <button type="button" onClick={() => goHome('#contact')}>{t('nav.contact')}</button>
-            <button type="button" onClick={() => navigate('/news')}>{t('nav.news')}</button>
-            <button type="button" onClick={() => navigate('/courses')}>{t('nav.courses')}</button>
-            <button type="button" className="footer-newsletter-btn" onClick={onNewsletterClick}><FaNewspaper /> Newsletter</button>
+          <div className="footer-links-split">
+            <div className="footer-links-col">
+              <button type="button" onClick={() => goHome('#home')}>{t('nav.home')}</button>
+              <button type="button" onClick={() => goHome('#services')}>{t('nav.services')}</button>
+              <button type="button" onClick={() => goHome('#about')}>{t('nav.about')}</button>
+              <button type="button" onClick={() => goHome('#contact')}>{t('nav.contact')}</button>
+            </div>
+            <div className="footer-links-col">
+              <button type="button" onClick={() => navigate('/news')}>{t('nav.news')}</button>
+              <button type="button" onClick={() => navigate('/courses')}>{t('nav.courses')}</button>
+              <button type="button" onClick={() => navigate('/collaborators')} className="footer-developers-link">Developers</button>
+              <button type="button" className="footer-newsletter-btn" onClick={onNewsletterClick}><FaNewspaper /> Newsletter</button>
+            </div>
           </div>
         </div>
 

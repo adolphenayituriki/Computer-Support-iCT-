@@ -25,9 +25,10 @@ export default function HowItWorks({ onLoginClick }) {
         <h2 className="section-title">{t('howItWorks.title')}</h2>
         <p className="section-sub">{t('howItWorks.subtitle')}</p>
         <div className="steps">
-          {steps.map((s) => (
+          {steps.map((s, i) => (
             <div className="step" key={s.num}>
               <div className="step-num">{s.num}</div>
+              {i < steps.length - 1 && <div className="step-connector" />}
               <h4>{s.title}</h4>
               <p>{s.desc}</p>
             </div>

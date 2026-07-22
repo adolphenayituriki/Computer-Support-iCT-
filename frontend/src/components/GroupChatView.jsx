@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaComments, FaPaperPlane, FaWifi, FaExclamationCircle, FaRedo } from 'react-icons/fa';
+import { FaUsers, FaPaperPlane, FaExclamationCircle, FaRedo } from 'react-icons/fa';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -22,10 +22,22 @@ function formatTime(dateStr) {
   return isToday ? time : `${d.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${time}`;
 }
 
-export default function UserChatView() {
+const AVATAR_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#f97316'];
+
+function getAvatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function getInitials(name) {
+  return (name || '?').split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+export default function GroupChatView() {
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [conv, setConv] = useState(null);
+  const [chat, setChat] = useState(null);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,20 +48,13 @@ export default function UserChatView() {
   const inputRef = useRef(null);
   const retryTimerRef = useRef(null);
 
-  const fetchConv = useCallback(async () => {
+  const fetchChat = useCallback(async () => {
     try {
-      const data = await apiFetch('/api/conversations');
+      const data = await apiFetch('/api/group-chat');
       if (data && !data.error) {
-        const newCount = data?.messages?.length || 0;
-        if (newCount > prevCountRef.current && prevCountRef.current > 0 && document.hidden) {
-          showToast('New message from admin');
-        }
-        prevCountRef.current = newCount;
-        setConv(data);
+        setChat(data);
         setError(null);
         setRetries(0);
-      } else if (data?.error === 'Not authorized, no token') {
-        setError(null);
       } else if (data?.error) {
         setError(data.error);
       }
@@ -57,33 +62,33 @@ export default function UserChatView() {
       setError('Could not connect to server. The backend may be starting up.');
     }
     setLoading(false);
-  }, [showToast]);
+  }, []);
 
-  useEffect(() => { fetchConv(); }, [fetchConv]);
+  useEffect(() => { fetchChat(); }, [fetchChat]);
 
   useEffect(() => {
     if (error && retries < 5) {
       const delay = Math.min(1000 * Math.pow(2, retries), 30000);
       retryTimerRef.current = setTimeout(() => {
         setRetries((r) => r + 1);
-        fetchConv();
+        fetchChat();
       }, delay);
       return () => clearTimeout(retryTimerRef.current);
     }
-  }, [error, retries, fetchConv]);
+  }, [error, retries, fetchChat]);
 
   useEffect(() => {
     if (!error && !loading) {
-      const interval = setInterval(fetchConv, 5000);
+      const interval = setInterval(fetchChat, 4000);
       return () => clearInterval(interval);
     }
-  }, [error, loading, fetchConv]);
+  }, [error, loading, fetchChat]);
 
   useEffect(() => {
     if (msgEndRef.current) {
       msgEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [conv?.messages?.length]);
+  }, [chat?.messages?.length]);
 
   const handleSend = async () => {
     if (!text.trim() || sending) return;
@@ -91,19 +96,12 @@ export default function UserChatView() {
     setText('');
     setSending(true);
     try {
-      let res;
-      if (conv) {
-        res = await apiFetch(`/api/conversations/${conv._id}/messages`, { method: 'POST', body: JSON.stringify({ text: msg }) });
-      } else {
-        res = await apiFetch('/api/conversations', { method: 'POST', body: JSON.stringify({ text: msg }) });
-        if (!res.error) showToast('Conversation started!');
-      }
+      const res = await apiFetch('/api/group-chat/messages', { method: 'POST', body: JSON.stringify({ text: msg }) });
       if (res.error) {
         setText(msg);
         return showToast(res.error, 'error');
       }
-      setConv(res);
-      prevCountRef.current = res?.messages?.length || 0;
+      setChat(res);
       setError(null);
     } catch {
       setText(msg);
@@ -118,14 +116,14 @@ export default function UserChatView() {
     setRetries(0);
     setError(null);
     setLoading(true);
-    fetchConv();
+    fetchChat();
   };
 
   if (loading) {
     return (
       <div className="dash-card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="uc-chat-wrap">
-          <div className="uc-chat-header"><FaComments /> Messages with Admin</div>
+          <div className="uc-chat-header"><FaUsers /> CS Hub Community</div>
           <div className="uc-chat-loading">
             <div className="btn-spinner" style={{ width: '22px', height: '22px' }} />
             <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.75rem' }}>Connecting to server...</p>
@@ -135,12 +133,14 @@ export default function UserChatView() {
     );
   }
 
+  const myId = user?.id || user?._id;
+
   return (
     <div className="dash-card" style={{ padding: 0, overflow: 'hidden' }}>
       <div className="uc-chat-wrap">
         <div className="uc-chat-header">
-          <FaComments /> Messages with Admin
-          <span className="uc-chat-status" title="Connected"><FaWifi /> Online</span>
+          <FaUsers /> CS Hub Community
+          <span className="uc-chat-status uc-chat-status--live"><span className="uc-live-dot" /> Live</span>
         </div>
 
         {error && (
@@ -160,24 +160,29 @@ export default function UserChatView() {
         )}
 
         <div className="uc-chat-messages">
-          {!conv ? (
+          {(!chat?.messages || chat.messages.length === 0) ? (
             <div className="uc-chat-empty">
-              <div className="uc-chat-empty-icon"><FaComments size={26} /></div>
-              <p className="uc-chat-empty-title">No conversation yet</p>
-              <p className="uc-chat-empty-sub">Send your first message below to start a conversation with the admin.</p>
-            </div>
-          ) : conv.messages.length === 0 ? (
-            <div className="uc-chat-empty">
-              <p className="uc-chat-empty-sub">Say hello!</p>
+              <div className="uc-chat-empty-icon uc-chat-empty-icon--green"><FaUsers size={26} /></div>
+              <p className="uc-chat-empty-title">Welcome to CS Hub Community!</p>
+              <p className="uc-chat-empty-sub">Be the first to start the conversation.</p>
             </div>
           ) : (
-            conv.messages.map((m, i) => {
-              const isMine = m.sender === 'user' || m.sender === user?.id || m.sender === user?._id;
+            chat.messages.map((m, i) => {
+              const isMine = m.sender === myId || m.sender === user?.email;
+              const prevMsg = i > 0 ? chat.messages[i - 1] : null;
+              const sameSender = prevMsg && prevMsg.sender === m.sender;
               return (
-                <div key={i} className={`uc-msg ${isMine ? 'uc-msg-sent' : 'uc-msg-received'}`}>
-                  <div className="uc-msg-sender">{isMine ? 'You' : (m.senderName || 'Admin')}</div>
-                  <div className="uc-msg-text">{m.text}</div>
-                  <div className="uc-msg-time">{formatTime(m.createdAt)}</div>
+                <div key={i} className={`uc-msg ${isMine ? 'uc-msg-sent' : 'uc-msg-received'} ${sameSender ? 'uc-msg-consecutive' : ''}`}>
+                  {!sameSender && (
+                    <div className="uc-msg-avatar" style={{ background: getAvatarColor(m.senderName) }}>
+                      {getInitials(m.senderName)}
+                    </div>
+                  )}
+                  <div className="uc-msg-body">
+                    {!sameSender && <div className="uc-msg-sender">{isMine ? 'You' : (m.senderName || 'Unknown')}</div>}
+                    <div className="uc-msg-text">{m.text}</div>
+                    <div className="uc-msg-time">{formatTime(m.createdAt)}</div>
+                  </div>
                 </div>
               );
             })
@@ -189,7 +194,7 @@ export default function UserChatView() {
           <input
             ref={inputRef}
             type="text"
-            placeholder={conv ? 'Type your message...' : 'Type your first message...'}
+            placeholder="Say something to the community..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}

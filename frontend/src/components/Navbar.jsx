@@ -8,17 +8,17 @@ import SettingsModal from './SettingsModal';
 import AILearningModal from './AILearningModal';
 
 const NOTIFY_ITEMS_EN = [
-  { icon: <FaClock />, text: <>Mon – Fri, 8AM – 5PM | WhatsApp: <strong>+250 780 505 948</strong></> },
+  { icon: <FaClock />, text: <>Mon – Fri, 8AM – 5PM | WhatsApp: <a href="https://wa.me/250780505948" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 700, textDecoration: 'underline' }}>+250 780 505 948</a></> },
   { icon: <FaLaptop />, text: <>Remote support now available — no need to move from your desk</> },
   { icon: <FaShieldAlt />, text: <>Never share your password. Our team will never ask for it.</> },
-  { icon: <FaHeadset />, text: <>24/7 Emergency Support — Call <strong>+250 780 505 948</strong></> },
+  { icon: <FaHeadset />, text: <>24/7 Emergency Support — Call <a href="tel:+250780505948" style={{ color: 'inherit', fontWeight: 700, textDecoration: 'underline' }}>+250 780 505 948</a></> },
 ];
 
 const NOTIFY_ITEMS_RW = [
-  { icon: <FaClock />, text: <>Ku wa mbere – Ku wa gatanu, 8:00 – 17:00 | WhatsApp: <strong>+250 780 505 948</strong></> },
+  { icon: <FaClock />, text: <>Ku wa mbere – Ku wa gatanu, 8:00 – 17:00 | WhatsApp: <a href="https://wa.me/250780505948" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 700, textDecoration: 'underline' }}>+250 780 505 948</a></> },
   { icon: <FaLaptop />, text: <>Ubufasha bwa kure buraboneka — nta kuburimbo bwarakeneye</> },
   { icon: <FaShieldAlt />, text: <>Ntimugire amakuru y'ibanga. Ikipe yacu ntizababaza.</> },
-  { icon: <FaHeadset />, text: <>Ubufasha bw'akanyuma 24/7 — Fona <strong>+250 780 505 948</strong></> },
+  { icon: <FaHeadset />, text: <>Ubufasha bw'akanyuma 24/7 — Fona <a href="tel:+250780505948" style={{ color: 'inherit', fontWeight: 700, textDecoration: 'underline' }}>+250 780 505 948</a></> },
 ];
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
@@ -44,12 +44,16 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
 
   const isNews = location.pathname === '/news';
   const isCourses = location.pathname === '/courses' || location.pathname === '/ai-learning';
+  const isLanding = location.pathname === '/';
+  const isCollaborators = location.pathname === '/collaborators';
+  const isNonLanding = !isLanding && !isDashboard;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll);
+    if (isNonLanding) setScrolled(true);
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [isNonLanding]);
 
   useEffect(() => {
     if (isNews) { setActive('news'); return; }
@@ -70,7 +74,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
   }, [isNews, isCourses]);
 
   useEffect(() => {
-    if (!scrolled || isDashboard) return;
+    if ((!scrolled && !isNonLanding) || isDashboard) return;
     const interval = setInterval(() => {
       setNotifyFading(true);
       setTimeout(() => {
@@ -79,7 +83,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
       }, 300);
     }, 4000);
     return () => clearInterval(interval);
-  }, [scrolled, isDashboard]);
+  }, [scrolled, isDashboard, isNonLanding]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -119,7 +123,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
 
   return (
     <header className={(scrolled && !isDashboard) ? 'scrolled' : isDashboard ? 'dash-header' : ''}>
-      {scrolled && !isDashboard && (
+      {((scrolled && isLanding) || isNonLanding) && !isDashboard && (
         <div className="nav-notify-bar">
           <span className={`nav-notify-content${notifyFading ? ' fading' : ''}`}>
             <span className="nav-notify-icon">{NOTIFY_ITEMS[notifyIdx].icon}</span>
@@ -222,8 +226,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             </>
           )}
         </ul>
-        <button className="nav-lang-btn" onClick={toggleLang} title={lang === 'en' ? 'Switch to Kinyarwanda' : 'Switch to English'}>
-          <FaGlobe /> {lang === 'en' ? 'RW' : 'EN'}
+        {/* Kinyarwanda toggle disabled until translations are complete */}
+        <button className="nav-lang-btn nav-lang-btn--disabled" title="Kinyarwanda translations coming soon" disabled>
+          <FaGlobe /> RW
         </button>
         <button className={`hamburger${open ? ' open' : ''}`} aria-label="Menu" onClick={() => setOpen((v) => !v)}>
           <span></span>

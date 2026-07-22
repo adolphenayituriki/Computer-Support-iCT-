@@ -35,6 +35,7 @@ const AILearningDashboard = lazy(() => import('./components/AILearningDashboard'
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const SetupAccount = lazy(() => import('./components/SetupAccount'));
+const CollaboratorsPage = lazy(() => import('./components/CollaboratorsPage'));
 
 function PageSpinner() {
   return (
@@ -95,6 +96,7 @@ export default function App() {
     const isDashboard = location.pathname === '/dashboard' || location.pathname === '/setup-account' || location.pathname === '/ai-dashboard';
     const isAdmin = location.pathname === '/admin';
     const isGamePlay = location.pathname === '/play' || location.pathname.startsWith('/play/');
+    const isCollaborators = location.pathname === '/collaborators';
     const [waVisible, setWaVisible] = useState(false);
 
     useEffect(() => {
@@ -120,8 +122,9 @@ export default function App() {
           <Route path="/setup-account" element={<Suspense fallback={<PageSpinner />}><SetupAccount /></Suspense>} />
           <Route path="/dashboard" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><Dashboard /></ProtectedRoute></Suspense>} />
           <Route path="/admin" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute></Suspense>} />
+          <Route path="/collaborators" element={<Suspense fallback={<PageSpinner />}><CollaboratorsPage /></Suspense>} />
         </Routes>
-        {!isDashboard && !isAdmin && !isGamePlay && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
         {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}
         <NewsletterPopup open={showNewsletter} onClose={() => setShowNewsletter(false)} />
         {!isDashboard && !isAdmin && !isGamePlay && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
