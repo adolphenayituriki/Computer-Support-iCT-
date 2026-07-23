@@ -1883,6 +1883,15 @@ export default function AdminDashboard() {
               )}
             </div>
 
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-red-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:block">Logout</span>
+            </button>
+
             {/* Profile */}
             <div className="relative" ref={profileRef}>
               <button
