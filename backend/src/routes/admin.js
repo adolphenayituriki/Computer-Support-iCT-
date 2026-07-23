@@ -1,11 +1,34 @@
 import { Router } from 'express';
 import { authenticate, adminOnly } from '../middleware/auth.js';
+import { handleUpload } from '../middleware/upload.js';
 import * as adminCtrl from '../controllers/adminController.js';
 import * as beneficiaryCtrl from '../controllers/beneficiaryController.js';
 
 const router = Router();
 
 router.use(authenticate, adminOnly);
+
+// File upload
+router.post('/upload', handleUpload, (req, res) => {
+  try {
+    const files = req.files || {};
+    const urls = {};
+    for (const [field, fileArr] of Object.entries(files)) {
+      if (fileArr && fileArr.length > 0) {
+        urls[field] = fileArr.map((f) => ({
+          url: `/uploads/courses/${f.filename}`,
+          filename: f.filename,
+          originalname: f.originalname,
+          size: f.size,
+          mimetype: f.mimetype,
+        }));
+      }
+    }
+    res.json({ files: urls });
+  } catch (err) {
+    res.status(500).json({ error: 'Upload failed.' });
+  }
+});
 
 // Users
 router.get('/users', adminCtrl.getUsers);
@@ -67,5 +90,14 @@ import * as testimonialCtrl from '../controllers/testimonialController.js';
 router.get('/testimonials', testimonialCtrl.getAllTestimonials);
 router.put('/testimonials/:id/approve', testimonialCtrl.approveTestimonial);
 router.delete('/testimonials/:id', testimonialCtrl.deleteTestimonial);
+
+// Live Sessions
+import * as liveSessionCtrl from '../controllers/liveSessionController.js';
+router.get('/live-sessions', liveSessionCtrl.getSessions);
+router.post('/live-sessions', liveSessionCtrl.createSession);
+router.put('/live-sessions/:id', liveSessionCtrl.updateSession);
+router.delete('/live-sessions/:id', liveSessionCtrl.deleteSession);
+router.post('/live-sessions/:id/start', liveSessionCtrl.startSession);
+router.post('/live-sessions/:id/end', liveSessionCtrl.endSession);
 
 export default router;
