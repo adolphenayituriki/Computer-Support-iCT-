@@ -194,9 +194,9 @@ export default function AdminChatView() {
   };
 
   const typeIcon = (type) => {
-    if (type === 'direct') return <FaComments style={{ color: '#3b82f6' }} />;
-    if (type === 'suggestion') return <FaLightbulb style={{ color: '#f59e0b' }} />;
-    return <FaTicketAlt style={{ color: '#10b981' }} />;
+    if (type === 'direct') return <FaComments style={{ color: '#6B7280' }} />;
+    if (type === 'suggestion') return <FaLightbulb style={{ color: '#6B7280' }} />;
+    return <FaTicketAlt style={{ color: '#6B7280' }} />;
   };
 
   const typeLabel = (type) => {

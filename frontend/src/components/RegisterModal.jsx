@@ -6,6 +6,20 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const GOOGLE_CLIENT_ID = '418298227634-m4cokncs8hbadpdvis61ffvdbq6vcr8d.apps.googleusercontent.com';
 
+const FRIENDLY_ERRORS = {
+  'Server error.': 'We\'re having trouble creating your account. Please try again.',
+  'Email already registered.': 'An account with this email already exists. Please sign in instead.',
+  'All fields are required.': 'Please fill in all required fields.',
+  'Google token is required.': 'Google sign-in was cancelled.',
+  'Google authentication failed. Please try again.': 'Google sign-in failed. Please try again.',
+  'No internet connection. Please check your network and try again.': 'No internet connection. Please check your network.',
+  'We\'re having trouble connecting. Please try again.': 'We\'re having trouble connecting. Please try again.',
+};
+
+function mapError(msg) {
+  return FRIENDLY_ERRORS[msg] || msg || 'Something went wrong. Please try again.';
+}
+
 export default function RegisterModal({ onClose, onSwitchToLogin }) {
   const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
@@ -34,7 +48,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
       onClose();
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(mapError(err.message));
       setLoading(false);
     }
   };
@@ -48,7 +62,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
       onClose();
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Google sign-in failed.');
+      setError(mapError(err.message || 'Google sign-in failed.'));
     } finally {
       setGoogleLoading(false);
     }

@@ -627,7 +627,7 @@ function AdminSuggestions() {
   return (
     <>
       {detail && <DetailModal item={detail} type="suggestion" onClose={() => setDetail(null)} onUpdated={fetchData} />}
-      <h3><FaLightbulb style={{ color: '#FFCE08' }} /> Suggestions ({items.length})</h3>
+      <h3><FaLightbulb style={{ color: '#6B7280' }} /> Suggestions ({items.length})</h3>
       {loading ? (
         <Loading />
       ) : items.length === 0 ? (
@@ -684,7 +684,7 @@ function AdminContacts() {
   return (
     <>
       {detail && <DetailModal item={detail} type="contact" onClose={() => setDetail(null)} onUpdated={fetchData} />}
-      <h3><FaEnvelope style={{ color: '#60a5fa' }} /> Contact Messages ({items.length})</h3>
+      <h3><FaEnvelope style={{ color: '#6B7280' }} /> Contact Messages ({items.length})</h3>
       {loading ? (
         <Loading />
       ) : items.length === 0 ? (
@@ -815,7 +815,7 @@ function AdminTeams() {
         </div>
       )}
       {detail && <DetailModal item={detail} type="team" onClose={() => setDetail(null)} onUpdated={fetchData} />}
-      <h3><FaUserTie style={{ color: '#16a34a' }} /> Team Applications ({items.length})</h3>
+      <h3><FaUserTie style={{ color: '#6B7280' }} /> Team Applications ({items.length})</h3>
       {loading ? (
         <Loading />
       ) : items.length === 0 ? (
@@ -948,7 +948,7 @@ function AdminNews() {
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3><FaNewspaper style={{ color: '#FFCE08' }} /> News ({items.length})</h3>
+        <h3><FaNewspaper style={{ color: '#6B7280' }} /> News ({items.length})</h3>
         <button className="btn btn-sm" onClick={() => setShowCreate(true)}><FaPlus /> New Post</button>
       </div>
       {loading ? (
@@ -1042,7 +1042,7 @@ function AdminTestimonials() {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3><FaStar style={{ color: '#FFCE08' }} /> Testimonials ({items.length})</h3>
+        <h3><FaStar style={{ color: '#6B7280' }} /> Testimonials ({items.length})</h3>
       </div>
       {loading ? (
         <Loading />
@@ -1292,7 +1292,7 @@ function AdminCourses() {
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3><FaBookOpen style={{ color: '#06b6d4' }} /> Courses ({items.length})</h3>
+        <h3><FaBookOpen style={{ color: '#6B7280' }} /> Courses ({items.length})</h3>
         <button className="btn btn-sm" onClick={() => setShowCreate(true)}><FaPlus /> New Course</button>
       </div>
       {loading ? (
@@ -1396,7 +1396,7 @@ function AdminBeneficiaries() {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3><FaUserTie style={{ color: '#8b5cf6' }} /> Beneficiaries ({items.length})</h3>
+        <h3><FaUserTie style={{ color: '#6B7280' }} /> Beneficiaries ({items.length})</h3>
       </div>
       {loading ? (
         <Loading />
@@ -1450,52 +1450,154 @@ function AdminBeneficiaries() {
   );
 }
 
-function AnalyticsView({ stats, ticketChart, appChart, onNavigate }) {
+function AnalyticsView({ stats, ticketChart, appChart, onNavigate, user }) {
   const max = Math.max(...Object.values(stats), 1);
+  const totalItems = Object.values(stats).reduce((a, b) => a + b, 0);
   const cards = [
-    { key: 'tickets', label: 'Tickets', count: stats.tickets, icon: <FaTicketAlt />, color: '#3b82f6', bg: '#eff6ff' },
-    { key: 'users', label: 'Users', count: stats.users, icon: <FaUsers />, color: '#10b981', bg: '#ecfdf5' },
-    { key: 'suggestions', label: 'Suggestions', count: stats.suggestions, icon: <FaLightbulb />, color: '#f59e0b', bg: '#fffbeb' },
-    { key: 'contacts', label: 'Messages', count: stats.contacts, icon: <FaEnvelope />, color: '#8b5cf6', bg: '#f5f3ff' },
-    { key: 'teams', label: 'Applications', count: stats.teams, icon: <FaUserTie />, color: '#06b6d4', bg: '#ecfeff' },
-    { key: 'beneficiaries', label: 'Beneficiaries', count: stats.beneficiaries, icon: <FaUserTie />, color: '#ec4899', bg: '#fdf2f8' },
-    { key: 'news', label: 'News', count: stats.news, icon: <FaNewspaper />, color: '#FFCE08', bg: '#fefce8' },
-    { key: 'courses', label: 'Courses', count: stats.courses, icon: <FaBookOpen />, color: '#14b8a6', bg: '#f0fdfa' },
-    { key: 'testimonials', label: 'Testimonials', count: stats.testimonials, icon: <FaStar />, color: '#f97316', bg: '#fff7ed' },
+    { key: 'tickets', label: 'Tickets', count: stats.tickets, icon: <FaTicketAlt />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'users', label: 'Users', count: stats.users, icon: <FaUsers />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'suggestions', label: 'Suggestions', count: stats.suggestions, icon: <FaLightbulb />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'contacts', label: 'Messages', count: stats.contacts, icon: <FaEnvelope />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'teams', label: 'Applications', count: stats.teams, icon: <FaUserTie />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'beneficiaries', label: 'Beneficiaries', count: stats.beneficiaries, icon: <FaUserTie />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'news', label: 'News', count: stats.news, icon: <FaNewspaper />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'courses', label: 'Courses', count: stats.courses, icon: <FaBookOpen />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { key: 'testimonials', label: 'Testimonials', count: stats.testimonials, icon: <FaStar />, color: '#6B7280', bg: '#f3f4f6', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
   ];
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  const quickActions = [
+    { key: 'tickets', label: 'New Ticket', icon: <FaTicketAlt />, color: '#6B7280', bg: '#f3f4f6' },
+    { key: 'users', label: 'Add User', icon: <FaUsers />, color: '#6B7280', bg: '#f3f4f6' },
+    { key: 'news', label: 'Post News', icon: <FaNewspaper />, color: '#6B7280', bg: '#f3f4f6' },
+    { key: 'courses', label: 'New Course', icon: <FaBookOpen />, color: '#6B7280', bg: '#f3f4f6' },
+    { key: 'contacts', label: 'Messages', icon: <FaEnvelope />, color: '#6B7280', bg: '#f3f4f6' },
+    { key: 'suggestions', label: 'Suggestions', icon: <FaLightbulb />, color: '#6B7280', bg: '#f3f4f6' },
+  ];
+
   return (
     <>
-      <div className="adm-page-header">
-        <div><h1>Analytics</h1><p>Overview of your platform activity</p></div>
+      <div className="adm-analytics-greeting">
+        <div className="adm-greeting-text">
+          <h1>{greeting}, {user?.name?.split(' ')[0] || 'Admin'}</h1>
+          <p>Here's what's happening across your platform today.</p>
+        </div>
+        <div className="adm-greeting-summary">
+          <div className="adm-greeting-stat">
+            <strong>{totalItems}</strong>
+            <span>Total Items</span>
+          </div>
+          <div className="adm-greeting-divider" />
+          <div className="adm-greeting-stat">
+            <strong>{ticketChart.open}</strong>
+            <span>Open Tickets</span>
+          </div>
+          <div className="adm-greeting-divider" />
+          <div className="adm-greeting-stat">
+            <strong>{appChart.pending}</strong>
+            <span>Pending Reviews</span>
+          </div>
+        </div>
       </div>
+
       <div className="adm-stats-grid">
         {cards.map((c) => (
           <div key={c.key} className="adm-stat-card" onClick={() => onNavigate && onNavigate(c.key)}>
             <div className="adm-stat-icon" style={{ background: c.bg, color: c.color }}>{c.icon}</div>
-            <div className="adm-stat-info"><strong>{c.count}</strong><span>{c.label}</span></div>
+            <div className="adm-stat-info">
+              <strong>{c.count}</strong>
+              <span>{c.label}</span>
+            </div>
           </div>
         ))}
       </div>
-      <div className="adm-chart-section">
-        <div className="adm-chart-header"><FaChartBar /> Overview</div>
-        <div className="adm-chart-bars">
-          {cards.map((item) => {
-            const pct = (item.count / max) * 100;
-            return (
-              <div key={item.key} className="adm-chart-row" onClick={() => onNavigate && onNavigate(item.key)}>
-                <span className="adm-chart-label">{item.label}</span>
-                <div className="adm-chart-track"><div className="adm-chart-fill" style={{ width: `${pct}%`, background: item.color }} /></div>
-                <span className="adm-chart-count">{item.count}</span>
-              </div>
-            );
-          })}
+
+      <div className="adm-quick-actions">
+        <div className="adm-quick-actions-header"><h3>Quick Actions</h3></div>
+        <div className="adm-quick-actions-grid">
+          {quickActions.map((a) => (
+            <button key={a.key} className="adm-quick-action-btn" onClick={() => onNavigate && onNavigate(a.key)}>
+              <div className="adm-quick-action-icon" style={{ background: a.bg, color: a.color }}>{a.icon}</div>
+              <span>{a.label}</span>
+            </button>
+          ))}
         </div>
       </div>
+
+      <div className="adm-analytics-grid-2col">
+        <div className="adm-chart-section">
+          <div className="adm-chart-header"><FaChartBar /> Platform Overview</div>
+          <div className="adm-chart-bars">
+            {cards.map((item) => {
+              const pct = (item.count / max) * 100;
+              return (
+                <div key={item.key} className="adm-chart-row" onClick={() => onNavigate && onNavigate(item.key)}>
+                  <span className="adm-chart-label">{item.label}</span>
+                  <div className="adm-chart-track"><div className="adm-chart-fill" style={{ width: `${Math.max(pct, 2)}%`, background: item.gradient || item.color }} /></div>
+                  <span className="adm-chart-count">{item.count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="adm-activity-panel">
+          <div className="adm-chart-header"><FaBell /> Recent Activity</div>
+          <div className="adm-activity-list">
+            {stats.tickets > 0 && (
+              <div className="adm-activity-item" onClick={() => onNavigate && onNavigate('tickets')}>
+                <div className="adm-activity-dot" style={{ background: '#6B7280' }} />
+                <div className="adm-activity-content">
+                  <span className="adm-activity-title">{ticketChart.open} open ticket{ticketChart.open !== 1 ? 's' : ''} need attention</span>
+                  <span className="adm-activity-time">Support queue</span>
+                </div>
+              </div>
+            )}
+            {stats.contacts > 0 && (
+              <div className="adm-activity-item" onClick={() => onNavigate && onNavigate('contacts')}>
+                <div className="adm-activity-dot" style={{ background: '#6B7280' }} />
+                <div className="adm-activity-content">
+                  <span className="adm-activity-title">New messages waiting for reply</span>
+                  <span className="adm-activity-time">Contact form</span>
+                </div>
+              </div>
+            )}
+            {stats.suggestions > 0 && (
+              <div className="adm-activity-item" onClick={() => onNavigate && onNavigate('suggestions')}>
+                <div className="adm-activity-dot" style={{ background: '#6B7280' }} />
+                <div className="adm-activity-content">
+                  <span className="adm-activity-title">Suggestions to review</span>
+                  <span className="adm-activity-time">Community feedback</span>
+                </div>
+              </div>
+            )}
+            {stats.teams > 0 && (
+              <div className="adm-activity-item" onClick={() => onNavigate && onNavigate('teams')}>
+                <div className="adm-activity-dot" style={{ background: '#6B7280' }} />
+                <div className="adm-activity-content">
+                  <span className="adm-activity-title">{appChart.pending} application{appChart.pending !== 1 ? 's' : ''} pending review</span>
+                  <span className="adm-activity-time">Team applications</span>
+                </div>
+              </div>
+            )}
+            {totalItems === 0 && (
+              <div className="adm-activity-empty">
+                <FaChartBar />
+                <p>No activity yet</p>
+                <span>Data will appear here as your platform grows.</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {(stats.tickets > 0 || stats.teams > 0) && (
         <div className="adm-chart-row-group">
           {stats.tickets > 0 && (
             <div className="adm-chart-sub-card">
-              <h4>Ticket Status</h4>
+              <h4><FaTicketAlt /> Ticket Status</h4>
               <div className="adm-chart-sub-items">
                 <div className="adm-chart-sub-item"><span style={{ background: '#f59e0b' }} />Open / In Progress <strong>{ticketChart.open}</strong></div>
                 <div className="adm-chart-sub-item"><span style={{ background: '#3b82f6' }} />Resolved <strong>{ticketChart.resolved}</strong></div>
@@ -1505,7 +1607,7 @@ function AnalyticsView({ stats, ticketChart, appChart, onNavigate }) {
           )}
           {stats.teams > 0 && (
             <div className="adm-chart-sub-card">
-              <h4>Application Status</h4>
+              <h4><FaUserTie /> Application Status</h4>
               <div className="adm-chart-sub-items">
                 <div className="adm-chart-sub-item"><span style={{ background: '#f59e0b' }} />Pending <strong>{appChart.pending}</strong></div>
                 <div className="adm-chart-sub-item"><span style={{ background: '#10b981' }} />Approved <strong>{appChart.approved}</strong></div>
@@ -1828,6 +1930,31 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      if (dy > 60) return;
+      if (dx > 70 && touchStartX < 40 && !sidebarOpen) {
+        setSidebarOpen(true);
+      } else if (dx < -70 && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     if (user) setProfileForm({ name: user.name || '', email: user.email || '' });
   }, [user]);
 
@@ -1908,6 +2035,7 @@ export default function AdminDashboard() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [readNotifs, setReadNotifs] = useState(new Set());
 
   const fetchNotifications = async () => {
     try {
@@ -1927,7 +2055,7 @@ export default function AdminDashboard() {
       const pendingTeams = teamsRes.status === 'fulfilled' && Array.isArray(teamsRes.value) ? teamsRes.value.filter(t => t.status === 'pending') : [];
       pendingTeams.forEach(t => items.push({ id: t._id, type: 'team', icon: '👤', title: t.name || 'New application', sub: `${t.email || ''} — ${new Date(t.createdAt).toLocaleString()}`, tab: 'teams', status: t.status }));
       setNotifications(items);
-      setUnreadCount(items.length);
+      setUnreadCount(items.filter(i => !readNotifs.has(`${i.type}-${i.id}`)).length);
     } catch {}
   };
 
@@ -1935,7 +2063,7 @@ export default function AdminDashboard() {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [readNotifs]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -1945,7 +2073,27 @@ export default function AdminDashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [notifOpen]);
 
+  const markNotifRead = (key) => {
+    setReadNotifs(prev => {
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+    setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const markAllNotifsRead = () => {
+    const keys = notifications.map(n => `${n.type}-${n.id}`);
+    setReadNotifs(prev => {
+      const next = new Set(prev);
+      keys.forEach(k => next.add(k));
+      return next;
+    });
+    setUnreadCount(0);
+  };
+
   const handleNotifClick = (item) => {
+    markNotifRead(`${item.type}-${item.id}`);
     setNotifOpen(false);
     setTab(item.tab);
   };
@@ -1953,7 +2101,7 @@ export default function AdminDashboard() {
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'A';
 
   const pageTitles = {
-    analytics: { title: 'Analytics', sub: 'Overview of your platform activity' },
+    analytics: { title: 'Dashboard', sub: 'Welcome back, ' + (user?.name?.split(' ')[0] || 'Admin') },
     tickets: { title: 'Tickets', sub: 'Manage and track all support requests' },
     users: { title: 'Users', sub: 'Manage user accounts and permissions' },
     suggestions: { title: 'Suggestions', sub: 'Review and manage user suggestions' },
@@ -1974,7 +2122,7 @@ export default function AdminDashboard() {
       return statsLoading ? (
         <Loading />
       ) : (
-        <AnalyticsView stats={stats} ticketChart={ticketChart} appChart={appChart} onNavigate={(t) => setTab(t)} />
+        <AnalyticsView stats={stats} ticketChart={ticketChart} appChart={appChart} onNavigate={(t) => setTab(t)} user={user} />
       );
     }
     if (tab === 'tickets') return <AdminTickets />;
@@ -2000,16 +2148,19 @@ export default function AdminDashboard() {
           <div className="adm-sidebar-logo">
             <img src="/LOGO IMAGE.png" alt="CS Hub" loading="lazy" />
             <div>
-              <strong>CS Hub</strong>
+              <strong>CS Hub (iCT)</strong>
               <span>Admin Panel</span>
             </div>
           </div>
         </div>
         <div className="adm-sidebar-user">
-          <div className="adm-sidebar-avatar">{initials}</div>
+          <div className="adm-sidebar-avatar">
+            {initials}
+            <span className="adm-sidebar-online-dot" />
+          </div>
           <div className="adm-sidebar-user-info">
             <span className="adm-sidebar-user-name">{user?.name || 'Admin'}</span>
-            <span className="adm-sidebar-user-role">Administrator</span>
+            <span className="adm-sidebar-user-role"><FaUserShield /> Administrator</span>
           </div>
         </div>
         <nav className="adm-sidebar-nav">
@@ -2032,12 +2183,13 @@ export default function AdminDashboard() {
         <div className="adm-sidebar-footer">
           <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}>
             <span className="adm-sidebar-item-icon"><FaQuestionCircle /></span>
-            <span className="adm-sidebar-item-label">Help</span>
+            <span className="adm-sidebar-item-label">Help & Support</span>
           </button>
           <button className="adm-sidebar-item" onClick={handleLogout}>
             <span className="adm-sidebar-item-icon"><FaSignOutAlt /></span>
-            <span className="adm-sidebar-item-label">Logout</span>
+            <span className="adm-sidebar-item-label">Sign Out</span>
           </button>
+          <div className="adm-sidebar-version">CS Hub v2.0</div>
         </div>
       </aside>
 
@@ -2048,9 +2200,12 @@ export default function AdminDashboard() {
           </button>
           <div className="adm-header-search">
             <FaSearch />
-            <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <input type="text" placeholder="Search anything..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <div className="adm-header-right">
+            <button className="adm-header-icon" title="Settings" onClick={() => { setProfileEditOpen(true); setProfileTab('password'); }}>
+              <FaCog />
+            </button>
             <div className="adm-header-notif" ref={notifRef}>
               <button className="adm-header-icon" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
                 <FaBell />
@@ -2060,21 +2215,32 @@ export default function AdminDashboard() {
                 <div className="adm-notif-dropdown">
                   <div className="adm-notif-dropdown-header">
                     <strong>Notifications</strong>
-                    {unreadCount > 0 && <span className="adm-notif-count">{unreadCount} new</span>}
+                    <div className="adm-notif-header-right">
+                      {unreadCount > 0 && <span className="adm-notif-count">{unreadCount} new</span>}
+                      {unreadCount > 0 && <button className="adm-notif-mark-read" onClick={markAllNotifsRead}>Mark all read</button>}
+                    </div>
                   </div>
                   <div className="adm-notif-dropdown-list">
                     {notifications.length === 0 ? (
-                      <div className="adm-notif-empty">No new notifications</div>
+                      <div className="adm-notif-empty">
+                        <span className="adm-notif-empty-icon">🔔</span>
+                        <p>No new notifications</p>
+                      </div>
                     ) : (
-                      notifications.slice(0, 15).map((n) => (
-                        <button key={`${n.type}-${n.id}`} className="adm-notif-item" onClick={() => handleNotifClick(n)}>
-                          <span className="adm-notif-icon">{n.icon}</span>
-                          <div className="adm-notif-content">
-                            <div className="adm-notif-title">{n.title}</div>
-                            <div className="adm-notif-sub">{n.sub}</div>
-                          </div>
-                        </button>
-                      ))
+                      notifications.slice(0, 15).map((n) => {
+                        const key = `${n.type}-${n.id}`;
+                        const isRead = readNotifs.has(key);
+                        return (
+                          <button key={key} className={`adm-notif-item${isRead ? ' read' : ''}`} onClick={() => handleNotifClick(n)}>
+                            <span className="adm-notif-icon">{n.icon}</span>
+                            <div className="adm-notif-content">
+                              <div className="adm-notif-title">{n.title}</div>
+                              <div className="adm-notif-sub">{n.sub}</div>
+                            </div>
+                            {!isRead && <span className="adm-notif-unread-dot" />}
+                          </button>
+                        );
+                      })
                     )}
                   </div>
                   {notifications.length > 0 && (

@@ -103,7 +103,7 @@ export default function CollaboratorsPage() {
               <div className="collab-card">
                 <div className="collab-card-header">
                   <div className="collab-avatar-wrap">
-                    <img src={c.photo} alt={c.realName} className="collab-avatar" />
+                    <img src={encodeURI(c.photo)} alt={c.realName} className="collab-avatar" />
                     <span className={`collab-status-dot ${c.status}`} />
                   </div>
                   <div className="collab-header-info">
@@ -146,7 +146,7 @@ export default function CollaboratorsPage() {
                 </div>
 
                 <div className="collab-card-footer">
-                  <div className="collab-footer-avatar"><img src={c.photo} alt="" /></div>
+                  <div className="collab-footer-avatar"><img src={encodeURI(c.photo)} alt="" /></div>
                   <div className="collab-footer-info">
                     <span className="collab-footer-name">{c.realName}</span>
                     <span className={`collab-footer-status ${c.status}`}>{c.status === 'active' ? 'Active' : 'Available'}</span>

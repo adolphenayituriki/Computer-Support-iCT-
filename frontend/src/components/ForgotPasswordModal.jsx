@@ -40,7 +40,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
         setMessage({ text: data.error, type: 'error' });
       }
     } catch {
-      setMessage({ text: 'Could not reach the server.', type: 'error' });
+      setMessage({ text: 'No internet connection. Please check your network.', type: 'error' });
     } finally {
       setLoadingToken(false);
     }
@@ -63,7 +63,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
         setMessage({ text: data.error, type: 'error' });
       }
     } catch {
-      setMessage({ text: 'Could not reach the server.', type: 'error' });
+      setMessage({ text: 'No internet connection. Please check your network.', type: 'error' });
     } finally {
       setLoadingResend(false);
     }
@@ -90,7 +90,7 @@ export default function ForgotPasswordModal({ onClose, onBackToLogin }) {
         setMessage({ text: data.error, type: 'error' });
       }
     } catch {
-      setMessage({ text: 'Could not reach the server.', type: 'error' });
+      setMessage({ text: 'No internet connection. Please check your network.', type: 'error' });
     } finally {
       setLoadingReset(false);
     }

@@ -36,13 +36,13 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ email, password }),
       });
     } catch {
-      throw new Error('Cannot reach server. Make sure the backend is running on port 3001.');
+      throw new Error('No internet connection. Please check your network and try again.');
     }
     let data;
     try {
       data = await res.json();
     } catch {
-      throw new Error('Server returned an empty response. Is the backend running?');
+      throw new Error('We\'re having trouble connecting. Please try again.');
     }
     if (!res.ok) throw new Error(data.error);
     localStorage.setItem('cshub_token', data.token);
@@ -60,13 +60,13 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ name, email, password, phone }),
       });
     } catch {
-      throw new Error('Cannot reach server. Make sure the backend is running on port 3001.');
+      throw new Error('No internet connection. Please check your network and try again.');
     }
     let data;
     try {
       data = await res.json();
     } catch {
-      throw new Error('Server returned an empty response. Is the backend running?');
+      throw new Error('We\'re having trouble connecting. Please try again.');
     }
     if (!res.ok) throw new Error(data.error);
     localStorage.setItem('cshub_token', data.token);
@@ -115,13 +115,13 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ phone }),
       });
     } catch {
-      throw new Error('Cannot reach server. Make sure the backend is running on port 3001.');
+      throw new Error('No internet connection. Please check your network and try again.');
     }
     let data;
     try {
       data = await res.json();
     } catch {
-      throw new Error('Server returned an empty response. Is the backend running?');
+      throw new Error('We\'re having trouble connecting. Please try again.');
     }
     if (!res.ok) throw new Error(data.error);
     localStorage.setItem('cshub_token', data.token);
@@ -139,13 +139,13 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ idToken }),
       });
     } catch {
-      throw new Error('Cannot reach server. Make sure the backend is running on port 3001.');
+      throw new Error('No internet connection. Please check your network and try again.');
     }
     let data;
     try {
       data = await res.json();
     } catch {
-      throw new Error('Server returned an empty response. Is the backend running?');
+      throw new Error('We\'re having trouble connecting. Please try again.');
     }
     if (!res.ok) throw new Error(data.error);
     localStorage.setItem('cshub_token', data.token);

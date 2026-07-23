@@ -16,7 +16,7 @@ export default {
   },
   "hero": {
     "badge": "★ Trusted by 1,200+ Students",
-    "tagline": "We help students, teachers, and anyone who needs digital skills, computer repair, software installation, and ICT support — whether on-site or remotely across Rwanda. Founded by students who saw the challenges many face with computers and ICT, we are here for you wherever you are.",
+    "tagline": "We help students, teachers, and anyone who needs digital skills, computer repair, software installation, and ICT support. Whether on-site or remotely across Rwanda. Founded by students who saw the challenges many face with computers and ICT, we are here for you wherever you are.",
     "devicesFixed": "Devices Fixed",
     "peopleHelped": "People Helped",
     "satisfaction": "Satisfaction",

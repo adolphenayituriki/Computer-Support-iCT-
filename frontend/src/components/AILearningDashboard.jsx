@@ -19,19 +19,19 @@ import {
 } from 'react-icons/fa';
 
 const FEATURES = [
-  { icon: <FaRobot />, key: 1, color: '#FFCE08', action: 'tutor' },
-  { icon: <FaImage />, key: 2, color: '#5694F7', action: 'topic' },
-  { icon: <FaVideo />, key: 3, color: '#10b981', action: 'topic' },
-  { icon: <FaHeadphones />, key: 4, color: '#f59e0b', action: 'topic' },
-  { icon: <FaFlask />, key: 5, color: '#8b5cf6', action: 'topic' },
-  { icon: <FaQuestionCircle />, key: 6, color: '#ef4444', action: 'quiz' },
-  { icon: <FaPuzzlePiece />, key: 7, color: '#06b6d4', action: 'topic' },
-  { icon: <FaBrain />, key: 8, color: '#ec4899', action: 'topic' },
-  { icon: <FaChartLine />, key: 9, color: '#14b8a6', action: 'progress' },
-  { icon: <FaRoute />, key: 10, color: '#f97316', action: null },
-  { icon: <FaLanguage />, key: 11, color: '#6366f1', action: null },
-  { icon: <FaMicroscope />, key: 12, color: '#22c55e', action: null },
-  { icon: <FaChalkboardTeacher />, key: 13, color: '#e11d48', action: null },
+  { icon: <FaRobot />, key: 1, color: '#6B7280', action: 'tutor' },
+  { icon: <FaImage />, key: 2, color: '#6B7280', action: 'topic' },
+  { icon: <FaVideo />, key: 3, color: '#6B7280', action: 'topic' },
+  { icon: <FaHeadphones />, key: 4, color: '#6B7280', action: 'topic' },
+  { icon: <FaFlask />, key: 5, color: '#6B7280', action: 'topic' },
+  { icon: <FaQuestionCircle />, key: 6, color: '#6B7280', action: 'quiz' },
+  { icon: <FaPuzzlePiece />, key: 7, color: '#6B7280', action: 'topic' },
+  { icon: <FaBrain />, key: 8, color: '#6B7280', action: 'topic' },
+  { icon: <FaChartLine />, key: 9, color: '#6B7280', action: 'progress' },
+  { icon: <FaRoute />, key: 10, color: '#6B7280', action: null },
+  { icon: <FaLanguage />, key: 11, color: '#6B7280', action: null },
+  { icon: <FaMicroscope />, key: 12, color: '#6B7280', action: null },
+  { icon: <FaChalkboardTeacher />, key: 13, color: '#6B7280', action: null },
 ];
 
 const SIDEBAR = [
@@ -185,10 +185,10 @@ export default function AILearningDashboard() {
   };
 
   const stats = [
-    { icon: <FaComments />, value: progressData?.recentSessions?.length || 0, label: 'AI Sessions', color: '#FFCE08' },
-    { icon: <FaQuestionCircle />, value: progressData?.summary?.totalQuizzes || 0, label: 'Quizzes Done', color: '#5694F7' },
-    { icon: <FaChartLine />, value: `${progressData?.summary?.avgScore || 0}%`, label: 'Avg Score', color: '#10b981' },
-    { icon: <FaStar />, value: progressData?.profile?.totalPoints || 0, label: 'Points', color: '#8b5cf6' },
+    { icon: <FaComments />, value: progressData?.recentSessions?.length || 0, label: 'AI Sessions', color: '#6B7280' },
+    { icon: <FaQuestionCircle />, value: progressData?.summary?.totalQuizzes || 0, label: 'Quizzes Done', color: '#6B7280' },
+    { icon: <FaChartLine />, value: `${progressData?.summary?.avgScore || 0}%`, label: 'Avg Score', color: '#6B7280' },
+    { icon: <FaStar />, value: progressData?.profile?.totalPoints || 0, label: 'Points', color: '#6B7280' },
   ];
 
   const tabTitles = {
@@ -333,31 +333,31 @@ export default function AILearningDashboard() {
                 <h3><FaClock style={{ marginRight: '0.5rem' }} /> Quick Access</h3>
                 <div className="ai-dash-quick-grid">
                   <button className="ai-dash-quick-card" onClick={() => handleNav('topic')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#FFCE08' }}><FaTools /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaTools /></div>
                     <span>AI Tools</span>
                   </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('tutor')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#5694F7' }}><FaRobot /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaRobot /></div>
                     <span>AI Tutor</span>
                   </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('quiz')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#ef4444' }}><FaQuestionCircle /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaQuestionCircle /></div>
                     <span>Quiz Generator</span>
                   </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('progress')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#10b981' }}><FaChartLine /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaChartLine /></div>
                     <span>My Progress</span>
                   </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('profile')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#8b5cf6' }}><FaUser /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaUser /></div>
                     <span>My Profile</span>
                   </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('resources')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#06b6d4' }}><FaBookOpen /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaBookOpen /></div>
                     <span>Resources</span>
                   </button>
                   <button className="ai-dash-quick-card" onClick={() => handleNav('topic')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#6366f1' }}><FaImage /></div>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaImage /></div>
                     <span>AI Image Gen</span>
                   </button>
                 </div>
@@ -369,7 +369,7 @@ export default function AILearningDashboard() {
                   <div className="ai-dash-activity-list">
                     {progressData.recentSessions.map((s, i) => (
                       <div className="ai-dash-activity-item" key={i}>
-                        <div className="ai-dash-activity-icon" style={{ color: '#FFCE08' }}><FaComments /></div>
+                        <div className="ai-dash-activity-icon" style={{ color: '#6B7280' }}><FaComments /></div>
                         <div className="ai-dash-activity-info">
                           <span>{s.subject} — {s.messages} messages</span>
                           <small>{new Date(s.date).toLocaleDateString()}</small>
@@ -424,28 +424,28 @@ export default function AILearningDashboard() {
                   <>
                     <div className="ai-dash-stats" style={{ marginBottom: '1.5rem' }}>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#FFCE08' }}><FaStar /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaStar /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.profile.totalPoints}</strong>
                           <span>Total Points</span>
                         </div>
                       </div>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#ef4444' }}><FaFire /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaFire /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.profile.streak}</strong>
                           <span>Day Streak</span>
                         </div>
                       </div>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#5694F7' }}><FaQuestionCircle /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaQuestionCircle /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.summary.totalQuizzes}</strong>
                           <span>Quizzes</span>
                         </div>
                       </div>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#10b981' }}><FaClock /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaClock /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.summary.totalStudyMinutes}m</strong>
                           <span>Study Time</span>
@@ -457,7 +457,7 @@ export default function AILearningDashboard() {
                         {progressData.subjects.map((s) => (
                           <div className="ai-dash-progress-card" key={s.subject}>
                             <div className="ai-dash-progress-header">
-                              <FaBookOpen size={24} style={{ color: '#FFCE08' }} />
+                              <FaBookOpen size={24} style={{ color: '#6B7280' }} />
                               <span>{s.subject}</span>
                             </div>
                             <div className="ai-dash-progress-bar">
@@ -472,7 +472,7 @@ export default function AILearningDashboard() {
                         {['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'English'].map((subject) => (
                           <div className="ai-dash-progress-card" key={subject}>
                             <div className="ai-dash-progress-header">
-                              <FaBookOpen size={24} style={{ color: '#FFCE08' }} />
+                              <FaBookOpen size={24} style={{ color: '#6B7280' }} />
                               <span>{subject}</span>
                             </div>
                             <div className="ai-dash-progress-bar">
@@ -499,9 +499,9 @@ export default function AILearningDashboard() {
                     <h3>{user?.name || 'Student'}</h3>
                     <p>{user?.email}</p>
                     <div className="ai-dash-profile-stats">
-                      <span><FaStar style={{ color: '#FFCE08' }} /> {progressData?.profile?.totalPoints || 0} points</span>
-                      <span><FaFire style={{ color: '#ef4444' }} /> {progressData?.profile?.streak || 0} day streak</span>
-                      <span><FaQuestionCircle style={{ color: '#5694F7' }} /> {progressData?.summary?.totalQuizzes || 0} quizzes</span>
+                      <span><FaStar style={{ color: '#6B7280' }} /> {progressData?.profile?.totalPoints || 0} points</span>
+                      <span><FaFire style={{ color: '#6B7280' }} /> {progressData?.profile?.streak || 0} day streak</span>
+                      <span><FaQuestionCircle style={{ color: '#6B7280' }} /> {progressData?.summary?.totalQuizzes || 0} quizzes</span>
                     </div>
                   </div>
                 </div>

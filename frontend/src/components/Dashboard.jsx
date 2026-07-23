@@ -11,7 +11,7 @@ import {
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
   FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome,
   FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
-  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers
+  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers, FaHeadset, FaRocket
 } from 'react-icons/fa';
 import API_BASE from '../api';
 
@@ -579,7 +579,7 @@ function TeamView({ teamData, setTeamData }) {
         {subTab === 'overview' && (
           <div className="team-overview-grid">
             <div className="team-dash-card">
-              <h3><FaUserTie style={{ color: '#06b6d4' }} /> My Profile</h3>
+              <h3><FaUserTie style={{ color: '#6B7280' }} /> My Profile</h3>
               <div className="team-dash-info">
                 <p><strong>{app.name}</strong></p>
                 <p><FaEnvelope /> {app.email}</p>
@@ -592,22 +592,22 @@ function TeamView({ teamData, setTeamData }) {
             </div>
             <div className="team-stats-grid">
               <div className="team-stat-card">
-                <FaHandshake size={24} color="#8b5cf6" />
+                <FaHandshake size={24} color="#6B7280" />
                 <span className="team-stat-num">{beneficiaries.length}</span>
                 <span className="team-stat-label">Beneficiaries</span>
               </div>
               <div className="team-stat-card">
-                <FaCheckCircle size={24} color="#10b981" />
+                <FaCheckCircle size={24} color="#6B7280" />
                 <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'resolved' || b.status === 'closed').length}</span>
                 <span className="team-stat-label">Resolved</span>
               </div>
               <div className="team-stat-card">
-                <FaClock size={24} color="#f59e0b" />
+                <FaClock size={24} color="#6B7280" />
                 <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'in-progress').length}</span>
                 <span className="team-stat-label">In Progress</span>
               </div>
               <div className="team-stat-card">
-                <FaExclamationCircle size={24} color="#ef4444" />
+                <FaExclamationCircle size={24} color="#6B7280" />
                 <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'open').length}</span>
                 <span className="team-stat-label">Open</span>
               </div>
@@ -616,7 +616,7 @@ function TeamView({ teamData, setTeamData }) {
         )}
         {subTab === 'beneficiaries' && (
           <div className="team-dash-card">
-            <h3><FaHandshake style={{ color: '#8b5cf6' }} /> Assigned Beneficiaries ({beneficiaries.length})</h3>
+            <h3><FaHandshake style={{ color: '#6B7280' }} /> Assigned Beneficiaries ({beneficiaries.length})</h3>
             {beneficiaries.length === 0 ? (
               <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
             ) : (
@@ -645,7 +645,7 @@ function TeamView({ teamData, setTeamData }) {
         )}
         {subTab === 'tickets' && (
           <div className="team-dash-card">
-            <h3><FaTicketAlt style={{ color: '#f59e0b' }} /> All Support Tickets</h3>
+            <h3><FaTicketAlt style={{ color: '#6B7280' }} /> All Support Tickets</h3>
             {ticketsLoading ? (
               <p style={{ textAlign: 'center', color: '#6b7280', padding: '2rem' }}>Loading tickets...</p>
             ) : teamTickets.length === 0 ? (
@@ -775,6 +775,7 @@ function DashboardView({ tickets, suggestionsCount, user }) {
 
 function HelpCenterView({ setTab }) {
   const [openFaq, setOpenFaq] = useState(null);
+  const [faqSearch, setFaqSearch] = useState('');
 
   const faqs = [
     { q: 'How do I submit a support ticket?', a: 'Go to the Tickets tab and fill out the form with your issue title, category, and description. Our team will respond through the ticket conversation.' },
@@ -787,71 +788,117 @@ function HelpCenterView({ setTab }) {
     { q: 'Is my data secure?', a: 'Yes. We use JWT authentication, encrypted passwords, and secure API endpoints. Your personal data is never shared with third parties.' },
   ];
 
+  const filteredFaqs = faqs.filter((f) =>
+    !faqSearch || f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())
+  );
+
   const quickLinks = [
-    { icon: <FaTicketAlt />, label: 'Submit Ticket', tab: 'tickets', color: '#3b82f6' },
-    { icon: <FaLightbulb />, label: 'Suggest Idea', tab: 'suggestions', color: '#8b5cf6' },
-    { icon: <FaComments />, label: 'Message Us', tab: 'chat', color: '#10b981' },
-    { icon: <FaWhatsapp />, label: 'WhatsApp', href: 'https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN', color: '#25d366' },
-    { icon: <FaPhone />, label: 'Call Us', href: 'tel:+250780505948', color: '#f59e0b' },
+    { icon: <FaTicketAlt />, label: 'Submit Ticket', desc: 'Report an issue', tab: 'tickets', color: '#6B7280', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { icon: <FaLightbulb />, label: 'Suggest Idea', desc: 'Share feedback', tab: 'suggestions', color: '#6B7280', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { icon: <FaComments />, label: 'Message Us', desc: 'Chat with us', tab: 'chat', color: '#6B7280', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { icon: <FaWhatsapp />, label: 'WhatsApp', desc: 'Join community', href: 'https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN', color: '#6B7280', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+    { icon: <FaPhone />, label: 'Call Us', desc: '+250 780 505 948', href: 'tel:+250780505948', color: '#6B7280', gradient: 'linear-gradient(135deg, #6B7280, #4b5563)' },
+  ];
+
+  const services = [
+    { icon: <FaWrench />, name: 'Repair & Troubleshooting', desc: 'Laptop/PC optimization, crash diagnosis, hardware advice', color: '#6B7280' },
+    { icon: <FaLaptop />, name: 'Software Installation', desc: 'Office, browsers, antivirus, school apps, drivers', color: '#6B7280' },
+    { icon: <FaVirus />, name: 'Virus Removal', desc: 'Malware, trojan, ransomware removal & security setup', color: '#6B7280' },
+    { icon: <FaShieldAlt />, name: 'Security Setup', desc: 'Antivirus, firewall, encryption, privacy hardening', color: '#6B7280' },
+    { icon: <FaWifi />, name: 'Network Support', desc: 'Wi-Fi, router, DNS, VPN configuration & fixes', color: '#6B7280' },
+    { icon: <FaHdd />, name: 'Hardware Upgrade', desc: 'RAM, SSD, GPU upgrades with professional install', color: '#6B7280' },
+    { icon: <FaKeyboard />, name: 'Peripheral Setup', desc: 'Printers, scanners, webcams, USB devices', color: '#6B7280' },
+    { icon: <FaEnvelope />, name: 'Email & Cloud', desc: 'Gmail, Outlook, Google Drive, OneDrive setup', color: '#6B7280' },
+    { icon: <FaCloud />, name: 'Data Backup', desc: 'Automated backup strategy, local & cloud', color: '#6B7280' },
+    { icon: <FaHeadphones />, name: 'Remote Support', desc: 'Instant remote desktop help from our technicians', color: '#6B7280' },
   ];
 
   return (
     <>
-      <div className="adm-page-header">
-        <h2>Help Center</h2>
-        <p>Find answers and get the support you need.</p>
-      </div>
-
-      <div className="dash-hc-grid">
-        {quickLinks.map((link) => (
-          link.href ? (
-            <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="dash-hc-card">
-              <div className="dash-hc-card-icon" style={{ background: `${link.color}15`, color: link.color }}>{link.icon}</div>
-              <span className="dash-hc-card-label">{link.label}</span>
-              <FaExternalLinkAlt className="dash-hc-card-ext" />
-            </a>
-          ) : (
-            <button key={link.label} className="dash-hc-card" onClick={() => setTab?.('tickets')}>
-              <div className="dash-hc-card-icon" style={{ background: `${link.color}15`, color: link.color }}>{link.icon}</div>
-              <span className="dash-hc-card-label">{link.label}</span>
+      <div className="hc-hero">
+        <div className="hc-hero-content">
+          <div className="hc-hero-badge"><FaHeadset /> Help Center</div>
+          <h2>How can we help you?</h2>
+          <p>Find answers, get support, and explore our services — all in one place.</p>
+          <div className="hc-hero-actions">
+            <button className="hc-hero-btn primary" onClick={() => setTab?.('tickets')}>
+              <FaTicketAlt /> Submit a Ticket
             </button>
-          )
-        ))}
+            <button className="hc-hero-btn secondary" onClick={() => setTab?.('chat')}>
+              <FaComments /> Live Chat
+            </button>
+          </div>
+        </div>
+        <div className="hc-hero-illustration">
+          <div className="hc-hero-circles">
+            <div className="hc-hero-circle c1" />
+            <div className="hc-hero-circle c2" />
+            <div className="hc-hero-circle c3" />
+            <FaHeadset className="hc-hero-icon" />
+          </div>
+        </div>
       </div>
 
-      <div className="adm-chart-section">
-        <div className="adm-chart-header"><FaBook /> Frequently Asked Questions</div>
-        <div className="dash-hc-faq-list">
-          {faqs.map((faq, i) => (
-            <div key={i} className={`dash-hc-faq-item${openFaq === i ? ' open' : ''}`}>
-              <button className="dash-hc-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                <span>{faq.q}</span>
-                <span className="dash-hc-faq-arrow">{openFaq === i ? '−' : '+'}</span>
+      <div className="hc-section">
+        <h3 className="hc-section-title">Quick Actions</h3>
+        <div className="hc-quick-grid">
+          {quickLinks.map((link) => (
+            link.href ? (
+              <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="hc-quick-card">
+                <div className="hc-quick-icon" style={{ background: link.gradient }}>{link.icon}</div>
+                <div className="hc-quick-text">
+                  <span className="hc-quick-label">{link.label}</span>
+                  <span className="hc-quick-desc">{link.desc}</span>
+                </div>
+                <FaChevronRight className="hc-quick-arrow" />
+              </a>
+            ) : (
+              <button key={link.label} className="hc-quick-card" onClick={() => setTab?.(link.tab)}>
+                <div className="hc-quick-icon" style={{ background: link.gradient }}>{link.icon}</div>
+                <div className="hc-quick-text">
+                  <span className="hc-quick-label">{link.label}</span>
+                  <span className="hc-quick-desc">{link.desc}</span>
+                </div>
+                <FaChevronRight className="hc-quick-arrow" />
               </button>
-              {openFaq === i && <div className="dash-hc-faq-a">{faq.a}</div>}
+            )
+          ))}
+        </div>
+      </div>
+
+      <div className="hc-section">
+        <div className="hc-section-header">
+          <h3 className="hc-section-title"><FaQuestionCircle /> Frequently Asked Questions</h3>
+          <div className="hc-faq-search">
+            <FaSearch />
+            <input type="text" placeholder="Search questions..." value={faqSearch} onChange={(e) => setFaqSearch(e.target.value)} />
+          </div>
+        </div>
+        <div className="hc-faq-list">
+          {filteredFaqs.length === 0 && (
+            <div className="hc-faq-empty">No matching questions found.</div>
+          )}
+          {filteredFaqs.map((faq, i) => (
+            <div key={i} className={`hc-faq-item${openFaq === i ? ' open' : ''}`}>
+              <button className="hc-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                <span>{faq.q}</span>
+                <span className={`hc-faq-chevron${openFaq === i ? ' rotated' : ''}`}><FaChevronRight /></span>
+              </button>
+              <div className="hc-faq-answer-wrap">
+                {openFaq === i && <div className="hc-faq-a">{faq.a}</div>}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="adm-chart-section">
-        <div className="adm-chart-header"><FaGraduationCap /> Services We Offer</div>
-        <div className="dash-hc-services-grid">
-          {[
-            { icon: <FaWrench />, name: 'Repair & Troubleshooting', desc: 'Laptop/PC optimization, crash diagnosis, hardware advice' },
-            { icon: <FaLaptop />, name: 'Software Installation', desc: 'Office, browsers, antivirus, school apps, drivers' },
-            { icon: <FaVirus />, name: 'Virus Removal', desc: 'Malware, trojan, ransomware removal & security setup' },
-            { icon: <FaShieldAlt />, name: 'Security Setup', desc: 'Antivirus, firewall, encryption, privacy hardening' },
-            { icon: <FaWifi />, name: 'Network Support', desc: 'Wi-Fi, router, DNS, VPN configuration & fixes' },
-            { icon: <FaHdd />, name: 'Hardware Upgrade', desc: 'RAM, SSD, GPU upgrades with professional install' },
-            { icon: <FaKeyboard />, name: 'Peripheral Setup', desc: 'Printers, scanners, webcams, USB devices' },
-            { icon: <FaEnvelope />, name: 'Email & Cloud', desc: 'Gmail, Outlook, Google Drive, OneDrive setup' },
-            { icon: <FaCloud />, name: 'Data Backup', desc: 'Automated backup strategy, local & cloud' },
-            { icon: <FaHeadphones />, name: 'Remote Support', desc: 'Instant remote desktop help from our technicians' },
-          ].map((svc) => (
-            <div key={svc.name} className="dash-hc-service-card">
-              <div className="dash-hc-service-icon">{svc.icon}</div>
-              <div>
+      <div className="hc-section">
+        <h3 className="hc-section-title"><FaRocket /> Services We Offer</h3>
+        <div className="hc-services-grid">
+          {services.map((svc) => (
+            <div key={svc.name} className="hc-service-card">
+              <div className="hc-service-icon" style={{ background: `${svc.color}12`, color: svc.color }}>{svc.icon}</div>
+              <div className="hc-service-text">
                 <strong>{svc.name}</strong>
                 <span>{svc.desc}</span>
               </div>
@@ -905,6 +952,31 @@ export default function Dashboard() {
     if (profileOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [profileOpen]);
+
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      if (dy > 60) return;
+      if (dx > 70 && touchStartX < 40 && !sidebarOpen) {
+        setSidebarOpen(true);
+      } else if (dx < -70 && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [sidebarOpen]);
 
   const handleProfileSave = async () => {
     setProfileLoading(true);
@@ -1003,9 +1075,9 @@ export default function Dashboard() {
       <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="adm-sidebar-header">
           <div className="adm-sidebar-logo">
-            <img src="/LOGO IMAGE.png" alt="CS Hub" loading="lazy" />
+            <img src="/LOGO IMAGE.png" alt="CS Hub (iCT)" loading="lazy" />
             <div>
-              <strong>CS Hub</strong>
+              <strong>CS Hub (iCT)</strong>
               <span>User Panel</span>
             </div>
           </div>
