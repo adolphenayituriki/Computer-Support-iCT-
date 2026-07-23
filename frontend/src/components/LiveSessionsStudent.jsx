@@ -6,8 +6,8 @@ import { useAuth } from '../AuthContext';
 import JitsiRoom from './JitsiRoom';
 
 const api = async (url, opts = {}) => {
-  const token = localStorage.getItem('token');
-  const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...opts.headers };
+  const jwt = localStorage.getItem('cshub_token');
+  const headers = { 'Content-Type': 'application/json', ...(jwt ? { Authorization: `Bearer ${jwt}` } : {}), ...opts.headers };
   try { const res = await fetch(`${API_BASE}${url}`, { ...opts, headers }); return await res.json(); } catch { return { error: 'Network error' }; }
 };
 
