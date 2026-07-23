@@ -15681,36 +15681,7 @@ header.scrolled .nav-dropdown-item-btn:hover {
    SESSION REGISTER BUTTON (floating FAB)
    ════════════════════════════════════════════════════════════════ */
 
-.emergency-btn-fab {
-  position: fixed;
-  bottom: 90px;
-  right: 24px;
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.15rem;
-  background: linear-gradient(135deg, #5694F7, #3b82f6);
-  color: #fff;
-  border: none;
-  border-radius: 50px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(86, 148, 247, 0.4);
-  transition: all 0.3s;
-}
 
-.emergency-btn-fab:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 28px rgba(86, 148, 247, 0.55);
-}
-
-.emergency-btn-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
 
 /* ════════════════════════════════════════════════════════════════
    SESSION INVITE — MODAL
@@ -16569,8 +16540,7 @@ header.scrolled .nav-dropdown-item-btn:hover {
   .session-form-row { grid-template-columns: 1fr; }
   .session-topic-group textarea { font-size: 0.85rem; }
 
-  /* Register button */
-  .emergency-btn-fab { bottom: 80px; right: 16px; padding: 0.65rem 1rem; font-size: 0.85rem; }
+  /* Register button - now using Tailwind */
 }
 
 @media (max-width: 380px) {
@@ -17524,4 +17494,12 @@ header.scrolled .nav-dropdown-item-btn:hover {
   .collab-mini-footer-inner {
     gap: 0.3rem;
   }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  .print-cert, .print-cert * { visibility: visible !important; }
+  .print-cert { position: absolute; left: 0; top: 0; background: white !important; }
+  button { display: none !important; }
+  @page { margin: 1in; }
 }

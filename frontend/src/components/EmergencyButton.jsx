@@ -19,9 +19,9 @@ export default function EmergencyButton() {
 
   return (
     <>
-      <button className="emergency-btn-fab" onClick={() => setOpen(true)} title="Register for Session">
+      <button className="fixed bottom-[90px] right-6 z-[999] flex items-center justify-center gap-2 px-[1.15rem] py-3 rounded-full bg-gradient-to-br from-[#5694F7] to-blue-500 text-white shadow-lg shadow-blue-500/40 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/55 transition-all duration-300" onClick={() => setOpen(true)} title="Register for Session">
         <FaPenFancy />
-        <span className="emergency-btn-label">Register for Session</span>
+        <span className="text-[0.82rem] font-semibold whitespace-nowrap">Register for Session</span>
       </button>
       <Modal open={open} onClose={() => setOpen(false)} wide>
         <SessionInvite onClose={() => setOpen(false)} />

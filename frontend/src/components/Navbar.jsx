@@ -228,10 +228,6 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
             </>
           )}
         </ul>
-        {/* Kinyarwanda toggle disabled until translations are complete */}
-        <button className="nav-lang-btn nav-lang-btn--disabled" title="Kinyarwanda translations coming soon" disabled>
-          <FaGlobe /> RW
-        </button>
         <button className={`hamburger${open ? ' open' : ''}`} aria-label="Menu" onClick={() => setOpen((v) => !v)}>
           <span></span>
           <span></span>

@@ -37,6 +37,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const SetupAccount = lazy(() => import('./components/SetupAccount'));
 const CollaboratorsPage = lazy(() => import('./components/CollaboratorsPage'));
 const LiveSessionsStudent = lazy(() => import('./components/LiveSessionsStudent'));
+const CoursePlayer = lazy(() => import('./components/CoursePlayer'));
 
 function PageSpinner() {
   return (
@@ -86,11 +87,12 @@ export default function App() {
   const [showTeam, setShowTeam] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [showNewsletter, setShowNewsletter] = useState(false);
-  const openLogin = () => { setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowLogin(true); };
+  const [loginMessage, setLoginMessage] = useState('');
+  const openLogin = (msg) => { setLoginMessage(msg || ''); setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowLogin(true); };
   const openRegister = () => { setShowLogin(false); setShowTeam(false); setShowForgot(false); setShowRegister(true); };
   const openTeam = () => { setShowLogin(false); setShowRegister(false); setShowForgot(false); setShowTeam(true); };
   const openForgot = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(true); };
-  const closeAll = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowNewsletter(false); };
+  const closeAll = () => { setShowLogin(false); setShowRegister(false); setShowTeam(false); setShowForgot(false); setShowNewsletter(false); setLoginMessage(''); };
 
   function AppLayout() {
     const location = useLocation();
@@ -115,7 +117,8 @@ export default function App() {
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/contact" element={<Suspense fallback={<PageSpinner />}><main><Contact /></main></Suspense>} />
           <Route path="/news" element={<Suspense fallback={<PageSpinner />}><News /></Suspense>} />
-          <Route path="/courses" element={<Suspense fallback={<PageSpinner />}><Courses /></Suspense>} />
+          <Route path="/courses" element={<Suspense fallback={<PageSpinner />}><Courses onLoginClick={openLogin} /></Suspense>} />
+          <Route path="/courses/:id" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><CoursePlayer /></ProtectedRoute></Suspense>} />
           <Route path="/ai-learning" element={<Suspense fallback={<PageSpinner />}><AILearning /></Suspense>} />
           <Route path="/play" element={<Suspense fallback={<PageSpinner />}><GameHub /></Suspense>} />
           <Route path="/play/:category" element={<Suspense fallback={<PageSpinner />}><GamePlay /></Suspense>} />
@@ -130,7 +133,7 @@ export default function App() {
         {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}
         <NewsletterPopup open={showNewsletter} onClose={() => setShowNewsletter(false)} />
         {!isDashboard && !isAdmin && !isGamePlay && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
-        <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} /></Modal>
+        <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} message={loginMessage} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
         <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>
         <Modal open={showForgot} onClose={closeAll}><ForgotPasswordModal onClose={closeAll} onBackToLogin={openLogin} /></Modal>

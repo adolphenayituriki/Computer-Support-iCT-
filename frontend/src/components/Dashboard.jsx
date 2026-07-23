@@ -5,6 +5,9 @@ import { useToast } from '../ToastContext';
 import UserChatView from './UserChatView';
 import GroupChatView from './GroupChatView';
 import HelpModal from './HelpModal';
+import { cn } from '../lib/utils';
+import { ScrollArea } from './ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import {
   FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
   FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
@@ -13,6 +16,7 @@ import {
   FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
   FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers, FaHeadset, FaRocket
 } from 'react-icons/fa';
+import { LayoutDashboard, Ticket, MessageSquare, Lightbulb, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -30,14 +34,20 @@ function useIsMobile(breakpoint = 768) {
 
 const SIDEBAR_GROUPS = [
   {
-    label: 'MAIN',
+    label: 'Overview',
     items: [
-      { key: 'analytics', icon: <FaTachometerAlt />, label: 'Analytics' },
-      { key: 'tickets', icon: <FaTicketAlt />, label: 'Tickets' },
-      { key: 'suggestions', icon: <FaLightbulb />, label: 'Suggestions' },
-      { key: 'chat', icon: <FaComments />, label: 'Messages' },
-      { key: 'group-chat', icon: <FaUsers />, label: 'Group Chat' },
-      { key: 'help', icon: <FaBook />, label: 'Help Center' },
+      { key: 'analytics', icon: LayoutDashboard, label: 'Dashboard', color: 'text-indigo-400' },
+      { key: 'courses', icon: FaGraduationCap, label: 'My Courses', color: 'text-sky-400' },
+      { key: 'tickets', icon: Ticket, label: 'Tickets', color: 'text-amber-400' },
+      { key: 'suggestions', icon: Lightbulb, label: 'Suggestions', color: 'text-orange-400' },
+    ],
+  },
+  {
+    label: 'Communication',
+    items: [
+      { key: 'chat', icon: MessageSquare, label: 'Messages', color: 'text-emerald-400' },
+      { key: 'group-chat', icon: FaUsers, label: 'Group Chat', color: 'text-violet-400' },
+      { key: 'help', icon: FaBook, label: 'Help Center', color: 'text-cyan-400' },
     ],
   },
 ];
@@ -910,6 +920,157 @@ function HelpCenterView({ setTab }) {
   );
 }
 
+function MyCoursesView() {
+  const navigate = useNavigate();
+  const [enrollments, setEnrollments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    const tokenVal = localStorage.getItem('cshub_token');
+    if (!tokenVal) { setLoading(false); return; }
+
+    fetch(`${API_BASE}/api/enrollments/my`, {
+      headers: { Authorization: `Bearer ${tokenVal}` },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) setEnrollments(data);
+        setLoading(false);
+      })
+      .catch((err) => { setError(err.message); setLoading(false); });
+  }, []);
+
+  const enriched = enrollments.map((e) => ({
+    enrollment: e.enrollment,
+    course: e.enrollment?.courseId,
+    progress: e.progress?.progress || 0,
+    completed: e.progress?.completed || false,
+    sections: e.progress?.sections || {},
+    enrolledAt: e.enrollment?.enrolledAt,
+  })).filter((e) => e.course);
+
+  const filtered = filter === 'all' ? enriched
+    : filter === 'completed' ? enriched.filter((e) => e.completed)
+    : filter === 'progress' ? enriched.filter((e) => !e.completed && e.progress > 0)
+    : enriched;
+
+  const completedCount = enriched.filter((e) => e.completed).length;
+  const progressCount = enriched.filter((e) => !e.completed && e.progress > 0).length;
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
+        <FaSpinner className="animate-spin" style={{ fontSize: '1.5rem', color: '#94a3b8' }} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+        <FaExclamationCircle style={{ fontSize: '2.5rem', color: '#ef4444', marginBottom: '1rem' }} />
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>Failed to load courses</h3>
+        <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{error}</p>
+      </div>
+    );
+  }
+
+  if (enriched.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+        <FaGraduationCap style={{ fontSize: '3rem', color: '#cbd5e1', marginBottom: '1rem' }} />
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>No Courses Yet</h3>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>Enroll in courses to start learning and track your progress here.</p>
+        <button onClick={() => window.open('/courses', '_blank')} style={{ padding: '0.65rem 1.5rem', background: 'linear-gradient(135deg, #FFCE08, #f59e0b)', color: '#1e293b', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>
+          Browse Courses
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1e293b', margin: 0 }}>My Courses</h2>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0' }}>{enriched.length} enrolled &middot; {completedCount} completed &middot; {progressCount} in progress</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.4rem' }}>
+          {[
+            { key: 'all', label: 'All' },
+            { key: 'progress', label: 'In Progress' },
+            { key: 'completed', label: 'Completed' },
+          ].map((f) => (
+            <button key={f.key} onClick={() => setFilter(f.key)}
+              style={{ padding: '0.4rem 0.85rem', borderRadius: '8px', border: 'none', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                background: filter === f.key ? '#FFCE08' : '#f1f5f9',
+                color: filter === f.key ? '#1e293b' : '#64748b',
+              }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+        {filtered.map((e) => {
+          const c = e.course;
+          const pct = e.progress;
+          return (
+            <div key={e.enrollment?._id || e.course?._id} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden', transition: 'box-shadow 0.2s, transform 0.2s', cursor: 'pointer' }}
+              onMouseEnter={(ev) => { ev.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; ev.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(ev) => { ev.currentTarget.style.boxShadow = 'none'; ev.currentTarget.style.transform = 'none'; }}
+              onClick={() => window.open(`/courses/${c._id}`, '_blank')}>
+              <div style={{ height: '140px', background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', position: 'relative', overflow: 'hidden' }}>
+                {c.thumbnail ? (
+                  <img src={c.thumbnail} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FaGraduationCap style={{ fontSize: '2.5rem', color: '#cbd5e1' }} />
+                  </div>
+                )}
+                {e.completed && (
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: '#10b981', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <FaCheckCircle size={10} /> Completed
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', textTransform: 'capitalize' }}>{c.category}</span>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 8px', borderRadius: '6px', background: pct >= 100 ? '#dcfce7' : '#fef9c3', color: pct >= 100 ? '#15803d' : '#a16207', textTransform: 'capitalize' }}>{c.difficulty}</span>
+                </div>
+                <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.3rem', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{c.title}</h3>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0 0 0.75rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>{c.description}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <div style={{ flex: 1, height: '6px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: '999px', transition: 'width 0.5s ease', background: pct >= 100 ? '#10b981' : 'linear-gradient(90deg, #FFCE08, #f59e0b)', width: `${pct}%` }} />
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: pct >= 100 ? '#10b981' : '#FFCE08', minWidth: '32px', textAlign: 'right' }}>{pct}%</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Enrolled {new Date(e.enrolledAt).toLocaleDateString()}</span>
+                  <button style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: 'none', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer',
+                    background: e.completed ? '#f1f5f9' : 'linear-gradient(135deg, #FFCE08, #f59e0b)',
+                    color: e.completed ? '#475569' : '#1e293b',
+                  }}>
+                    {e.completed ? 'Review' : pct > 0 ? 'Continue' : 'Start'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user, logout, updateProfile, changePassword } = useAuth();
   const { showToast } = useToast();
@@ -920,6 +1081,7 @@ export default function Dashboard() {
   };
   const [tab, setTab] = useState('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileEditOpen, setProfileEditOpen] = useState(false);
@@ -1056,11 +1218,24 @@ export default function Dashboard() {
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
+  const pageTitles = {
+    analytics: { title: 'Dashboard', sub: 'Welcome back, ' + (user?.name?.split(' ')[0] || 'User') },
+    courses: { title: 'My Courses', sub: 'Continue learning where you left off' },
+    tickets: { title: 'Tickets', sub: 'Submit and track support requests' },
+    suggestions: { title: 'Suggestions', sub: 'Share your ideas with us' },
+    chat: { title: 'Messages', sub: 'Real-time support chat' },
+    'group-chat': { title: 'Group Chat', sub: 'Community group messaging' },
+    help: { title: 'Help Center', sub: 'Find answers and guides' },
+    team: { title: 'Team Dashboard', sub: 'Team member overview' },
+  };
+
+  const currentPage = pageTitles[tab] || pageTitles.analytics;
+
   const sidebarGroups = [...SIDEBAR_GROUPS];
   if (teamData?.isTeamMember) {
     sidebarGroups.push({
       label: 'ACCOUNT',
-      items: [{ key: 'team', icon: <FaUserTie />, label: 'Team Dashboard' }],
+      items: [{ key: 'team', icon: FaUserTie, label: 'Team Dashboard', color: 'text-purple-400' }],
     });
   }
 
@@ -1069,132 +1244,228 @@ export default function Dashboard() {
     : tickets;
 
   return (
-    <div className="adm-layout">
-      {sidebarOpen && isMobile && <div className="adm-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+    <div className="flex min-h-screen bg-slate-50 font-sans">
+      <TooltipProvider delayDuration={0}>
+        {sidebarOpen && isMobile && (
+          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
 
-      <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`}>
-        <div className="adm-sidebar-header">
-          <div className="adm-sidebar-logo">
-            <img src="/LOGO IMAGE.png" alt="CS Hub (iCT)" loading="lazy" />
-            <div>
-              <strong>CS Hub (iCT)</strong>
-              <span>User Panel</span>
+        <aside className={cn(
+          'fixed top-0 left-0 bottom-0 z-50 flex flex-col bg-slate-950 text-white transition-all duration-300 ease-in-out',
+          'border-r border-white/5',
+          collapsed ? 'w-[68px]' : 'w-[280px]',
+          'max-lg:-translate-x-full max-lg:shadow-2xl',
+          sidebarOpen && 'max-lg:translate-x-0',
+        )}>
+          {/* Header */}
+          <div className={cn('flex items-center gap-3 border-b border-white/5', collapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3')}>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 shadow-lg shadow-black/20">
+              <img src="/LOGO IMAGE.png" alt="CS Hub" className="h-full w-full rounded-[9px] object-contain" loading="lazy" />
             </div>
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-bold tracking-tight text-white">CS Hub (iCT)</div>
+                <div className="text-[10px] font-medium text-slate-500">User Panel</div>
+              </div>
+            )}
+            <button
+              onClick={() => setCollapsed((c) => !c)}
+              className={cn(
+                'hidden lg:flex h-5 w-5 items-center justify-center rounded-md border border-white/10 bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white',
+                collapsed && 'hidden',
+              )}
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </button>
           </div>
-        </div>
-        <div className="adm-sidebar-user">
-          <div className="adm-sidebar-avatar">{initials}</div>
-          <div className="adm-sidebar-user-info">
-            <span className="adm-sidebar-user-name">{user?.name || 'User'}</span>
-            <span className="adm-sidebar-user-role">{teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
-          </div>
-        </div>
-        <nav className="adm-sidebar-nav">
-          {sidebarGroups.map((group) => (
-            <div key={group.label} className="adm-sidebar-group">
-              <div className="adm-sidebar-group-label">{group.label}</div>
-              {group.items.map((item) => (
-                <button
-                  key={item.key}
-                  className={`adm-sidebar-item${tab === item.key ? ' active' : ''}`}
-                  onClick={() => { setTab(item.key); setSidebarOpen(false); }}
-                >
-                  <span className="adm-sidebar-item-icon">{item.icon}</span>
-                  <span className="adm-sidebar-item-label">{item.label}</span>
-                </button>
+
+          {/* Collapsed toggle */}
+          {collapsed && (
+            <div className="flex justify-center py-1.5">
+              <button
+                onClick={() => setCollapsed(false)}
+                className="hidden lg:flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white"
+              >
+                <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
+          {/* User info (expanded only) */}
+          {!collapsed && (
+            <div className="mx-3 mt-3 flex items-center gap-3 rounded-lg bg-white/[0.04] px-3 py-2.5 border border-white/5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-yellow-400 text-xs font-bold text-slate-900">{initials}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-semibold text-white truncate">{user?.name || 'User'}</div>
+                <div className="text-[10px] text-slate-500">{teamData?.isTeamMember ? 'Team Member' : 'User'}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Nav */}
+          <ScrollArea className="flex-1 px-2 py-1">
+            <nav className="flex flex-col gap-0.5">
+              {sidebarGroups.map((group) => (
+                <div key={group.label} className="mb-1">
+                  {!collapsed && (
+                    <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-600">
+                      {group.label}
+                    </div>
+                  )}
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = tab === item.key;
+                    const btn = (
+                      <button
+                        key={item.key}
+                        onClick={() => { setTab(item.key); setSidebarOpen(false); }}
+                        className={cn(
+                          'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
+                          collapsed && 'justify-center px-0 py-2.5',
+                          isActive
+                            ? 'bg-white/[0.08] text-white'
+                            : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                        )}
+                      >
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-yellow-400 shadow-sm shadow-yellow-400/30" />
+                        )}
+                        <Icon className={cn('h-[18px] w-[18px] shrink-0 transition-colors', isActive ? item.color : 'text-slate-500 group-hover:text-slate-300')} />
+                        {!collapsed && <span className="truncate">{item.label}</span>}
+                      </button>
+                    );
+                    if (collapsed) {
+                      return (
+                        <Tooltip key={item.key}>
+                          <TooltipTrigger asChild>{btn}</TooltipTrigger>
+                          <TooltipContent side="right" sideOffset={8}>{item.label}</TooltipContent>
+                        </Tooltip>
+                      );
+                    }
+                    return btn;
+                  })}
+                </div>
               ))}
-            </div>
-          ))}
-        </nav>
-        <div className="adm-sidebar-footer">
-          <button className="adm-sidebar-item" onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}>
-            <span className="adm-sidebar-item-icon"><FaQuestionCircle /></span>
-            <span className="adm-sidebar-item-label">Help</span>
-          </button>
-          <button className="adm-sidebar-item" onClick={handleLogout}>
-            <span className="adm-sidebar-item-icon"><FaSignOutAlt /></span>
-            <span className="adm-sidebar-item-label">Logout</span>
-          </button>
-        </div>
-      </aside>
+            </nav>
+          </ScrollArea>
 
-      <div className="adm-main">
-        <header className="adm-header">
-          <button className="adm-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          {/* Footer */}
+          <div className="border-t border-white/5 px-2 py-2">
+            {!collapsed ? (
+              <>
+                <button onClick={() => { setHelpOpen(true); setSidebarOpen(false); }}
+                  className={cn('flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
+                    'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                  )}>
+                  <FaQuestionCircle className="h-[18px] w-[18px] shrink-0 text-slate-500" />
+                  <span>Help</span>
+                </button>
+                <button onClick={handleLogout}
+                  className={cn('flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
+                    'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                  )}>
+                  <FaSignOutAlt className="h-[18px] w-[18px] shrink-0 text-slate-500" />
+                  <span>Logout</span>
+                </button>
+                <div className="mt-2 text-center text-[10px] font-medium text-slate-700">CS Hub v2.0</div>
+              </>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button onClick={handleLogout}
+                    className="flex w-full justify-center rounded-lg py-2.5 text-slate-400 transition-colors hover:bg-white/[0.04] hover:text-white">
+                    <FaSignOutAlt className="h-[18px] w-[18px]" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={8}>Logout</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        </aside>
+      </TooltipProvider>
+
+      <div className={cn('flex flex-1 flex-col transition-all duration-300', collapsed ? 'lg:ml-[68px]' : 'lg:ml-[280px]')}>
+        <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-lg lg:px-5">
+          <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 lg:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <FaBars />
           </button>
-          <div className="adm-header-search">
-            <FaSearch />
-            <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <div className="flex flex-col min-w-0">
+            <h2 className="text-sm font-bold text-slate-900 leading-tight">{currentPage.title}</h2>
+            <span className="text-[10px] text-slate-400">{currentPage.sub}</span>
           </div>
-          <div className="adm-header-right">
-            <div className="adm-header-notif" ref={notifRef}>
-              <button className="adm-header-icon" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 h-8 w-52 transition-all focus-within:border-cshub-yellow focus-within:bg-white focus-within:ring-2 focus-within:ring-cshub-yellow/20">
+              <FaSearch className="text-slate-400 text-xs shrink-0" />
+              <input type="text" placeholder="Search tickets..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-transparent text-xs text-slate-700 outline-none placeholder:text-slate-400" />
+            </div>
+            <div className="relative" ref={notifRef}>
+              <button className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-cshub-yellow hover:text-cshub-yellow" title="Notifications" onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}>
                 <FaBell />
-                {unreadCount > 0 && <span className="adm-header-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+                {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>}
               </button>
               {notifOpen && (
-                <div className="adm-notif-dropdown">
-                  <div className="adm-notif-dropdown-header">
-                    <strong>Notifications</strong>
-                    {unreadCount > 0 && <span className="adm-notif-count">{unreadCount} new</span>}
+                <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-xl shadow-black/10 z-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                    <span className="text-xs font-bold text-slate-900">Notifications</span>
+                    {unreadCount > 0 && <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">{unreadCount} new</span>}
                   </div>
-                  <div className="adm-notif-dropdown-list">
+                  <div className="max-h-72 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="adm-notif-empty">No new notifications</div>
+                      <div className="px-4 py-6 text-center text-xs text-slate-400">No new notifications</div>
                     ) : (
                       notifications.slice(0, 15).map((n) => (
-                        <button key={`${n.type}-${n.id}`} className="adm-notif-item" onClick={() => handleNotifClick(n)}>
-                          <span className="adm-notif-icon">{n.icon}</span>
-                          <div className="adm-notif-content">
-                            <div className="adm-notif-title">{n.title}</div>
-                            <div className="adm-notif-sub">{n.sub}</div>
+                        <button key={`${n.type}-${n.id}`} className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-slate-50" onClick={() => handleNotifClick(n)}>
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm">{n.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-medium text-slate-900 truncate">{n.title}</div>
+                            <div className="text-[10px] text-slate-400">{n.sub}</div>
                           </div>
                         </button>
                       ))
                     )}
                   </div>
                   {notifications.length > 0 && (
-                    <div className="adm-notif-dropdown-footer">
-                      <button onClick={() => { setNotifOpen(false); setTab('tickets'); }}>View all</button>
+                    <div className="border-t border-slate-100 px-4 py-2 text-center">
+                      <button className="text-xs font-medium text-amber-600 hover:text-amber-700" onClick={() => { setNotifOpen(false); setTab('tickets'); }}>View all</button>
                     </div>
                   )}
                 </div>
               )}
             </div>
-            <div className="adm-header-user" ref={profileRef}>
-              <button className="adm-header-user-btn" onClick={() => setProfileOpen(!profileOpen)}>
-                <div className="adm-header-avatar">{initials}</div>
-                <span className="adm-header-name">{user?.name || 'User'}</span>
+            <div className="relative" ref={profileRef}>
+              <button className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 h-8 transition-colors hover:border-cshub-yellow" onClick={() => setProfileOpen(!profileOpen)}>
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-yellow-400 text-[10px] font-bold text-slate-900">{initials}</div>
+                <span className="text-xs font-medium text-slate-700 hidden sm:inline">{user?.name || 'User'}</span>
               </button>
               {profileOpen && (
-                <div className="adm-profile-dropdown">
-                  <div className="adm-profile-dropdown-header">
-                    <div className="adm-profile-dropdown-avatar">{initials}</div>
-                    <div>
-                      <div className="adm-profile-dropdown-name">{user?.name || 'User'}</div>
-                      <div className="adm-profile-dropdown-email">{user?.email || ''}</div>
-                      <span className="adm-profile-role-badge"><FaUserShield /> {teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-200 bg-white shadow-xl shadow-black/10 z-50">
+                  <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-yellow-400 text-sm font-bold text-slate-900">{initials}</div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-slate-900 truncate">{user?.name || 'User'}</div>
+                      <div className="text-[10px] text-slate-400 truncate">{user?.email || ''}</div>
+                      <span className="mt-0.5 inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"><FaUserShield className="text-[8px]" /> {teamData?.isTeamMember ? 'Team Member' : 'User'}</span>
                     </div>
                   </div>
-                  <div className="adm-profile-dropdown-divider"></div>
-                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileEditOpen(true); setProfileTab('profile'); setProfileOpen(false); }}>
-                    <FaCog /> Settings
-                  </button>
-                  <button className="adm-profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('/'); }}>
-                    <FaHome /> Back to Home
-                  </button>
-                  <div className="adm-profile-dropdown-divider"></div>
-                  <button className="adm-profile-dropdown-item adm-profile-dropdown-logout" onClick={handleLogout}>
-                    <FaSignOutAlt /> Sign Out
-                  </button>
+                  <div className="py-1">
+                    <button className="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900" onClick={() => { setProfileEditOpen(true); setProfileTab('profile'); setProfileOpen(false); }}>
+                      <FaCog className="text-[11px] text-slate-400" /> Settings
+                    </button>
+                    <button className="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900" onClick={() => { setProfileOpen(false); navigate('/'); }}>
+                      <FaHome className="text-[11px] text-slate-400" /> Back to Home
+                    </button>
+                    <div className="my-1 border-t border-slate-100"></div>
+                    <button className="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-50" onClick={handleLogout}>
+                      <FaSignOutAlt className="text-[11px]" /> Sign Out
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </header>
 
-        <main className="adm-content">
+        <main className="flex-1 p-4 lg:p-5 bg-slate-50">
           {teamData?.application && !teamData.isTeamMember && (
             <div className="dash-card" style={{ marginBottom: '1rem', padding: '1rem 1.2rem', borderLeft: `4px solid ${teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b'}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
@@ -1210,6 +1481,8 @@ export default function Dashboard() {
           )}
           {tab === 'analytics' ? (
             <DashboardView tickets={searchQuery.trim() ? filteredTickets : tickets} suggestionsCount={suggestionsCount} user={user} />
+          ) : tab === 'courses' ? (
+            <MyCoursesView />
           ) : tab === 'tickets' ? (
             <TicketsView tickets={searchQuery.trim() ? filteredTickets : tickets} setTickets={setTickets} />
           ) : tab === 'suggestions' ? (
