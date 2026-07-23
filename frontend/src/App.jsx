@@ -124,7 +124,7 @@ export default function App() {
           <Route path="/dashboard" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><Dashboard /></ProtectedRoute></Suspense>} />
           <Route path="/admin" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute></Suspense>} />
           <Route path="/collaborators" element={<Suspense fallback={<PageSpinner />}><CollaboratorsPage /></Suspense>} />
-          <Route path="/live-sessions" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><LiveSessionsStudent /></ProtectedRoute></Suspense>} />
+          <Route path="/live-sessions" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><main className="pt-24 pb-12 px-4 max-w-3xl mx-auto min-h-screen"><LiveSessionsStudent /></main></ProtectedRoute></Suspense>} />
         </Routes>
         {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
         {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}

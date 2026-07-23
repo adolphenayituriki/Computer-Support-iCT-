@@ -206,7 +206,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
           ) : (
             <>
               <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.home')}</a></li>
-              <li><a href="/news" className={active === 'news' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.news')}</a></li>
+              <li><a href="/live-sessions" className={active === 'live-sessions' ? 'active' : ''} onClick={() => setOpen(false)}><FaVideo style={{ fontSize: '0.78em', marginRight: '0.25rem', verticalAlign: 'middle' }} /> Live Sessions</a></li>
               <li className={`nav-dropdown${coursesOpen ? ' open' : ''}`} onMouseEnter={handleCoursesEnter} onMouseLeave={handleCoursesLeave}>
                 <button className={`nav-dropdown-trigger${isCourses ? ' active' : ''}`} onClick={() => setCoursesOpen((v) => !v)}>
                   {t('nav.courses')} <FaCaretDown className="nav-caret" />
