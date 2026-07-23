@@ -91,13 +91,14 @@ export default function JitsiRoom({ roomName, displayName, email, onMeetingEnd, 
         setParticipants((p) => Math.max(0, p - 1));
       });
       api.addEventListener('videoConferenceJoined', () => {
-        setLoading(false);
         setParticipants((p) => p + 1);
       });
       api.addEventListener('videoConferenceLeft', handleMeetingEnd);
       api.addEventListener('error', (e) => {
         console.error('Jitsi error:', e);
       });
+
+      setLoading(false);
 
       if (settings.muteParticipants) {
         api.addEventListener('participantJoined', (event) => {
