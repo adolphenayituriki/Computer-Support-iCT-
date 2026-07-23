@@ -8,7 +8,12 @@ import JitsiRoom from './JitsiRoom';
 const api = async (url, opts = {}) => {
   const token = localStorage.getItem('token');
   const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...opts.headers };
-  try { const res = await fetch(`${API_BASE}${url}`, { ...opts, headers }); return await res.json(); } catch { return { error: 'Network error' }; }
+  try {
+    const res = await fetch(`${API_BASE}${url}`, { ...opts, headers });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+    return data;
+  } catch (e) { return { error: e.message || 'Network error' }; }
 };
 
 const STATUSES = { scheduled: 'bg-blue-100 text-blue-600', live: 'bg-emerald-100 text-emerald-600', ended: 'bg-slate-100 text-slate-500', cancelled: 'bg-red-100 text-red-500' };
@@ -35,7 +40,13 @@ export default function LiveSessionsAdmin() {
     api('/api/admin/live-sessions').then((d) => { setSessions(Array.isArray(d) ? d : []); setLoading(false); }).catch(() => setLoading(false));
   };
 
-  useEffect(() => { fetchData(); api('/api/admin/users').then((d) => { setUsers(Array.isArray(d) ? d : (d.users || [])); }).catch(() => {}); }, []);
+  useEffect(() => {
+    fetchData();
+    api('/api/admin/users').then((d) => {
+      if (d.error) { showToast('Failed to load users: ' + d.error, 'error'); setUsers([]); return; }
+      setUsers(Array.isArray(d) ? d : (d.users || []));
+    }).catch(() => { showToast('Failed to load users.', 'error'); });
+  }, []);
 
   useEffect(() => {
     const handler = (e) => { if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) setShowUserDropdown(false); };
