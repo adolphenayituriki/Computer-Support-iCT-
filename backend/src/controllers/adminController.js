@@ -405,7 +405,7 @@ export async function getAllCoursesAdmin(_req, res) {
 
 export async function createCourseAdmin(req, res) {
   try {
-    const { title, description, content, category, difficulty, estimatedTime, published, tags } = req.body;
+    const { title, description, content, category, difficulty, estimatedTime, published, tags, thumbnail, introVideo, videoUrl, resources } = req.body;
     if (!title || !description) return res.status(400).json({ error: 'Title and description are required.' });
     const course = await Course.create({
       title, description,
@@ -416,6 +416,10 @@ export async function createCourseAdmin(req, res) {
       author: req.user.name,
       published: published !== undefined ? published : true,
       tags: tags || [],
+      thumbnail: thumbnail || '',
+      introVideo: introVideo || '',
+      videoUrl: videoUrl || '',
+      resources: resources || [],
     });
     res.status(201).json(course);
   } catch (err) {
