@@ -153,7 +153,10 @@ export default function CoursePlayer() {
 
       if (enrollRes.ok) {
         const enrollData = await enrollRes.json();
-        const enroll = enrollData.find((e) => e.courseId === id);
+        const enroll = enrollData.find((e) => {
+          const cid = e.courseId?._id || e.courseId;
+          return cid === id;
+        });
         if (enroll) setEnrolled(true);
         else { navigate('/courses'); showToast('Enroll first to access this course.', 'error'); return; }
       } else if (user) {
@@ -225,7 +228,7 @@ export default function CoursePlayer() {
   const hasResources = course.resources && course.resources.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pt-[80px]">
       {showAssessment && (
         <Assessment
           course={course}
@@ -233,8 +236,8 @@ export default function CoursePlayer() {
           onComplete={() => setShowAssessment(false)}
         />
       )}
-      <div className="sticky top-[85px] z-30 bg-white border-b border-slate-200 shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
+      <div className="sticky top-[80px] z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 backdrop-blur-lg">
+        <div className="mx-auto max-w-6xl px-4 flex items-center gap-4 w-full">
           <button onClick={() => navigate('/courses')} className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors shrink-0">
             <FaArrowLeft /> <span className="hidden sm:inline">Back</span>
           </button>
@@ -257,11 +260,11 @@ export default function CoursePlayer() {
             )}
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-4 sm:hidden pb-2">
-          <div className="flex items-center gap-2">
-            <div className="flex-1"><ProgressBar progress={courseProgress} /></div>
-            <span className="text-[10px] font-bold shrink-0" style={{ color: courseProgress >= 100 ? '#10b981' : '#FFCE08' }}>{courseProgress}%</span>
-          </div>
+      </div>
+      <div className="mx-auto max-w-6xl px-4 sm:hidden py-2">
+        <div className="flex items-center gap-2">
+          <div className="flex-1"><ProgressBar progress={courseProgress} /></div>
+          <span className="text-[10px] font-bold shrink-0" style={{ color: courseProgress >= 100 ? '#10b981' : '#FFCE08' }}>{courseProgress}%</span>
         </div>
       </div>
 
@@ -299,7 +302,7 @@ export default function CoursePlayer() {
             )}
 
             {hasContent && (
-              <div className="rounded-2xl border-2 border-[#FFCE08]/30 bg-gradient-to-br from-white to-yellow-50/50 overflow-hidden mt-10 shadow-lg shadow-amber-100/50">
+              <div className="rounded-2xl border-2 border-[#FFCE08]/30 bg-gradient-to-br from-white to-yellow-50/50 overflow-hidden shadow-lg shadow-amber-100/50">
                 <div className="p-4 border-b border-slate-600 flex items-center justify-between" style={{ background: '#6B7280' }}>
                   <div className="flex items-center gap-2 text-sm font-bold text-white">
                     <div className="h-7 w-7 rounded-lg bg-white/20 flex items-center justify-center">
@@ -309,7 +312,7 @@ export default function CoursePlayer() {
                   </div>
                   <span className="text-[10px] text-white/80 font-medium bg-white/15 px-2 py-0.5 rounded-full">Scroll to read</span>
                 </div>
-                <div className="max-h-[395px] overflow-y-auto p-6 scroll-smooth">
+                <div className="max-h-[400px] overflow-y-auto p-6 scroll-smooth">
                   <div className="prose prose-sm prose-slate max-w-none" style={{ fontSize: `${textSize}px` }}>
                     <ReactMarkdown rehypePlugins={[rehypeRaw]}>{course.content}</ReactMarkdown>
                   </div>

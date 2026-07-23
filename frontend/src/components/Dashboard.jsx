@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import UserChatView from './UserChatView';
 import GroupChatView from './GroupChatView';
 import HelpModal from './HelpModal';
@@ -14,7 +16,7 @@ import {
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
   FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome,
   FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
-  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers, FaHeadset, FaRocket
+  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers, FaHeadset, FaRocket, FaSpinner, FaChevronRight
 } from 'react-icons/fa';
 import { LayoutDashboard, Ticket, MessageSquare, Lightbulb, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import API_BASE from '../api';
@@ -921,11 +923,11 @@ function HelpCenterView({ setTab }) {
 }
 
 function MyCoursesView() {
-  const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   useEffect(() => {
     const tokenVal = localStorage.getItem('cshub_token');
@@ -962,6 +964,12 @@ function MyCoursesView() {
   const completedCount = enriched.filter((e) => e.completed).length;
   const progressCount = enriched.filter((e) => !e.completed && e.progress > 0).length;
 
+  const getActionButton = (e) => {
+    if (e.completed) return { label: 'Review Course', bg: '#10b981', color: '#fff' };
+    if (e.progress > 0) return { label: 'Resume Course', bg: 'linear-gradient(135deg, #FFCE08, #f59e0b)', color: '#1e293b' };
+    return { label: 'Start Learning', bg: 'linear-gradient(135deg, #FFCE08, #f59e0b)', color: '#1e293b' };
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
@@ -993,6 +1001,8 @@ function MyCoursesView() {
     );
   }
 
+  const modalItem = selectedCourse ? enriched.find((e) => (e.course?._id || e.course?.id) === selectedCourse) : null;
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -1017,49 +1027,59 @@ function MyCoursesView() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {filtered.map((e) => {
           const c = e.course;
           const pct = e.progress;
+          const btn = getActionButton(e);
           return (
-            <div key={e.enrollment?._id || e.course?._id} style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', overflow: 'hidden', transition: 'box-shadow 0.2s, transform 0.2s', cursor: 'pointer' }}
-              onMouseEnter={(ev) => { ev.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; ev.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(ev) => { ev.currentTarget.style.boxShadow = 'none'; ev.currentTarget.style.transform = 'none'; }}
-              onClick={() => window.open(`/courses/${c._id}`, '_blank')}>
-              <div style={{ height: '140px', background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', position: 'relative', overflow: 'hidden' }}>
+            <div key={e.enrollment?._id || e.course?._id}
+              className="group rounded-xl border border-slate-200 bg-white overflow-hidden transition-all hover:shadow-md hover:border-slate-300 cursor-pointer flex flex-col"
+              onClick={() => setSelectedCourse(c._id || c.id)}>
+              <div className="aspect-[16/10] w-full overflow-hidden bg-slate-100 relative">
                 {c.thumbnail ? (
-                  <img src={c.thumbnail} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FaGraduationCap style={{ fontSize: '2.5rem', color: '#cbd5e1' }} />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FaGraduationCap className="text-3xl text-slate-200" />
                   </div>
                 )}
                 {e.completed && (
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: '#10b981', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <FaCheckCircle size={10} /> Completed
+                  <div className="absolute top-2 right-2 inline-flex items-center gap-0.5 rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-bold text-white">
+                    <FaCheckCircle size={8} /> Done
                   </div>
                 )}
               </div>
-              <div style={{ padding: '1rem' }}>
-                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', textTransform: 'capitalize' }}>{c.category}</span>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 8px', borderRadius: '6px', background: pct >= 100 ? '#dcfce7' : '#fef9c3', color: pct >= 100 ? '#15803d' : '#a16207', textTransform: 'capitalize' }}>{c.difficulty}</span>
+              <div className="p-3 flex flex-col flex-1">
+                <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                  <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${c.category === 'hardware' ? 'bg-blue-100 text-blue-700' : c.category === 'software' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}`}>
+                    {c.category}
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${c.difficulty === 'beginner' ? 'bg-emerald-100 text-emerald-700' : c.difficulty === 'intermediate' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
+                    {c.difficulty}
+                  </span>
                 </div>
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.3rem', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{c.title}</h3>
-                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0 0 0.75rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>{c.description}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <div style={{ flex: 1, height: '6px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', borderRadius: '999px', transition: 'width 0.5s ease', background: pct >= 100 ? '#10b981' : 'linear-gradient(90deg, #FFCE08, #f59e0b)', width: `${pct}%` }} />
+
+                <h3 className="text-xs font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-slate-700 leading-tight">{c.title}</h3>
+                <p className="text-[10px] text-slate-500 mb-2 line-clamp-2 flex-1 leading-relaxed">{c.description}</p>
+
+                {!e.completed && (
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-semibold text-slate-500">{pct}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500 ease-out" style={{
+                        width: `${pct}%`,
+                        background: pct >= 100 ? '#10b981' : 'linear-gradient(90deg, #FFCE08, #f59e0b)',
+                      }} />
+                    </div>
                   </div>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: pct >= 100 ? '#10b981' : '#FFCE08', minWidth: '32px', textAlign: 'right' }}>{pct}%</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Enrolled {new Date(e.enrolledAt).toLocaleDateString()}</span>
-                  <button style={{ padding: '0.4rem 0.9rem', borderRadius: '8px', border: 'none', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer',
-                    background: e.completed ? '#f1f5f9' : 'linear-gradient(135deg, #FFCE08, #f59e0b)',
-                    color: e.completed ? '#475569' : '#1e293b',
-                  }}>
-                    {e.completed ? 'Review' : pct > 0 ? 'Continue' : 'Start'}
+                )}
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
+                  <button className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-slate-800 transition-colors">
+                    {e.completed ? <><FaCheckCircle size={9} /> Review</> : pct > 0 ? <><FaPlay size={9} /> Continue</> : <><FaPlay size={9} /> Start</>}
                   </button>
                 </div>
               </div>
@@ -1067,6 +1087,68 @@ function MyCoursesView() {
           );
         })}
       </div>
+
+      {modalItem && (
+        <div className="adm-modal-overlay" onClick={() => setSelectedCourse(null)}>
+          <div className="adm-modal" style={{ maxWidth: '520px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+            <div className="adm-modal-header" style={{ padding: '0.75rem 1.25rem' }}>
+              <h3 style={{ fontSize: '0.9rem', margin: 0 }}>{modalItem.course.title}</h3>
+              <button className="adm-modal-close" onClick={() => setSelectedCourse(null)}><FaTimes /></button>
+            </div>
+            <div style={{ overflow: 'auto', flex: 1 }}>
+              {modalItem.course.thumbnail && (
+                <div style={{ width: '100%', height: '140px', overflow: 'hidden' }}>
+                  <img src={modalItem.course.thumbnail} alt={modalItem.course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
+
+              <div style={{ padding: '1.25rem' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${modalItem.course.category === 'hardware' ? 'bg-blue-100 text-blue-700' : modalItem.course.category === 'software' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}`}>
+                    {modalItem.course.category}
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${modalItem.course.difficulty === 'beginner' ? 'bg-emerald-100 text-emerald-700' : modalItem.course.difficulty === 'intermediate' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
+                    {modalItem.course.difficulty}
+                  </span>
+                  {modalItem.course.estimatedTime && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-slate-400"><FaClock size={9} /> {modalItem.course.estimatedTime}</span>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.6, marginBottom: '1rem' }}>{modalItem.course.description}</p>
+
+                {!modalItem.completed && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#374151' }}>Progress</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: modalItem.completed ? '#10b981' : '#FFCE08' }}>{modalItem.progress}%</span>
+                    </div>
+                    <div style={{ height: '4px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', borderRadius: '999px', transition: 'width 0.5s ease', background: modalItem.completed ? '#10b981' : 'linear-gradient(90deg, #FFCE08, #f59e0b)', width: `${modalItem.progress}%` }} />
+                    </div>
+                  </div>
+                )}
+
+                {modalItem.completed && (
+                  <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl mb-4 border border-emerald-200">
+                    <FaCheckCircle className="text-emerald-500" />
+                    <span className="text-xs font-semibold text-emerald-700">Course completed! You can review the material anytime.</span>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => { setSelectedCourse(null); window.open(`/courses/${modalItem.course._id || modalItem.course.id}`, '_blank'); }}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all"
+                    style={{ background: getActionButton(modalItem).bg, color: getActionButton(modalItem).color }}>
+                    {getActionButton(modalItem).label}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1385,7 +1467,7 @@ export default function Dashboard() {
       </TooltipProvider>
 
       <div className={cn('flex flex-1 flex-col transition-all duration-300', collapsed ? 'lg:ml-[68px]' : 'lg:ml-[280px]')}>
-        <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-lg lg:px-5">
+        <header className="sticky top-[80px] z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-lg lg:px-5">
           <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 lg:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <FaBars />
           </button>

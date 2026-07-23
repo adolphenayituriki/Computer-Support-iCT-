@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FaBookOpen, FaClock, FaSignal, FaArrowLeft, FaTag, FaUser, FaHeart, FaRegHeart, FaComment, FaShare, FaPaperPlane, FaPlay, FaCheckCircle, FaSpinner, FaGraduationCap, FaLock } from 'react-icons/fa';
+import { FaBookOpen, FaClock, FaSignal, FaArrowLeft, FaTag, FaUser, FaHeart, FaRegHeart, FaComment, FaShare, FaPaperPlane, FaPlay, FaCheckCircle, FaSpinner, FaGraduationCap, FaLock, FaTimes, FaClipboardCheck, FaCircle } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useNavigate } from 'react-router-dom';
@@ -184,133 +184,194 @@ export default function Courses({ onLoginClick }) {
 
     return (
       <div className="min-h-screen bg-slate-50">
-        <div className="mx-auto max-w-3xl px-4 pt-24 pb-12">
-          <button type="button" onClick={() => setSelected(null)}
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-            <FaArrowLeft /> Back to Courses
-          </button>
+        <div className="mx-auto max-w-6xl px-4 pt-32 pb-12">
+          <div className="mb-8">
+            <h1 className="flex items-center gap-3 text-2xl font-bold text-slate-900 mb-2">
+              <FaBookOpen className="text-[#FFCE08]" /> Knowledge Base
+            </h1>
+            <p className="text-sm text-slate-500">Short guides and tutorials covering the most common questions and issues.</p>
+          </div>
 
-          <article className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="p-6 md:p-8">
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${CATEGORY_COLORS[selected.category] || CATEGORY_COLORS.general}`}>
-                  {CATEGORY_ICONS[selected.category] || '\u{1F4D6}'} {selected.category}
-                </span>
-                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${DIFFICULTY_COLORS[selected.difficulty] || DIFFICULTY_COLORS.beginner}`}>
-                  <FaSignal size={10} /> {selected.difficulty}
-                </span>
-                {selected.estimatedTime && (
-                  <span className="inline-flex items-center gap-1 text-xs text-slate-400"><FaClock size={11} /> {selected.estimatedTime}</span>
-                )}
-                {isCompleted && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                    <FaCheckCircle size={10} /> Completed
-                  </span>
-                )}
-              </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+            <div className="relative flex-1">
+              <FaBookOpen className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300" />
+              <input type="text" placeholder="Search courses..."
+                value={search} onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+            </div>
+            <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900">
+              <option value="">All Categories</option>
+              {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+            {user && (
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900">
+                <option value="">All Status</option>
+                <option value="enrolled">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="not-enrolled">Not Enrolled</option>
+              </select>
+            )}
+          </div>
 
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">{selected.title}</h1>
-              <p className="text-sm text-slate-500 mb-4">{selected.description}</p>
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+              <FaBookOpen size={40} className="text-slate-200 mb-3" />
+              <p className="text-sm text-slate-400">No courses found. Check back later for new guides.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map((course) => {
+                const enroll = enrollments[course._id];
+                const isEnrolled = !!enroll;
+                const progress = enroll?.progress?.progress || 0;
+                const isCompleted = enroll?.progress?.completed;
+                const visibleTags = (course.tags || []).slice(0, 3);
+                const extraTags = (course.tags || []).length - 3;
 
-              {isEnrolled && (
-                <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-slate-600">Your Progress</span>
-                    <span className="text-xs font-bold" style={{ color: progress >= 100 ? '#10b981' : '#FFCE08' }}>{progress}%</span>
-                  </div>
-                  <ProgressBar progress={progress} />
-                </div>
-              )}
-
-              {selected.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-6">
-                  {selected.tags.map((tag, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                      <FaTag size={9} /> {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {selected.content ? (
-                <div className="prose prose-sm prose-slate max-w-none mb-6">
-                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>{selected.content.replace(/For the testimonials[\s\S]*$/i, '')}</ReactMarkdown>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400 italic mb-6">Full content coming soon.</p>
-              )}
-
-              <div className="flex items-center gap-2 text-xs text-slate-400 mb-6 pt-4 border-t border-slate-100">
-                <FaUser size={11} /> {selected.author} &middot; {new Date(selected.createdAt).toLocaleDateString()}
-              </div>
-
-              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-                {!isEnrolled ? (
-                  <button onClick={(e) => handleEnroll(selected._id, e)} disabled={enrolling === selected._id}
-                    className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50"
-                    style={{ background: 'linear-gradient(135deg, #FFCE08, #f59e0b)' }}>
-                    {enrolling === selected._id ? <><FaSpinner className="animate-spin" /> Enrolling...</> : <><FaGraduationCap /> Enroll in Course</>}
-                  </button>
-                ) : (
-                  <button onClick={(e) => handleStartCourse(selected._id, e)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-colors">
-                    {isCompleted ? <><FaCheckCircle /> Review Course</> : progress > 0 ? <><FaPlay /> Continue Course</> : <><FaPlay /> Start Course</>}
-                  </button>
-                )}
-                <button type="button" onClick={() => handleLike(selected._id)}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${likes.liked ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                  {likes.liked ? <FaHeart /> : <FaRegHeart />} {likes.count}
-                </button>
-                <button type="button" onClick={() => handleShare(selected)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-200 transition-colors">
-                  <FaShare /> Share
-                </button>
-              </div>
-
-              <div>
-                <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">
-                  <FaComment style={{ color: '#FFCE08' }} /> Comments ({comments.length})
-                </h4>
-                {comments.length === 0 ? (
-                  <p className="text-xs text-slate-400 mb-4">No comments yet. Start the conversation!</p>
-                ) : (
-                  <div className="max-h-72 overflow-y-auto mb-4 space-y-3">
-                    {comments.map((c, i) => (
-                      <div key={i} className="flex gap-3 pb-3 border-b border-slate-50 last:border-0">
-                        <div className="h-7 w-7 rounded-full bg-yellow-100 flex items-center justify-center text-[10px] font-bold text-amber-700 shrink-0">
-                          {c.userName?.charAt(0).toUpperCase() || <FaUser size={9} />}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-semibold text-slate-700">{c.userName}</span>
-                            <span className="text-[10px] text-slate-400">{new Date(c.createdAt).toLocaleString()}</span>
-                          </div>
-                          <p className="text-xs text-slate-600">{c.text}</p>
-                        </div>
+                return (
+                  <article key={course._id}
+                    className="group rounded-xl border border-slate-200 bg-white overflow-hidden transition-all hover:shadow-md hover:border-slate-300 cursor-pointer flex flex-col"
+                    onClick={() => setSelected(course)}
+                    onKeyDown={(e) => e.key === 'Enter' && setSelected(course)}
+                    role="button" tabIndex={0}>
+                    {course.thumbnail && (
+                      <div className="aspect-video w-full overflow-hidden bg-slate-100">
+                        <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                       </div>
+                    )}
+                    <div className="p-4 flex flex-col flex-1">
+                    <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLORS[course.category] || CATEGORY_COLORS.general}`}>
+                        {course.category}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${DIFFICULTY_COLORS[course.difficulty] || DIFFICULTY_COLORS.beginner}`}>
+                        {course.difficulty}
+                      </span>
+                      {isCompleted && (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                          <FaCheckCircle size={8} /> Done
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-sm font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-slate-700">{course.title}</h3>
+                    <p className="text-[11px] text-slate-500 mb-2 line-clamp-2 flex-1">{course.description}</p>
+
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400 flex-wrap mb-3">
+                      {course.estimatedTime && (
+                        <span className="flex items-center gap-1"><FaClock size={9} /> {course.estimatedTime}</span>
+                      )}
+                      {visibleTags.map((tag, i) => (
+                        <span key={i} className="text-slate-400">{tag}</span>
+                      ))}
+                      {extraTags > 0 && (
+                        <span className="text-slate-400 font-medium">+{extraTags}</span>
+                      )}
+                    </div>
+
+                    {isEnrolled && !isCompleted && (
+                      <div className="mb-3">
+                        <ProgressBar progress={progress} />
+                      </div>
+                    )}
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
+                      {!isEnrolled ? (
+                        <button onClick={(e) => handleEnroll(course._id, e)} disabled={enrolling === course._id}
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white transition-all disabled:opacity-50"
+                          style={{ background: 'linear-gradient(135deg, #FFCE08, #f59e0b)' }}>
+                          {enrolling === course._id ? <FaSpinner className="animate-spin" size={10} /> : <FaGraduationCap size={10} />}
+                          Enroll
+                        </button>
+                      ) : (
+                        <button onClick={(e) => handleStartCourse(course._id, e)}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 transition-colors">
+                          {isCompleted ? <><FaCheckCircle size={10} /> Review</> : progress > 0 ? <><FaPlay size={10} /> Continue</> : <><FaPlay size={10} /> Start</>}
+                        </button>
+                      )}
+                    </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setSelected(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[520px] max-h-[85vh] flex flex-col mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <button onClick={() => setSelected(null)} className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors shrink-0">
+                  <FaTimes size={14} />
+                </button>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-bold text-slate-900 truncate">{selected.title}</h2>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto flex-1">
+              {selected.thumbnail && (
+                <div className="w-full h-36 bg-slate-100 overflow-hidden">
+                  <img src={selected.thumbnail} alt={selected.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLORS[selected.category] || CATEGORY_COLORS.general}`}>
+                    {selected.category}
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${DIFFICULTY_COLORS[selected.difficulty] || DIFFICULTY_COLORS.beginner}`}>
+                    {selected.difficulty}
+                  </span>
+                  {selected.estimatedTime && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-slate-400"><FaClock size={9} /> {selected.estimatedTime}</span>
+                  )}
+                </div>
+
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">{selected.description}</p>
+
+                {selected.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {selected.tags.map((tag, i) => (
+                      <span key={i} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                        <FaTag size={8} /> {tag}
+                      </span>
                     ))}
                   </div>
                 )}
-                {user ? (
-                  <div className="flex gap-2">
-                    <input type="text" placeholder="Write a comment..." value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleComment(selected._id); } }}
-                      className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
-                    <button type="button" disabled={submitting || !commentText.trim()}
-                      onClick={() => handleComment(selected._id)}
-                      className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-xs text-white hover:bg-slate-800 disabled:opacity-40 transition-colors">
-                      {submitting ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <FaPaperPlane size={11} />}
-                    </button>
+
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 mb-4">
+                  <h4 className="text-xs font-bold text-slate-700 mb-2">Course Info</h4>
+                  <div className="space-y-1.5 text-[11px] text-slate-600">
+                    <div className="flex justify-between"><span className="text-slate-400">Author</span><span className="font-medium">{selected.author}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Duration</span><span className="font-medium">{selected.estimatedTime || 'N/A'}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Published</span><span className="font-medium">{new Date(selected.createdAt).toLocaleDateString()}</span></div>
                   </div>
-                ) : (
-                  <p className="text-xs text-slate-400 text-center py-2">
-                    <button type="button" className="text-slate-900 font-semibold underline" onClick={() => navigate('/')}>Sign in</button> to leave a comment.
-                  </p>
-                )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button onClick={(e) => handleEnroll(selected._id, e)} disabled={enrolling === selected._id}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-50"
+                    style={{ background: 'linear-gradient(135deg, #FFCE08, #f59e0b)' }}>
+                    {enrolling === selected._id ? <><FaSpinner className="animate-spin" /> Enrolling...</> : <><FaGraduationCap /> Enroll in Course</>}
+                  </button>
+                  <button type="button" onClick={() => handleLike(selected._id)}
+                    className={`inline-flex items-center gap-1 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors ${likes.liked ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                    {likes.liked ? <FaHeart /> : <FaRegHeart />} {likes.count}
+                  </button>
+                  <button type="button" onClick={() => handleShare(selected)}
+                    className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2.5 text-xs font-medium text-slate-500 hover:bg-slate-200 transition-colors">
+                    <FaShare />
+                  </button>
+                </div>
               </div>
             </div>
-          </article>
+          </div>
         </div>
       </div>
     );
@@ -355,14 +416,12 @@ export default function Courses({ onLoginClick }) {
             <p className="text-sm text-slate-400">No courses found. Check back later for new guides.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {filtered.map((course) => {
               const enroll = enrollments[course._id];
               const isEnrolled = !!enroll;
               const progress = enroll?.progress?.progress || 0;
               const isCompleted = enroll?.progress?.completed;
-              const visibleTags = (course.tags || []).slice(0, 3);
-              const extraTags = (course.tags || []).length - 3;
 
               return (
                 <article key={course._id}
@@ -371,61 +430,52 @@ export default function Courses({ onLoginClick }) {
                   onKeyDown={(e) => e.key === 'Enter' && setSelected(course)}
                   role="button" tabIndex={0}>
                   {course.thumbnail && (
-                    <div className="aspect-video w-full overflow-hidden bg-slate-100">
+                    <div className="aspect-[16/10] w-full overflow-hidden bg-slate-100">
                       <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     </div>
                   )}
-                  <div className="p-4 flex flex-col flex-1">
-                  <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLORS[course.category] || CATEGORY_COLORS.general}`}>
-                      {course.category}
-                    </span>
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${DIFFICULTY_COLORS[course.difficulty] || DIFFICULTY_COLORS.beginner}`}>
-                      {course.difficulty}
-                    </span>
-                    {isCompleted && (
-                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                        <FaCheckCircle size={8} /> Done
+                  <div className="p-3 flex flex-col flex-1">
+                    <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${CATEGORY_COLORS[course.category] || CATEGORY_COLORS.general}`}>
+                        {course.category}
                       </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-sm font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-slate-700">{course.title}</h3>
-                  <p className="text-[11px] text-slate-500 mb-2 line-clamp-2 flex-1">{course.description}</p>
-
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 flex-wrap mb-3">
-                    {course.estimatedTime && (
-                      <span className="flex items-center gap-1"><FaClock size={9} /> {course.estimatedTime}</span>
-                    )}
-                    {visibleTags.map((tag, i) => (
-                      <span key={i} className="text-slate-400">{tag}</span>
-                    ))}
-                    {extraTags > 0 && (
-                      <span className="text-slate-400 font-medium">+{extraTags}</span>
-                    )}
-                  </div>
-
-                  {isEnrolled && !isCompleted && (
-                    <div className="mb-3">
-                      <ProgressBar progress={progress} />
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${DIFFICULTY_COLORS[course.difficulty] || DIFFICULTY_COLORS.beginner}`}>
+                        {course.difficulty}
+                      </span>
+                      {isCompleted && (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">
+                          <FaCheckCircle size={7} /> Done
+                        </span>
+                      )}
                     </div>
-                  )}
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
-                    {!isEnrolled ? (
-                      <button onClick={(e) => handleEnroll(course._id, e)} disabled={enrolling === course._id}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white transition-all disabled:opacity-50"
-                        style={{ background: 'linear-gradient(135deg, #FFCE08, #f59e0b)' }}>
-                        {enrolling === course._id ? <FaSpinner className="animate-spin" size={10} /> : <FaGraduationCap size={10} />}
-                        Enroll
-                      </button>
-                    ) : (
-                      <button onClick={(e) => handleStartCourse(course._id, e)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 transition-colors">
-                        {isCompleted ? <><FaCheckCircle size={10} /> Review</> : progress > 0 ? <><FaPlay size={10} /> Continue</> : <><FaPlay size={10} /> Start</>}
-                      </button>
+                    <h3 className="text-xs font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-slate-700 leading-tight">{course.title}</h3>
+                    <p className="text-[10px] text-slate-500 mb-2 line-clamp-2 flex-1 leading-relaxed">{course.description}</p>
+
+                    {isEnrolled && !isCompleted && (
+                      <div className="mb-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-semibold text-slate-500">{progress}%</span>
+                        </div>
+                        <ProgressBar progress={progress} />
+                      </div>
                     )}
-                  </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
+                      {!isEnrolled ? (
+                        <button onClick={(e) => handleEnroll(course._id, e)} disabled={enrolling === course._id}
+                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold text-white transition-all disabled:opacity-50"
+                          style={{ background: 'linear-gradient(135deg, #FFCE08, #f59e0b)' }}>
+                          {enrolling === course._id ? <FaSpinner className="animate-spin" size={9} /> : <FaGraduationCap size={9} />}
+                          Enroll
+                        </button>
+                      ) : (
+                        <button onClick={(e) => handleStartCourse(course._id, e)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-slate-800 transition-colors">
+                          {isCompleted ? <><FaCheckCircle size={9} /> Review</> : progress > 0 ? <><FaPlay size={9} /> Continue</> : <><FaPlay size={9} /> Start</>}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </article>
               );
