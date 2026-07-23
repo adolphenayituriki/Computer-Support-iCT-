@@ -1,4 +1,5 @@
 import LiveSession from '../models/LiveSession.js';
+import User from '../models/User.js';
 
 function generateRoomId() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -9,10 +10,20 @@ function generateRoomId() {
 
 export async function createSession(req, res) {
   try {
-    const { title, description, course, scheduledAt, duration, settings } = req.body;
+    const { title, description, course, hostId, scheduledAt, duration, settings } = req.body;
     if (!title || !scheduledAt) return res.status(400).json({ error: 'Title and scheduled time required.' });
+
+    let host = req.user.id;
+    let hostName = req.user.name;
+    if (hostId) {
+      const user = await User.findById(hostId).select('name');
+      if (!user) return res.status(400).json({ error: 'Selected host not found.' });
+      host = user._id;
+      hostName = user.name;
+    }
+
     const session = await LiveSession.create({
-      title, description, course, host: req.user.id, hostName: req.user.name,
+      title, description, course, host, hostName,
       jitsiRoomId: generateRoomId(), scheduledAt, duration: duration || 60,
       settings: { ...settings },
     });
@@ -45,7 +56,12 @@ export async function getSession(req, res) {
 
 export async function updateSession(req, res) {
   try {
-    const session = await LiveSession.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { hostId, ...updates } = req.body;
+    if (hostId) {
+      const user = await User.findById(hostId).select('name');
+      if (user) { updates.host = user._id; updates.hostName = user.name; }
+    }
+    const session = await LiveSession.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!session) return res.status(404).json({ error: 'Session not found.' });
     res.json(session);
   } catch (e) { res.status(500).json({ error: e.message }); }

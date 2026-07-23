@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaVideo, FaCalendarAlt, FaClock, FaUsers, FaPlay, FaStop, FaTrash, FaEdit, FaTimes, FaEye, FaSpinner } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaPlus, FaVideo, FaCalendarAlt, FaClock, FaUsers, FaPlay, FaStop, FaTrash, FaEdit, FaTimes, FaEye, FaSpinner, FaUser, FaCopy, FaCheck } from 'react-icons/fa';
 import { cn } from '../lib/utils';
 import API_BASE from '../api';
 import { useToast } from '../ToastContext';
@@ -20,15 +20,28 @@ export default function LiveSessionsAdmin() {
   const [showCreate, setShowCreate] = useState(false);
   const [editSession, setEditSession] = useState(null);
   const [activeRoom, setActiveRoom] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', scheduledAt: '', duration: 60, settings: { enableChat: true, enableScreenShare: true, enableRecording: false, muteParticipants: false, maxParticipants: 100 } });
+  const [form, setForm] = useState({ title: '', description: '', hostId: '', scheduledAt: '', duration: 60, settings: { enableChat: true, enableScreenShare: true, enableRecording: false, muteParticipants: false, maxParticipants: 100 } });
   const [submitting, setSubmitting] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [copied, setCopied] = useState(null);
+  const userDropdownRef = useRef(null);
+
+  const FETCH_FORM = { title: '', description: '', hostId: '', scheduledAt: '', duration: 60, settings: { enableChat: true, enableScreenShare: true, enableRecording: false, muteParticipants: false, maxParticipants: 100 } };
 
   const fetchData = () => {
     setLoading(true);
     api('/api/admin/live-sessions').then((d) => { setSessions(Array.isArray(d) ? d : []); setLoading(false); }).catch(() => setLoading(false));
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); api('/api/admin/users').then((d) => { setUsers(Array.isArray(d) ? d : (d.users || [])); }).catch(() => {}); }, []);
+
+  useEffect(() => {
+    const handler = (e) => { if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) setShowUserDropdown(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +54,8 @@ export default function LiveSessionsAdmin() {
     if (res.error) return showToast(res.error, 'error');
     showToast(editSession ? 'Session updated.' : 'Session created.');
     setShowCreate(false); setEditSession(null);
-    setForm({ title: '', description: '', scheduledAt: '', duration: 60, settings: { enableChat: true, enableScreenShare: true, enableRecording: false, muteParticipants: false, maxParticipants: 100 } });
+    setForm(FETCH_FORM);
+    setUserSearch('');
     fetchData();
   };
 
@@ -68,15 +82,27 @@ export default function LiveSessionsAdmin() {
   const openEdit = (s) => {
     setForm({
       title: s.title, description: s.description || '',
+      hostId: s.host?._id || s.host || '',
       scheduledAt: s.scheduledAt ? new Date(s.scheduledAt).toISOString().slice(0, 16) : '',
       duration: s.duration || 60,
       settings: { ...form.settings, ...(s.settings || {}) },
     });
+    const hostUser = users.find((u) => u._id === (s.host?._id || s.host));
+    setUserSearch(hostUser?.name || s.hostName || '');
     setEditSession(s); setShowCreate(true);
   };
 
   const joinAsHost = (s) => {
     setActiveRoom(s);
+  };
+
+  const copyLink = (s) => {
+    const url = `https://meet.jit.si/${s.jitsiRoomId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(s._id);
+      showToast('Link copied to clipboard!');
+      setTimeout(() => setCopied(null), 2000);
+    }).catch(() => showToast('Failed to copy link.', 'error'));
   };
 
   if (activeRoom) {
@@ -116,6 +142,44 @@ export default function LiveSessionsAdmin() {
             <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3">
               <input className={inputCls} placeholder="Session title *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
               <textarea rows="2" className={cn(inputCls, "resize-none")} placeholder="Description (optional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <div ref={userDropdownRef} className="relative">
+                <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">Host / Tutor</label>
+                <div className="relative">
+                  <FaUser className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-300" />
+                  <input
+                    className={cn(inputCls, "pl-7 pr-7")}
+                    placeholder="Search by name..."
+                    value={userSearch}
+                    onFocus={() => setShowUserDropdown(true)}
+                    onChange={(e) => { setUserSearch(e.target.value); setForm({ ...form, hostId: '' }); setShowUserDropdown(true); }}
+                  />
+                  {form.hostId && <button type="button" onClick={() => { setForm({ ...form, hostId: '' }); setUserSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"><FaTimes className="text-[10px]" /></button>}
+                </div>
+                {showUserDropdown && userSearch.trim() && !form.hostId && (
+                  <div className="absolute z-50 mt-1 max-h-40 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                    {users.filter((u) => u.name?.toLowerCase().includes(userSearch.toLowerCase()) || u.email?.toLowerCase().includes(userSearch.toLowerCase())).length === 0 ? (
+                      <div className="px-3 py-2 text-[11px] text-slate-400">No users found</div>
+                    ) : (
+                      users.filter((u) => u.name?.toLowerCase().includes(userSearch.toLowerCase()) || u.email?.toLowerCase().includes(userSearch.toLowerCase())).slice(0, 20).map((u) => (
+                        <button
+                          key={u._id}
+                          type="button"
+                          onClick={() => { setForm({ ...form, hostId: u._id }); setUserSearch(u.name); setShowUserDropdown(false); }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-[11px] hover:bg-slate-50 transition-colors"
+                        >
+                          <FaUser className="h-3 w-3 text-slate-300" />
+                          <div>
+                            <span className="font-medium text-slate-700">{u.name}</span>
+                            {u.email && <span className="ml-1 text-slate-400">({u.email})</span>}
+                          </div>
+                          {u.role && <span className="ml-auto rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-medium text-slate-500">{u.role}</span>}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+                {form.hostId && <p className="mt-1 text-[10px] text-emerald-600 font-medium">✓ Host selected: {userSearch}</p>}
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">Date & Time *</label>
@@ -154,7 +218,7 @@ export default function LiveSessionsAdmin() {
 
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaVideo className="h-3.5 w-3.5 text-red-500" /> Live Sessions ({sessions.length})</h3>
-        <button onClick={() => { setForm({ title: '', description: '', scheduledAt: '', duration: 60, settings: { enableChat: true, enableScreenShare: true, enableRecording: false, muteParticipants: false, maxParticipants: 100 } }); setEditSession(null); setShowCreate(true); }} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800"><FaPlus /> New Session</button>
+        <button onClick={() => { setForm(FETCH_FORM); setUserSearch(''); setEditSession(null); setShowCreate(true); }} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800"><FaPlus /> New Session</button>
       </div>
 
       {loading ? (
@@ -184,6 +248,11 @@ export default function LiveSessionsAdmin() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
+                  {s.status === 'live' && (
+                    <button onClick={() => copyLink(s)} className={cn("flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-semibold transition-colors", copied === s._id ? "bg-emerald-100 text-emerald-600" : "bg-blue-100 text-blue-600 hover:bg-blue-200")}>
+                      {copied === s._id ? <><FaCheck className="text-[8px]" /> Copied</> : <><FaCopy className="text-[8px]" /> Copy Link</>}
+                    </button>
+                  )}
                   {s.status === 'scheduled' && (
                     <button onClick={() => handleStart(s._id)} className="flex items-center gap-1 rounded-lg bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-emerald-600"><FaPlay className="text-[8px]" /> Start</button>
                   )}

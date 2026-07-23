@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaVideo, FaCalendarAlt, FaClock, FaUsers, FaSignOutAlt, FaSpinner, FaSearch } from 'react-icons/fa';
+import { FaVideo, FaCalendarAlt, FaClock, FaUsers, FaSignOutAlt, FaSpinner, FaSearch, FaCopy, FaCheck, FaLink } from 'react-icons/fa';
 import { cn } from '../lib/utils';
 import API_BASE from '../api';
 import { useAuth } from '../AuthContext';
@@ -18,6 +18,7 @@ export default function LiveSessionsStudent() {
   const [activeRoom, setActiveRoom] = useState(null);
   const [search, setSearch] = useState('');
   const [joiningId, setJoiningId] = useState(null);
+  const [copied, setCopied] = useState(null);
 
   const fetchData = () => {
     setLoading(true);
@@ -40,6 +41,14 @@ export default function LiveSessionsStudent() {
     }
     setActiveRoom(null);
     fetchData();
+  };
+
+  const copyLink = (session) => {
+    const url = `https://meet.jit.si/${session.jitsiRoomId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(session._id);
+      setTimeout(() => setCopied(null), 2000);
+    }).catch(() => {});
   };
 
   const filtered = sessions.filter((s) => {
@@ -98,8 +107,27 @@ export default function LiveSessionsStudent() {
             <span className="flex items-center gap-1"><FaUsers className="text-[8px]" /> {s.participants?.length || 0}</span>
           </div>
           <span className="text-[10px] text-slate-300 mt-0.5 block">by {s.hostName}</span>
+          {s.status === 'live' && s.jitsiRoomId && (
+            <div className="mt-1.5 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 border border-emerald-100">
+              <FaLink className="h-2.5 w-2.5 text-emerald-400 shrink-0" />
+              <span className="text-[9px] text-emerald-600 font-mono truncate">https://meet.jit.si/{s.jitsiRoomId}</span>
+            </div>
+          )}
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex flex-col items-end gap-1.5">
+          {(s.status === 'live' || s.status === 'scheduled') && (
+            <button
+              onClick={() => copyLink(s)}
+              className={cn(
+                "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-semibold transition-colors",
+                copied === s._id
+                  ? "bg-emerald-100 text-emerald-600"
+                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              )}
+            >
+              {copied === s._id ? <><FaCheck className="text-[8px]" /> Copied</> : <><FaCopy className="text-[8px]" /> Copy Link</>}
+            </button>
+          )}
           {(s.status === 'live' || s.status === 'scheduled') ? (
             <button
               onClick={() => s.status === 'live' ? handleJoin(s) : null}
