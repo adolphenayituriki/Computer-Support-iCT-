@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../LanguageContext';
-import { FaUser, FaBell, FaClock, FaShieldAlt, FaHeadset, FaLaptop, FaGlobe, FaCaretDown, FaBookOpen, FaRobot, FaVideo } from 'react-icons/fa';
+import { FaUser, FaBell, FaClock, FaShieldAlt, FaHeadset, FaLaptop, FaGlobe, FaCaretDown, FaBookOpen, FaRobot } from 'react-icons/fa';
 
 import SettingsModal from './SettingsModal';
 import AILearningModal from './AILearningModal';
@@ -170,7 +170,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
               <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.home')}</a></li>
               <li><a href="/#services" className={active === 'services' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.services')}</a></li>
               <li><a href="/news" className={active === 'news' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.news')}</a></li>
-              <li><a href="/live-sessions" className={active === 'live-sessions' ? 'active' : ''} onClick={() => setOpen(false)}><FaVideo style={{ fontSize: '0.78em', marginRight: '0.25rem', verticalAlign: 'middle' }} /> Live Sessions</a></li>
+              <li><a href="/live-sessions" className={active === 'live-sessions' ? 'active' : ''} onClick={() => setOpen(false)}>Live Sessions</a></li>
               <li className={`nav-dropdown${coursesOpen ? ' open' : ''}`} onMouseEnter={handleCoursesEnter} onMouseLeave={handleCoursesLeave}>
                 <button className={`nav-dropdown-trigger${isCourses ? ' active' : ''}`} onClick={() => setCoursesOpen((v) => !v)}>
                   {t('nav.courses')} <FaCaretDown className="nav-caret" />
@@ -206,7 +206,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
           ) : (
             <>
               <li><a href="/#home" className={active === 'home' ? 'active' : ''} onClick={() => setOpen(false)}>{t('nav.home')}</a></li>
-              <li><a href="/live-sessions" className={active === 'live-sessions' ? 'active' : ''} onClick={() => setOpen(false)}><FaVideo style={{ fontSize: '0.78em', marginRight: '0.25rem', verticalAlign: 'middle' }} /> Live Sessions</a></li>
+              <li><a href="/live-sessions" className={active === 'live-sessions' ? 'active' : ''} onClick={() => setOpen(false)}>Live Sessions</a></li>
               <li className={`nav-dropdown${coursesOpen ? ' open' : ''}`} onMouseEnter={handleCoursesEnter} onMouseLeave={handleCoursesLeave}>
                 <button className={`nav-dropdown-trigger${isCourses ? ' active' : ''}`} onClick={() => setCoursesOpen((v) => !v)}>
                   {t('nav.courses')} <FaCaretDown className="nav-caret" />
