@@ -11,6 +11,7 @@ import courseRoutes from './courses.js';
 import beneficiaryRoutes from './beneficiaries.js';
 import testimonialRoutes from './testimonials.js';
 import sessionInviteRoutes from './sessionInvites.js';
+import liveSessionRoutes from './liveSessions.js';
 import adminRoutes from './admin.js';
 
 const router = Router();
@@ -27,6 +28,7 @@ router.use('/courses', courseRoutes);
 router.use('/beneficiaries', beneficiaryRoutes);
 router.use('/testimonials', testimonialRoutes);
 router.use('/session-invites', sessionInviteRoutes);
+router.use('/live-sessions', liveSessionRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;

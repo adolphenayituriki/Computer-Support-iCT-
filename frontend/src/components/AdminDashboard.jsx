@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import AdminCourses from './AdminCourses';
 import AdminChatView from './AdminChatView';
+import LiveSessionsAdmin from './LiveSessionsAdmin';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
@@ -1542,7 +1543,7 @@ export default function AdminDashboard() {
   const profileRef = useRef(null);
   const notifRef = useRef(null);
   const isMobile = useIsMobile();
-  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 });
+  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0, liveSessions: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -1631,10 +1632,11 @@ export default function AdminDashboard() {
       ['courses', '/api/admin/courses'],
       ['beneficiaries', '/api/admin/beneficiaries'],
       ['testimonials', '/api/admin/testimonials'],
+      ['liveSessions', '/api/admin/live-sessions'],
     ];
     Promise.allSettled(endpoints.map(([_, url]) => api(url)))
       .then((results) => {
-        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0 };
+        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0, liveSessions: 0 };
         results.forEach((r, i) => {
           if (r.status === 'fulfilled' && Array.isArray(r.value)) s[endpoints[i][0]] = r.value.length;
         });
@@ -1761,18 +1763,7 @@ export default function AdminDashboard() {
     if (tab === 'courses') return <AdminCourses />;
     if (tab === 'testimonials') return <AdminTestimonials />;
     if (tab === 'invites') return <AdminInvites />;
-    if (tab === 'live-sessions') return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center px-8 text-center animate-in fade-in">
-        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-xl shadow-red-500/20">
-          <FaVideo className="h-8 w-8" />
-        </div>
-        <h3 className="mb-2 text-lg font-bold text-slate-900">Live Sessions</h3>
-        <p className="max-w-sm text-sm leading-relaxed text-slate-500">
-          Create and manage live lecture rooms. Students can join individual sessions in real-time.
-          This feature is coming soon.
-        </p>
-      </div>
-    );
+    if (tab === 'live-sessions') return <LiveSessionsAdmin />;
     if (tab === 'settings') {
       setProfileEditOpen(true);
       setProfileTab('profile');

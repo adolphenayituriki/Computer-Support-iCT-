@@ -91,4 +91,13 @@ router.get('/testimonials', testimonialCtrl.getAllTestimonials);
 router.put('/testimonials/:id/approve', testimonialCtrl.approveTestimonial);
 router.delete('/testimonials/:id', testimonialCtrl.deleteTestimonial);
 
+// Live Sessions
+import * as liveSessionCtrl from '../controllers/liveSessionController.js';
+router.get('/live-sessions', liveSessionCtrl.getSessions);
+router.post('/live-sessions', liveSessionCtrl.createSession);
+router.put('/live-sessions/:id', liveSessionCtrl.updateSession);
+router.delete('/live-sessions/:id', liveSessionCtrl.deleteSession);
+router.post('/live-sessions/:id/start', liveSessionCtrl.startSession);
+router.post('/live-sessions/:id/end', liveSessionCtrl.endSession);
+
 export default router;

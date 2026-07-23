@@ -36,6 +36,7 @@ const Dashboard = lazy(() => import('./components/Dashboard'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const SetupAccount = lazy(() => import('./components/SetupAccount'));
 const CollaboratorsPage = lazy(() => import('./components/CollaboratorsPage'));
+const LiveSessionsStudent = lazy(() => import('./components/LiveSessionsStudent'));
 
 function PageSpinner() {
   return (
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="/dashboard" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><Dashboard /></ProtectedRoute></Suspense>} />
           <Route path="/admin" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute></Suspense>} />
           <Route path="/collaborators" element={<Suspense fallback={<PageSpinner />}><CollaboratorsPage /></Suspense>} />
+          <Route path="/live-sessions" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><LiveSessionsStudent /></ProtectedRoute></Suspense>} />
         </Routes>
         {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
         {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}
