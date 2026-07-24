@@ -11,12 +11,12 @@ import { cn } from '../lib/utils';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import {
-  FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaTrash, FaEdit,
+  FaTicketAlt, FaClock, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaTrash, FaEdit,
   FaSave, FaTimes, FaEye, FaUndo, FaLightbulb, FaReply, FaComments, FaUserTie,
   FaHandshake, FaMapMarkerAlt, FaPhone, FaEnvelope, FaBars, FaTachometerAlt,
   FaCog, FaQuestionCircle, FaSignOutAlt, FaSearch, FaBell, FaUserShield, FaHome,
   FaBook, FaShieldAlt, FaVirus, FaWifi, FaLaptop, FaMicrosoft, FaHdd, FaKeyboard,
-  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers, FaHeadset, FaRocket, FaSpinner, FaChevronRight
+  FaCloud, FaHeadphones, FaGraduationCap, FaWhatsapp, FaExternalLinkAlt, FaPlus, FaWrench, FaUsers, FaHeadset, FaRocket, FaSpinner, FaChevronRight, FaPlay
 } from 'react-icons/fa';
 import { LayoutDashboard, Ticket, MessageSquare, Lightbulb, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import API_BASE from '../api';
@@ -188,49 +188,60 @@ function TicketsView({ tickets, setTickets }) {
   };
 
   const modalContent = viewTicket ? (
-    <div className="adm-modal-overlay" onClick={() => setViewTicket(null)}>
-      <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="adm-modal-header">
-          <h3>{viewTicket.title}</h3>
-          <button className="adm-modal-close" onClick={() => setViewTicket(null)}><FaTimes /></button>
-        </div>
-        <div className="adm-modal-body">
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-            <span className={`ticket-status status-${viewTicket.status}`}>{viewTicket.status.toUpperCase()}</span>
-            <span className="ticket-category">{viewTicket.category}</span>
+    <div className="fixed inset-0 z-[600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setViewTicket(null)}>
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in fade-in zoom-in-95 max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur px-5 py-4 rounded-t-2xl">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-slate-900 truncate">{viewTicket.title}</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={cn('inline-flex items-center rounded-full px-2 py-px text-[10px] font-bold', viewTicket.status === 'open' ? 'bg-blue-100 text-blue-700' : viewTicket.status === 'in-progress' ? 'bg-amber-100 text-amber-700' : viewTicket.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600')}>{viewTicket.status === 'in-progress' ? 'IN PROGRESS' : viewTicket.status?.toUpperCase()}</span>
+              <span className="rounded-md bg-slate-100 px-1.5 py-px text-[10px] font-medium text-slate-500 capitalize">{viewTicket.category}</span>
+            </div>
           </div>
-          <p style={{ color: '#6b7280', lineHeight: 1.6, marginBottom: '0.5rem' }}>{viewTicket.description}</p>
-          <p style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+          <button onClick={() => setViewTicket(null)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"><FaTimes className="text-xs" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          <div className="rounded-lg bg-slate-50 p-3">
+            <p className="text-xs text-slate-600 leading-relaxed">{viewTicket.description}</p>
+            <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1"><FaClock className="text-[8px]" /> Submitted {new Date(viewTicket.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
             {viewTicket.status === 'open' && (
-              <button className="btn btn-sm" onClick={() => handleStatus(tid(viewTicket), 'closed')}><FaCheckCircle style={{ marginRight: '0.3rem' }} /> Mark Resolved</button>
+              <button className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-600 hover:shadow-md transition-all" onClick={() => handleStatus(tid(viewTicket), 'resolved')}><FaCheckCircle className="text-[10px]" /> Mark Resolved</button>
             )}
             {viewTicket.status === 'closed' && (
-              <button className="btn btn-outline btn-sm" onClick={() => handleStatus(tid(viewTicket), 'open')}><FaUndo style={{ marginRight: '0.3rem' }} /> Reopen</button>
+              <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 transition-all" onClick={() => handleStatus(tid(viewTicket), 'open')}><FaUndo className="text-[10px]" /> Reopen</button>
             )}
-            <button className="btn btn-outline btn-sm" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleDelete(tid(viewTicket))}><FaTrash style={{ marginRight: '0.3rem' }} /> Delete</button>
+            <button className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-red-500 hover:bg-red-50 transition-all" onClick={() => handleDelete(tid(viewTicket))}><FaTrash className="text-[10px]" /> Delete</button>
           </div>
-          <div style={{ marginTop: '1.2rem', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
-            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.9rem', color: '#374151' }}><FaReply style={{ transform: 'scaleX(-1)', marginRight: '0.4rem' }} />Conversation ({viewTicket.messages?.length || 0})</h4>
-            <div className="msg-thread">
+          <div className="border-t border-slate-100 pt-4">
+            <h5 className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-3"><FaComments className="text-slate-400" /> Conversation <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-slate-100 px-1.5 text-[10px] font-bold text-slate-500">{viewTicket.messages?.length || 0}</span></h5>
+            <div className="space-y-2.5 max-h-56 overflow-y-auto rounded-xl bg-slate-50 p-3">
               {(!viewTicket.messages || viewTicket.messages.length === 0) ? (
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+                <div className="flex flex-col items-center py-4 text-center">
+                  <FaComments className="mb-2 h-5 w-5 text-slate-200" />
+                  <p className="text-xs text-slate-400">No messages yet. Start the conversation below.</p>
+                </div>
               ) : (
                 viewTicket.messages.map((m, i) => (
-                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
-                    <div className="msg-header">
-                      <strong>{m.senderName}</strong>
-                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                  <div key={i} className={cn('rounded-xl p-3 text-xs', m.sender === 'admin' ? 'bg-slate-900 text-white ml-4' : 'bg-white border border-slate-200 mr-4 shadow-sm')}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <div className={cn('flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold', m.sender === 'admin' ? 'bg-white/10 text-white' : 'bg-amber-100 text-amber-700')}>{m.senderName?.[0]?.toUpperCase() || 'U'}</div>
+                        <strong className={cn('text-[10px] font-semibold', m.sender === 'admin' ? 'text-slate-300' : 'text-slate-700')}>{m.senderName}</strong>
+                      </div>
+                      <span className="text-[9px] text-slate-400">{new Date(m.createdAt).toLocaleString()}</span>
                     </div>
-                    <p>{m.text}</p>
+                    <p className={cn('leading-relaxed', m.sender === 'admin' ? 'text-slate-200' : 'text-slate-600')}>{m.text}</p>
                   </div>
                 ))
               )}
               <div ref={msgEndRef} />
             </div>
-            <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-              <input type="text" placeholder="Type your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
-              <button className="btn btn-sm" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+            <div className="flex gap-2 mt-3">
+              <input type="text" className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none transition-all placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:ring-2 focus:ring-slate-900/10" placeholder="Type your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
+              <button className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white inline-block" /> : 'Send'}</button>
             </div>
           </div>
         </div>
@@ -240,123 +251,166 @@ function TicketsView({ tickets, setTickets }) {
 
   return (
     <>
-      <div className="adm-page-header">
-        <div><h1>Support Tickets</h1><p>Manage your support requests and track their status.</p></div>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h1 className="text-sm font-bold text-slate-900">Support Tickets</h1>
+        <button onClick={() => document.getElementById('new-ticket-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800 transition-colors shadow-sm">
+          <FaPlus className="text-[9px]" /> New Ticket
+        </button>
       </div>
 
-      <div className="adm-stats-grid">
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><FaTicketAlt /></div>
-          <div className="adm-stat-info"><strong>{tickets.length}</strong><span>Total</span></div>
-        </div>
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#fffbeb', color: '#f59e0b' }}><FaExclamationCircle /></div>
-          <div className="adm-stat-info"><strong>{openCount}</strong><span>Open</span></div>
-        </div>
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><FaCheckCircle /></div>
-          <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved</span></div>
-        </div>
-      </div>
-
-      <div className="adm-chart-section" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 700, color: '#111827', marginBottom: '1.25rem' }}><FaPlus /> New Support Request</div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <input type="text" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-            <option value="general">General</option>
-            <option value="hardware">Hardware</option>
-            <option value="software">Software</option>
-            <option value="virus">Virus / Malware</option>
-            <option value="network">Network</option>
-            <option value="training">Training</option>
-          </select>
-          <textarea rows="3" placeholder="Describe your issue in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" className="btn" disabled={submitting}>{submitting ? <><span className="btn-spinner"></span> Submitting...</> : <><FaPlus /> Submit Request</>}</button>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white p-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500 text-sm"><FaTicketAlt /></div>
+          <div className="min-w-0">
+            <strong className="block text-sm font-extrabold text-slate-900">{tickets.length}</strong>
+            <span className="text-[10px] text-slate-500 font-medium">Total</span>
           </div>
-          {message && <p className="form-feedback">{message}</p>}
+        </div>
+        <div className="flex items-center gap-2.5 rounded-xl border border-amber-100 bg-amber-50 p-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-500 text-sm"><FaExclamationCircle /></div>
+          <div className="min-w-0">
+            <strong className="block text-sm font-extrabold text-amber-700">{openCount}</strong>
+            <span className="text-[10px] text-amber-600/70 font-medium">Open</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 rounded-xl border border-emerald-100 bg-emerald-50 p-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-500 text-sm"><FaCheckCircle /></div>
+          <div className="min-w-0">
+            <strong className="block text-sm font-extrabold text-emerald-700">{resolvedCount}</strong>
+            <span className="text-[10px] text-emerald-600/70 font-medium">Resolved</span>
+          </div>
+        </div>
+      </div>
+
+      {/* New Ticket Form */}
+      <div id="new-ticket-form" className="rounded-xl border border-slate-200 bg-white mb-3 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-2 bg-slate-900 px-4 py-2">
+          <FaPlus className="text-[10px] text-white/60" />
+          <h3 className="text-[11px] font-bold text-white">New Support Request</h3>
+        </div>
+        <form onSubmit={handleSubmit} className="p-3 space-y-2">
+          <input className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-cshub-yellow focus:bg-white focus:ring-2 focus:ring-cshub-yellow/20" placeholder="Title (e.g. Laptop won't boot)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+            {[
+              { value: 'general', icon: FaHeadset, label: 'General', color: 'text-slate-500', active: 'bg-slate-900 text-white border-slate-900' },
+              { value: 'hardware', icon: FaCog, label: 'Hardware', color: 'text-blue-500', active: 'bg-blue-600 text-white border-blue-600' },
+              { value: 'software', icon: FaRocket, label: 'Software', color: 'text-violet-500', active: 'bg-violet-600 text-white border-violet-600' },
+              { value: 'virus', icon: FaExclamationTriangle, label: 'Virus', color: 'text-red-500', active: 'bg-red-500 text-white border-red-500' },
+              { value: 'network', icon: FaWifi, label: 'Network', color: 'text-cyan-500', active: 'bg-cyan-600 text-white border-cyan-600' },
+              { value: 'training', icon: FaGraduationCap, label: 'Training', color: 'text-amber-500', active: 'bg-amber-500 text-white border-amber-500' },
+            ].map((cat) => {
+              const Icon = cat.icon;
+              const isActive = form.category === cat.value;
+              return (
+                <button key={cat.value} type="button" onClick={() => setForm({ ...form, category: cat.value })}
+                  className={cn('flex items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[10px] font-semibold transition-all',
+                    isActive ? cat.active : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                  )}>
+                  <Icon className="text-[11px]" /> {cat.label}
+                </button>
+              );
+            })}
+          </div>
+          <textarea rows="2" className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none resize-none transition-all placeholder:text-slate-400 focus:border-cshub-yellow focus:bg-white focus:ring-2 focus:ring-cshub-yellow/20" placeholder="Describe your issue..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+          <div className="flex items-center justify-between">
+            {message ? (
+              <p className="text-[11px] text-red-500 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-red-500" />{message}</p>
+            ) : <span />}
+            <button type="submit" className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all hover:bg-slate-800 disabled:opacity-50" disabled={submitting}>
+              {submitting ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <><FaPlus className="text-[9px]" /> Submit</>}
+            </button>
+          </div>
         </form>
       </div>
 
-      <div className="adm-chart-section">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaTicketAlt /> My Tickets ({tickets.length})</div>
-          <div className="dash-filters">
+      {/* Tickets List */}
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-100">
+          <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
+            <FaTicketAlt className="text-slate-400 text-[10px]" /> My Tickets
+            <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-slate-100 px-1 text-[9px] font-bold text-slate-600">{tickets.length}</span>
+          </div>
+          <div className="flex gap-1">
             {['all', 'open', 'closed'].map((f) => (
-              <button key={f} className={`filter-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
+              <button key={f} className={cn('rounded-md px-2 py-1 text-[10px] font-medium transition-all', filter === f ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100')} onClick={() => setFilter(f)}>
                 {f.charAt(0).toUpperCase() + f.slice(1)}
+                {f === 'open' && openCount > 0 && <span className={cn('ml-1 inline-flex h-3.5 min-w-[14px] items-center justify-center rounded-full px-1 text-[8px] font-bold', filter === f ? 'bg-white/20' : 'bg-amber-100 text-amber-700')}>{openCount}</span>}
               </button>
             ))}
           </div>
         </div>
-        {filteredTickets.length === 0 ? (
-          <div className="empty-state" style={{ padding: '2rem 1rem' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-              <FaTicketAlt size={24} style={{ color: '#3b82f6' }} />
+        <div className="p-3">
+          {filteredTickets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
+              <FaTicketAlt className="mb-2 h-5 w-5 text-slate-300" />
+              <p className="text-xs font-semibold text-slate-500">No {filter !== 'all' ? filter : ''} tickets yet</p>
+              <p className="text-[10px] text-slate-400">Submit a request above to get started.</p>
             </div>
-            <p style={{ marginTop: '1rem', fontWeight: 600 }}>No {filter !== 'all' ? filter : ''} tickets yet.</p>
-            <span>Submit a support request above to get started.</span>
-          </div>
-        ) : (
-          <div className="ticket-list">
-            {filteredTickets.map((t) => (
-              <div key={tid(t)} className="ticket-item" onClick={() => setViewTicket(t)}>
-                <div className="ticket-top">
-                  <span className={`ticket-status status-${t.status}`}>
-                    {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
-                  </span>
-                  <span className="ticket-category">{t.category}</span>
-                  <div className="ticket-actions" onClick={(e) => e.stopPropagation()}>
-                    <button className="ticket-action-btn" title="View" onClick={() => setViewTicket(t)}><FaEye /></button>
-                    <button className="ticket-action-btn" title="Edit" onClick={() => startEdit(t)}><FaEdit /></button>
-                    <button className="ticket-action-btn" title="Delete" onClick={() => handleDelete(tid(t))} style={{ color: '#ef4444' }}><FaTrash /></button>
-                  </div>
-                </div>
-                {editingId === tid(t) ? (
-                  <div className="ticket-edit-form" onClick={(e) => e.stopPropagation()}>
-                    <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
-                    <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
-                      <option value="general">General</option>
-                      <option value="hardware">Hardware</option>
-                      <option value="software">Software</option>
-                      <option value="virus">Virus / Malware</option>
-                      <option value="network">Network</option>
-                      <option value="training">Training</option>
-                    </select>
-                    <textarea rows="2" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? <span className="btn-spinner"></span> : <><FaSave /> Save</>}</button>
-                      <button className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => setEditingId(null)}><FaTimes /> Cancel</button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937', margin: '0.5rem 0 0.25rem' }}>{t.title}</h4>
-                    <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>{t.description}</p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                        {new Date(t.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                      </span>
-                      <div onClick={(e) => e.stopPropagation()}>
-                        {(t.status === 'open' || t.status === 'in-progress') && (
-                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#10b981' }} onClick={() => handleStatus(tid(t), 'resolved')}>
-                            <FaCheckCircle style={{ marginRight: '0.3rem' }} /> Resolve
-                          </button>
-                        )}
-                        {t.status === 'resolved' && (
-                          <button className="btn-link" style={{ fontSize: '0.78rem', color: '#f59e0b' }} onClick={() => handleStatus(tid(t), 'open')}>
-                            <FaUndo style={{ marginRight: '0.3rem' }} /> Reopen
-                          </button>
-                        )}
+          ) : (
+            <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+              {filteredTickets.map((t) => {
+                const catIcons = { hardware: FaCog, software: FaRocket, virus: FaExclamationTriangle, network: FaCloud, training: FaGraduationCap, general: FaHeadset };
+                const CatIcon = catIcons[t.category] || FaHeadset;
+                return (
+                <div key={tid(t)} className={cn('group flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-3 py-2.5 transition-all hover:border-slate-200 hover:bg-slate-50/50 cursor-pointer', editingId === tid(t) && 'ring-2 ring-slate-900/10')} onClick={() => setViewTicket(t)}>
+                  {editingId === tid(t) ? (
+                    <div className="flex-1 space-y-2" onClick={(e) => e.stopPropagation()}>
+                      <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
+                      <div className="flex gap-2">
+                        <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} className="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] text-slate-700 outline-none bg-white">
+                          <option value="general">General</option>
+                          <option value="hardware">Hardware</option>
+                          <option value="software">Software</option>
+                          <option value="virus">Virus</option>
+                          <option value="network">Network</option>
+                          <option value="training">Training</option>
+                        </select>
+                        <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] text-slate-700 outline-none bg-white">
+                          <option value="open">Open</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="resolved">Resolved</option>
+                          <option value="closed">Closed</option>
+                        </select>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <button className="rounded-md bg-slate-900 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-slate-800" disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? '...' : 'Save'}</button>
+                        <button className="rounded-md border border-slate-200 px-2.5 py-1 text-[10px] font-medium text-slate-500 hover:bg-slate-50" onClick={() => setEditingId(null)}>Cancel</button>
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                  ) : (
+                    <>
+                      <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px]', t.status === 'open' ? 'bg-blue-50 text-blue-500' : t.status === 'in-progress' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500')}>
+                        <CatIcon />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className={cn('inline-flex rounded-full px-1.5 py-px text-[8px] font-bold tracking-wide', t.status === 'open' ? 'bg-blue-100 text-blue-700' : t.status === 'in-progress' ? 'bg-amber-100 text-amber-700' : t.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600')}>
+                            {t.status === 'in-progress' ? 'IN PROGRESS' : t.status.toUpperCase()}
+                          </span>
+                          <span className="text-[9px] text-slate-400 capitalize">{t.category}</span>
+                        </div>
+                        <h4 className="text-xs font-semibold text-slate-800 truncate">{t.title}</h4>
+                      </div>
+                      <span className="text-[9px] text-slate-400 shrink-0 hidden sm:block">{new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <div className="flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        {(t.status === 'open' || t.status === 'in-progress') && (
+                          <button className="rounded-md bg-emerald-50 px-1.5 py-1 text-[9px] font-bold text-emerald-600 hover:bg-emerald-100 transition-colors" onClick={() => handleStatus(tid(t), 'resolved')}><FaCheckCircle className="inline mr-0.5 text-[7px]" />Resolve</button>
+                        )}
+                        {t.status === 'resolved' && (
+                          <button className="rounded-md bg-amber-50 px-1.5 py-1 text-[9px] font-bold text-amber-600 hover:bg-amber-100 transition-colors" onClick={() => handleStatus(tid(t), 'open')}><FaUndo className="inline mr-0.5 text-[7px]" />Reopen</button>
+                        )}
+                        <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" onClick={() => setViewTicket(t)}><FaEye className="text-[9px]" /></button>
+                        <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" onClick={() => startEdit(t)}><FaEdit className="text-[9px]" /></button>
+                        <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" onClick={() => handleDelete(tid(t))}><FaTrash className="text-[9px]" /></button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );})}
+            </div>
+          )}
+        </div>
       </div>
       {modalContent}
     </>
@@ -441,36 +495,37 @@ function SuggestionsView({ onCountChange }) {
   };
 
   const sugModalContent = viewSug ? (
-    <div className="adm-modal-overlay" onClick={() => setViewSug(null)}>
-      <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="adm-modal-header">
-          <h3>{viewSug.title}</h3>
-          <button className="adm-modal-close" onClick={() => setViewSug(null)}><FaTimes /></button>
+    <div className="fixed inset-0 z-[600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setViewSug(null)}>
+      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl animate-in fade-in zoom-in-95 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-3 rounded-t-xl">
+          <h3 className="text-sm font-bold text-slate-900 truncate">{viewSug.title}</h3>
+          <button onClick={() => setViewSug(null)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400 hover:bg-slate-200"><FaTimes /></button>
         </div>
-        <div className="adm-modal-body">
-          <p style={{ color: '#6b7280', lineHeight: 1.6, marginBottom: '0.5rem' }}>{viewSug.description}</p>
-          <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '1.2rem' }}>{new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-          <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
-            <h4 style={{ margin: '0 0 0.6rem', fontSize: '0.9rem', color: '#374151' }}><FaReply style={{ transform: 'scaleX(-1)', marginRight: '0.4rem' }} />Conversation ({viewSug.messages?.length || 0})</h4>
-            <div className="msg-thread">
+        <div className="px-5 py-4 space-y-3">
+          <p className="text-xs text-slate-500 leading-relaxed">{viewSug.description}</p>
+          <p className="text-[10px] text-slate-400">{new Date(viewSug.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          <div className="border-t border-slate-100 pt-3">
+            <h5 className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 mb-2"><FaReply className="scale-x-[-1]" /> Conversation ({viewSug.messages?.length || 0})</h5>
+            <div className="space-y-2 max-h-48 overflow-y-auto rounded-lg bg-slate-50 p-3">
               {(!viewSug.messages || viewSug.messages.length === 0) ? (
-                <p style={{ fontSize: '0.85rem', color: '#6b7280', textAlign: 'center', padding: '1rem 0' }}>No messages yet.</p>
+                <p className="text-center text-xs text-slate-400 py-2">No messages yet.</p>
               ) : (
                 viewSug.messages.map((m, i) => (
-                  <div key={i} className={`msg-bubble ${m.sender === 'admin' ? 'msg-admin' : 'msg-user'}`}>
-                    <div className="msg-header">
-                      <strong>{m.senderName}</strong>
-                      <span>{new Date(m.createdAt).toLocaleString()}</span>
+                  <div key={i} className={cn('rounded-lg p-2.5 text-xs', m.sender === 'admin' ? 'bg-slate-900 text-white ml-6' : 'bg-white border border-slate-200 mr-6')}>
+                    <div className="flex items-center justify-between mb-1">
+                      <strong className={cn('text-[10px] font-semibold', m.sender === 'admin' ? 'text-slate-300' : 'text-slate-700')}>{m.senderName}</strong>
+                      <span className="text-[9px] text-slate-400">{new Date(m.createdAt).toLocaleString()}</span>
                     </div>
-                    <p>{m.text}</p>
+                    <p className={cn('leading-relaxed', m.sender === 'admin' ? 'text-slate-200' : 'text-slate-600')}>{m.text}</p>
                   </div>
                 ))
               )}
               <div ref={sugMsgEndRef} />
             </div>
-            <div className="msg-reply-form" style={{ marginTop: '0.7rem' }}>
-              <input type="text" placeholder="Type your reply..." value={sugReplyText} onChange={(e) => setSugReplyText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }} />
-              <button className="btn btn-sm" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? <span className="btn-spinner"></span> : 'Send'}</button>
+            <div className="flex gap-2 mt-2">
+              <input type="text" className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" placeholder="Type reply..." value={sugReplyText} onChange={(e) => setSugReplyText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSugReply(); } }} />
+              <button className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={sugSendingReply || !sugReplyText.trim()} onClick={handleSugReply}>{sugSendingReply ? '...' : 'Send'}</button>
             </div>
           </div>
         </div>
@@ -484,50 +539,46 @@ function SuggestionsView({ onCountChange }) {
         <h2>Suggestions</h2>
         <p>Share your ideas to help us improve our services.</p>
       </div>
-      <div className="dashboard-grid">
-        <div className="sug-form-card">
-          <div className="sug-form-header">
-            <FaLightbulb className="sug-form-icon" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500"><FaLightbulb /></div>
             <div>
-              <h3>Suggest a Service</h3>
-              <p>Tell us what support or service you want us to add.</p>
+              <h3 className="text-sm font-bold text-slate-900 mb-0.5">Suggest a Service</h3>
+              <p className="text-xs text-slate-500">Tell us what support or service you want us to add.</p>
             </div>
           </div>
-          <form onSubmit={handleSubmit}>
-            <input type="text" placeholder="What service would you like to see?" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-            <textarea rows="3" placeholder="Describe your idea in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-            <button type="submit" className="btn" disabled={suggesting}>{suggesting ? <><span className="btn-spinner"></span> Submitting...</> : 'Submit Suggestion'}</button>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="What service would you like to see?" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+            <textarea rows="3" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none resize-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="Describe your idea in detail..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+            <button type="submit" className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={suggesting}>{suggesting ? 'Submitting...' : 'Submit Suggestion'}</button>
           </form>
-          {feedback && <p className="form-feedback" style={{ marginTop: '0.8rem' }}>{feedback}</p>}
+          {feedback && <p className="mt-2 text-xs text-emerald-600">{feedback}</p>}
         </div>
-        <div className="sug-list-card">
-          <h3>My Suggestions <span className="sug-count">{suggestions.length}</span></h3>
+        <div className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 mb-3">My Suggestions <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">{suggestions.length}</span></h3>
           {suggestions.length === 0 ? (
-            <div className="empty-state" style={{ padding: '2rem 1rem' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                <FaLightbulb size={24} style={{ color: '#8b5cf6' }} />
-              </div>
-              <p style={{ marginTop: '1rem', fontWeight: 600 }}>No suggestions yet.</p>
-              <span>Share your ideas to help us improve.</span>
+            <div className="flex flex-col items-center justify-center py-10 text-center rounded-xl border border-dashed border-slate-200">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50"><FaLightbulb className="h-5 w-5 text-violet-400" /></div>
+              <p className="mt-2.5 text-xs font-semibold text-slate-600">No suggestions yet.</p>
+              <p className="text-[10px] text-slate-400">Share your ideas to help us improve.</p>
             </div>
           ) : (
-            <div className="sug-list">
+            <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
               {suggestions.map((s) => (
-                <div key={sid(s)} className="sug-item" onClick={() => setViewSug(s)}>
-                  <div className="sug-item-top">
-                    <h4>{s.title}</h4>
+                <div key={sid(s)} className="rounded-lg border border-slate-100 bg-slate-50 p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition-colors" onClick={() => setViewSug(s)}>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h4 className="text-xs font-semibold text-slate-800 truncate">{s.title}</h4>
                     {(s.messages || []).length > 0 && (
-                      <span className="sug-reply-count">
+                      <span className="flex items-center gap-1 text-[10px] text-slate-400 shrink-0">
                         <FaReply style={{ transform: 'scaleX(-1)' }} /> {s.messages.length}
                       </span>
                     )}
                   </div>
-                  <p>{s.description}</p>
-                  <div className="sug-item-meta">
-                    <span className="sug-date">
-                      {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </span>
-                  </div>
+                  <p className="text-[11px] text-slate-500 line-clamp-2 mb-1.5">{s.description}</p>
+                  <span className="text-[10px] text-slate-400">
+                    {new Date(s.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
                 </div>
               ))}
             </div>
@@ -576,78 +627,87 @@ function TeamView({ teamData, setTeamData }) {
 
   return (
     <>
-      <div className="adm-page-header">
-        <h2>Team Dashboard</h2>
-        <p>Manage your team profile and assigned beneficiaries.</p>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-sm font-bold text-slate-900">Team Dashboard</h2>
+          <p className="text-[10px] text-slate-400">Manage your team profile and assigned beneficiaries.</p>
+        </div>
       </div>
-      <div className="team-dash">
-        <div className="team-dash-sub-nav">
+      <div className="space-y-3">
+        <div className="flex gap-1 p-1 bg-slate-100 rounded-lg overflow-x-auto">
           {subTabs.map((st) => (
-            <button key={st.key} className={`team-sub-tab${subTab === st.key ? ' active' : ''}`} onClick={() => setSubTab(st.key)}>
+            <button key={st.key} className={cn('flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-all shrink-0', subTab === st.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700')} onClick={() => setSubTab(st.key)}>
               {st.icon} {st.label}
             </button>
           ))}
         </div>
         {subTab === 'overview' && (
-          <div className="team-overview-grid">
-            <div className="team-dash-card">
-              <h3><FaUserTie style={{ color: '#6B7280' }} /> My Profile</h3>
-              <div className="team-dash-info">
-                <p><strong>{app.name}</strong></p>
-                <p><FaEnvelope /> {app.email}</p>
-                {app.phone && <p><FaPhone /> {app.phone}</p>}
-                {app.location && <p><FaMapMarkerAlt /> {app.location}</p>}
-                {app.involvement && <p>Role: <strong>{app.involvement}</strong></p>}
-                {app.applicantType && <p>Type: <strong>{app.applicantType}</strong></p>}
-                {app.skills?.length > 0 && <p className="team-dash-skills">{app.skills.map((s) => <span key={s}>{s}</span>)}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <h3 className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3"><FaUserTie className="text-slate-400" /> My Profile</h3>
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-semibold text-slate-800">{app.name}</p>
+                <p className="text-xs text-slate-600 flex items-center gap-1.5"><FaEnvelope className="text-slate-400" /> {app.email}</p>
+                {app.phone && <p className="text-xs text-slate-600 flex items-center gap-1.5"><FaPhone className="text-slate-400" /> {app.phone}</p>}
+                {app.location && <p className="text-xs text-slate-600 flex items-center gap-1.5"><FaMapMarkerAlt className="text-slate-400" /> {app.location}</p>}
+                {app.involvement && <p className="text-xs text-slate-600">Role: <strong className="text-slate-800">{app.involvement}</strong></p>}
+                {app.applicantType && <p className="text-xs text-slate-600">Type: <strong className="text-slate-800">{app.applicantType}</strong></p>}
+                {app.skills?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {app.skills.map((s) => <span key={s} className="rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold px-2 py-0.5">{s}</span>)}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="team-stats-grid">
-              <div className="team-stat-card">
-                <FaHandshake size={24} color="#6B7280" />
-                <span className="team-stat-num">{beneficiaries.length}</span>
-                <span className="team-stat-label">Beneficiaries</span>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-slate-200 bg-white p-3 flex flex-col items-center gap-1 text-center">
+                <FaHandshake className="h-5 w-5 text-slate-400" />
+                <span className="text-lg font-extrabold text-slate-900">{beneficiaries.length}</span>
+                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Beneficiaries</span>
               </div>
-              <div className="team-stat-card">
-                <FaCheckCircle size={24} color="#6B7280" />
-                <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'resolved' || b.status === 'closed').length}</span>
-                <span className="team-stat-label">Resolved</span>
+              <div className="rounded-xl border border-slate-200 bg-white p-3 flex flex-col items-center gap-1 text-center">
+                <FaCheckCircle className="h-5 w-5 text-emerald-400" />
+                <span className="text-lg font-extrabold text-slate-900">{beneficiaries.filter((b) => b.status === 'resolved' || b.status === 'closed').length}</span>
+                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Resolved</span>
               </div>
-              <div className="team-stat-card">
-                <FaClock size={24} color="#6B7280" />
-                <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'in-progress').length}</span>
-                <span className="team-stat-label">In Progress</span>
+              <div className="rounded-xl border border-slate-200 bg-white p-3 flex flex-col items-center gap-1 text-center">
+                <FaClock className="h-5 w-5 text-blue-400" />
+                <span className="text-lg font-extrabold text-slate-900">{beneficiaries.filter((b) => b.status === 'in-progress').length}</span>
+                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">In Progress</span>
               </div>
-              <div className="team-stat-card">
-                <FaExclamationCircle size={24} color="#6B7280" />
-                <span className="team-stat-num">{beneficiaries.filter((b) => b.status === 'open').length}</span>
-                <span className="team-stat-label">Open</span>
+              <div className="rounded-xl border border-slate-200 bg-white p-3 flex flex-col items-center gap-1 text-center">
+                <FaExclamationCircle className="h-5 w-5 text-amber-400" />
+                <span className="text-lg font-extrabold text-slate-900">{beneficiaries.filter((b) => b.status === 'open').length}</span>
+                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Open</span>
               </div>
             </div>
           </div>
         )}
         {subTab === 'beneficiaries' && (
-          <div className="team-dash-card">
-            <h3><FaHandshake style={{ color: '#6B7280' }} /> Assigned Beneficiaries ({beneficiaries.length})</h3>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3"><FaHandshake className="text-slate-400" /> Assigned Beneficiaries ({beneficiaries.length})</h3>
             {beneficiaries.length === 0 ? (
-              <div className="empty-state"><FaHandshake size={32} style={{ color: '#d1d5db' }} /><p>No beneficiaries assigned yet.</p></div>
+              <div className="flex flex-col items-center justify-center py-10 text-center rounded-xl border border-dashed border-slate-200">
+                <FaHandshake className="h-8 w-8 text-slate-200 mb-2" />
+                <p className="text-xs text-slate-400">No beneficiaries assigned yet.</p>
+              </div>
             ) : (
-              <div className="team-dash-list">
+              <div className="flex flex-col gap-2">
                 {beneficiaries.map((b) => (
-                  <div key={b._id || b.id} className="team-dash-item">
-                    <div className="team-dash-item-main">
-                      <strong>{b.name}</strong>
-                      <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{b.issue?.slice(0, 120)}</span>
-                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
+                  <div key={b._id || b.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border border-slate-100">
+                    <div className="min-w-0 flex-1">
+                      <strong className="block text-xs font-semibold text-slate-800 truncate">{b.name}</strong>
+                      <span className="text-[11px] text-slate-500 block">{b.issue?.slice(0, 120)}</span>
+                      <span className="text-[10px] text-slate-400">{b.location} {b.phone ? `• ${b.phone}` : ''}</span>
                     </div>
-                    <div className="team-dash-item-actions">
-                      <select value={b.status} onChange={(e) => updateBeneficiaryStatus(b._id || b.id, e.target.value)} className="beneficiary-status-select">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <select value={b.status} onChange={(e) => updateBeneficiaryStatus(b._id || b.id, e.target.value)} className="rounded-md border border-slate-200 px-2 py-1 text-[10px] text-slate-600 outline-none bg-white">
                         <option value="open">Open</option>
                         <option value="in-progress">In Progress</option>
                         <option value="resolved">Resolved</option>
                         <option value="closed">Closed</option>
                       </select>
-                      <span className={`ticket-status ${b.status === 'resolved' || b.status === 'closed' ? 'status-resolved' : b.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{b.status}</span>
+                      <span className={cn('inline-flex items-center rounded-full px-2 py-px text-[10px] font-semibold', b.status === 'resolved' || b.status === 'closed' ? 'bg-emerald-100 text-emerald-700' : b.status === 'in-progress' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700')}>{b.status}</span>
                     </div>
                   </div>
                 ))}
@@ -656,22 +716,25 @@ function TeamView({ teamData, setTeamData }) {
           </div>
         )}
         {subTab === 'tickets' && (
-          <div className="team-dash-card">
-            <h3><FaTicketAlt style={{ color: '#6B7280' }} /> All Support Tickets</h3>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-3"><FaTicketAlt className="text-slate-400" /> All Support Tickets</h3>
             {ticketsLoading ? (
-              <p style={{ textAlign: 'center', color: '#6b7280', padding: '2rem' }}>Loading tickets...</p>
+              <p className="text-center text-xs text-slate-400 py-8">Loading tickets...</p>
             ) : teamTickets.length === 0 ? (
-              <div className="empty-state"><FaTicketAlt size={32} style={{ color: '#d1d5db' }} /><p>No tickets in the system.</p></div>
+              <div className="flex flex-col items-center justify-center py-10 text-center rounded-xl border border-dashed border-slate-200">
+                <FaTicketAlt className="h-8 w-8 text-slate-200 mb-2" />
+                <p className="text-xs text-slate-400">No tickets in the system.</p>
+              </div>
             ) : (
-              <div className="team-dash-list">
+              <div className="flex flex-col gap-2">
                 {teamTickets.map((t) => (
-                  <div key={t._id} className="team-dash-item">
-                    <div className="team-dash-item-main">
-                      <strong>{t.title}</strong>
-                      <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{t.description?.slice(0, 100)}</span>
-                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>by {t.userName} • {t.category}</span>
+                  <div key={t._id} className="flex items-start justify-between gap-3 p-3 rounded-lg border border-slate-100">
+                    <div className="min-w-0 flex-1">
+                      <strong className="block text-xs font-semibold text-slate-800">{t.title}</strong>
+                      <span className="text-[11px] text-slate-500 block">{t.description?.slice(0, 100)}</span>
+                      <span className="text-[10px] text-slate-400">by {t.userName} • {t.category}</span>
                     </div>
-                    <span className={`ticket-status ${t.status === 'resolved' || t.status === 'closed' ? 'status-resolved' : t.status === 'in-progress' ? 'status-in-progress' : 'status-open'}`}>{t.status}</span>
+                    <span className={cn('inline-flex items-center rounded-full px-2 py-px text-[10px] font-semibold shrink-0', t.status === 'resolved' || t.status === 'closed' ? 'bg-emerald-100 text-emerald-700' : t.status === 'in-progress' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700')}>{t.status}</span>
                   </div>
                 ))}
               </div>
@@ -690,90 +753,105 @@ function DashboardView({ tickets, suggestionsCount, user }) {
 
   return (
     <>
-      <div className="adm-page-header">
-        <div><h1>Analytics</h1><p>Overview of your support activity</p></div>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h1 className="text-sm font-bold text-slate-900">Analytics</h1>
       </div>
 
-      <div className="adm-stats-grid">
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><FaTicketAlt /></div>
-          <div className="adm-stat-info"><strong>{tickets.length}</strong><span>Tickets</span></div>
-        </div>
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#fffbeb', color: '#f59e0b' }}><FaExclamationCircle /></div>
-          <div className="adm-stat-info"><strong>{openCount}</strong><span>Open</span></div>
-        </div>
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><FaCheckCircle /></div>
-          <div className="adm-stat-info"><strong>{resolvedCount}</strong><span>Resolved</span></div>
-        </div>
-        <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background: '#f5f3ff', color: '#8b5cf6' }}><FaLightbulb /></div>
-          <div className="adm-stat-info"><strong>{suggestionsCount || 0}</strong><span>Suggestions</span></div>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 mb-3">
+        {[
+          { label: 'Tickets', count: tickets.length, icon: FaTicketAlt, bg: 'bg-blue-50', text: 'text-blue-500' },
+          { label: 'Open', count: openCount, icon: FaExclamationCircle, bg: 'bg-amber-50', text: 'text-amber-500' },
+          { label: 'Resolved', count: resolvedCount, icon: FaCheckCircle, bg: 'bg-emerald-50', text: 'text-emerald-500' },
+          { label: 'Suggestions', count: suggestionsCount || 0, icon: FaLightbulb, bg: 'bg-violet-50', text: 'text-violet-500' },
+        ].map((s) => (
+          <div key={s.label} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5">
+            <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm', s.bg, s.text)}><s.icon /></div>
+            <div className="min-w-0">
+              <strong className="block text-sm font-extrabold text-slate-900">{s.count}</strong>
+              <span className="text-[10px] text-slate-500 font-medium">{s.label}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="adm-chart-section">
-        <div className="adm-chart-header"><FaTicketAlt /> Ticket Status</div>
-        <div className="adm-chart-bars">
+      {/* Ticket Status */}
+      <div className="rounded-xl border border-slate-200 bg-white p-3 mb-3">
+        <div className="text-[11px] font-bold text-slate-900 mb-2 flex items-center gap-1.5"><FaTicketAlt className="text-slate-400 text-[10px]" /> Ticket Status</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
-            { label: 'Open', count: tickets.filter((t) => t.status === 'open').length, color: '#f59e0b' },
-            { label: 'In Progress', count: tickets.filter((t) => t.status === 'in-progress').length, color: '#3b82f6' },
-            { label: 'Resolved', count: tickets.filter((t) => t.status === 'resolved').length, color: '#10b981' },
-            { label: 'Closed', count: tickets.filter((t) => t.status === 'closed').length, color: '#6b7280' },
+            { label: 'Open', count: tickets.filter((t) => t.status === 'open').length, color: 'bg-amber-500', ring: 'ring-amber-100', text: 'text-amber-700' },
+            { label: 'In Progress', count: tickets.filter((t) => t.status === 'in-progress').length, color: 'bg-blue-500', ring: 'ring-blue-100', text: 'text-blue-700' },
+            { label: 'Resolved', count: tickets.filter((t) => t.status === 'resolved').length, color: 'bg-emerald-500', ring: 'ring-emerald-100', text: 'text-emerald-700' },
+            { label: 'Closed', count: tickets.filter((t) => t.status === 'closed').length, color: 'bg-slate-400', ring: 'ring-slate-100', text: 'text-slate-600' },
           ].map((item) => (
-            <div key={item.label} className="adm-chart-row">
-              <span className="adm-chart-label">{item.label}</span>
-              <div className="adm-chart-track">
-                <div className="adm-chart-fill" style={{ width: `${(item.count / maxTicket) * 100}%`, background: item.color }} />
+            <div key={item.label} className="flex items-center gap-2.5 rounded-lg border border-slate-100 bg-slate-50/50 p-2.5">
+              <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full ring-4', item.color, item.ring)} />
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-medium text-slate-500 block">{item.label}</span>
               </div>
-              <span className="adm-chart-count">{item.count}</span>
+              <strong className={cn('text-sm font-extrabold', item.text)}>{item.count}</strong>
             </div>
           ))}
         </div>
+        {/* Progress bar */}
+        {tickets.length > 0 && (
+          <div className="flex h-1.5 rounded-full overflow-hidden bg-slate-100 mt-3">
+            <div className="bg-amber-500 transition-all duration-500" style={{ width: `${(tickets.filter((t) => t.status === 'open').length / tickets.length) * 100}%` }} />
+            <div className="bg-blue-500 transition-all duration-500" style={{ width: `${(tickets.filter((t) => t.status === 'in-progress').length / tickets.length) * 100}%` }} />
+            <div className="bg-emerald-500 transition-all duration-500" style={{ width: `${(tickets.filter((t) => t.status === 'resolved').length / tickets.length) * 100}%` }} />
+            <div className="bg-slate-400 transition-all duration-500" style={{ width: `${(tickets.filter((t) => t.status === 'closed').length / tickets.length) * 100}%` }} />
+          </div>
+        )}
       </div>
 
-      <div className="adm-chart-row-group">
-        <div className="adm-chart-sub-card">
-          <h4>Recent Tickets</h4>
+      {/* Bottom row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <h4 className="text-[11px] font-bold text-slate-900 mb-2 flex items-center gap-1.5"><FaClock className="text-slate-400 text-[10px]" /> Recent Tickets</h4>
           {tickets.length === 0 ? (
-            <div className="empty-state" style={{ padding: '1.5rem 1rem' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                <FaTicketAlt size={20} style={{ color: '#3b82f6' }} />
-              </div>
-              <p style={{ marginTop: '0.7rem', fontSize: '0.85rem' }}>No tickets yet.</p>
+            <div className="flex flex-col items-center justify-center py-6 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
+              <FaTicketAlt className="mb-1.5 h-4 w-4 text-slate-300" />
+              <p className="text-[10px] text-slate-400">No tickets yet.</p>
             </div>
           ) : (
-            <div className="adm-chart-sub-items">
+            <div className="space-y-1">
               {tickets.slice(0, 5).map((t) => (
-                <div key={t._id || t.id} className="adm-chart-sub-item">
-                  <span style={{ background: t.status === 'open' ? '#f59e0b' : t.status === 'in-progress' ? '#3b82f6' : t.status === 'resolved' ? '#10b981' : '#6b7280' }} />
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title || 'Untitled'}</span>
-                  <strong style={{ textTransform: 'capitalize', fontSize: '0.75rem' }}>{t.status}</strong>
+                <div key={t._id || t.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 transition-colors">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: t.status === 'open' ? '#f59e0b' : t.status === 'in-progress' ? '#3b82f6' : t.status === 'resolved' ? '#10b981' : '#6b7280' }} />
+                  <span className="flex-1 text-[11px] text-slate-700 truncate">{t.title || 'Untitled'}</span>
+                  <span className={cn('text-[8px] font-bold uppercase tracking-wide shrink-0', t.status === 'open' ? 'text-amber-600' : t.status === 'in-progress' ? 'text-blue-600' : t.status === 'resolved' ? 'text-emerald-600' : 'text-slate-500')}>{t.status}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
-        <div className="adm-chart-sub-card">
-          <h4>Categories</h4>
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <h4 className="text-[11px] font-bold text-slate-900 mb-2 flex items-center gap-1.5"><FaCog className="text-slate-400 text-[10px]" /> Categories</h4>
           {tickets.length === 0 ? (
-            <div className="empty-state" style={{ padding: '1.5rem 1rem' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                <FaLightbulb size={20} style={{ color: '#8b5cf6' }} />
-              </div>
-              <p style={{ marginTop: '0.7rem', fontSize: '0.85rem' }}>No data yet.</p>
+            <div className="flex flex-col items-center justify-center py-6 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
+              <FaCog className="mb-1.5 h-4 w-4 text-slate-300" />
+              <p className="text-[10px] text-slate-400">No data yet.</p>
             </div>
           ) : (
-            <div className="adm-chart-sub-items">
-              {['general', 'hardware', 'software', 'virus', 'network', 'training'].map((cat) => {
+            <div className="space-y-1">
+              {[
+                { cat: 'general', icon: FaHeadset, color: 'text-slate-500' },
+                { cat: 'hardware', icon: FaCog, color: 'text-blue-500' },
+                { cat: 'software', icon: FaRocket, color: 'text-violet-500' },
+                { cat: 'virus', icon: FaExclamationTriangle, color: 'text-red-500' },
+                { cat: 'network', icon: FaWifi, color: 'text-cyan-500' },
+                { cat: 'training', icon: FaGraduationCap, color: 'text-amber-500' },
+              ].map(({ cat, icon: Icon, color }) => {
                 const count = tickets.filter((t) => t.category === cat).length;
                 if (count === 0) return null;
+                const pct = Math.round((count / tickets.length) * 100);
                 return (
-                  <div key={cat} className="adm-chart-sub-item">
-                    <span style={{ background: '#3b82f6' }} />
-                    <span style={{ flex: 1, textTransform: 'capitalize' }}>{cat}</span>
-                    <strong>{count}</strong>
+                  <div key={cat} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 transition-colors">
+                    <Icon className={cn('text-[11px] shrink-0', color)} />
+                    <span className="flex-1 text-[11px] text-slate-700 capitalize">{cat}</span>
+                    <span className="text-[10px] text-slate-400 shrink-0">{pct}%</span>
+                    <strong className="text-[11px] font-bold text-slate-900 w-5 text-right">{count}</strong>
                   </div>
                 );
               })}
@@ -827,92 +905,91 @@ function HelpCenterView({ setTab }) {
 
   return (
     <>
-      <div className="hc-hero">
-        <div className="hc-hero-content">
-          <div className="hc-hero-badge"><FaHeadset /> Help Center</div>
-          <h2>How can we help you?</h2>
-          <p>Find answers, get support, and explore our services — all in one place.</p>
-          <div className="hc-hero-actions">
-            <button className="hc-hero-btn primary" onClick={() => setTab?.('tickets')}>
+      <div className="flex flex-col md:flex-row items-center gap-6 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 md:p-8 mb-4 overflow-hidden relative">
+        <div className="flex-1 text-white relative z-10">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold text-white/80 mb-3"><FaHeadset /> Help Center</div>
+          <h2 className="text-lg font-extrabold mb-1">How can we help you?</h2>
+          <p className="text-xs text-white/50 mb-4">Find answers, get support, and explore our services — all in one place.</p>
+          <div className="flex flex-wrap gap-2">
+            <button className="flex items-center gap-1.5 rounded-lg bg-cshub-yellow px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-amber-400 transition-colors" onClick={() => setTab?.('tickets')}>
               <FaTicketAlt /> Submit a Ticket
             </button>
-            <button className="hc-hero-btn secondary" onClick={() => setTab?.('chat')}>
+            <button className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10 transition-colors" onClick={() => setTab?.('chat')}>
               <FaComments /> Live Chat
             </button>
           </div>
         </div>
-        <div className="hc-hero-illustration">
-          <div className="hc-hero-circles">
-            <div className="hc-hero-circle c1" />
-            <div className="hc-hero-circle c2" />
-            <div className="hc-hero-circle c3" />
-            <FaHeadset className="hc-hero-icon" />
+        <div className="hidden md:flex items-center justify-center relative z-10">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border border-white/10" />
+            <div className="absolute inset-2 h-20 w-20 rounded-full border border-white/5" />
+            <FaHeadset className="absolute inset-0 m-auto h-8 w-8 text-cshub-yellow" />
           </div>
         </div>
       </div>
 
-      <div className="hc-section">
-        <h3 className="hc-section-title">Quick Actions</h3>
-        <div className="hc-quick-grid">
+      <div className="mb-4">
+        <h3 className="text-sm font-bold text-slate-900 mb-3">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {quickLinks.map((link) => (
             link.href ? (
-              <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="hc-quick-card">
-                <div className="hc-quick-icon" style={{ background: link.gradient }}>{link.icon}</div>
-                <div className="hc-quick-text">
-                  <span className="hc-quick-label">{link.label}</span>
-                  <span className="hc-quick-desc">{link.desc}</span>
+              <a key={link.label} href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 hover:shadow-sm transition-all">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-700 to-slate-600 text-white text-sm">{link.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-xs font-semibold text-slate-800">{link.label}</span>
+                  <span className="block text-[10px] text-slate-400">{link.desc}</span>
                 </div>
-                <FaChevronRight className="hc-quick-arrow" />
+                <FaChevronRight className="h-3 w-3 text-slate-300 shrink-0" />
               </a>
             ) : (
-              <button key={link.label} className="hc-quick-card" onClick={() => setTab?.(link.tab)}>
-                <div className="hc-quick-icon" style={{ background: link.gradient }}>{link.icon}</div>
-                <div className="hc-quick-text">
-                  <span className="hc-quick-label">{link.label}</span>
-                  <span className="hc-quick-desc">{link.desc}</span>
+              <button key={link.label} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 hover:shadow-sm transition-all text-left w-full" onClick={() => setTab?.(link.tab)}>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-700 to-slate-600 text-white text-sm">{link.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-xs font-semibold text-slate-800">{link.label}</span>
+                  <span className="block text-[10px] text-slate-400">{link.desc}</span>
                 </div>
-                <FaChevronRight className="hc-quick-arrow" />
+                <FaChevronRight className="h-3 w-3 text-slate-300 shrink-0" />
               </button>
             )
           ))}
         </div>
       </div>
 
-      <div className="hc-section">
-        <div className="hc-section-header">
-          <h3 className="hc-section-title"><FaQuestionCircle /> Frequently Asked Questions</h3>
-          <div className="hc-faq-search">
-            <FaSearch />
-            <input type="text" placeholder="Search questions..." value={faqSearch} onChange={(e) => setFaqSearch(e.target.value)} />
+      <div className="mb-4">
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><FaQuestionCircle /> Frequently Asked Questions</h3>
+          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 h-8 w-48 md:w-56">
+            <FaSearch className="text-slate-400 text-xs shrink-0" />
+            <input type="text" placeholder="Search questions..." value={faqSearch} onChange={(e) => setFaqSearch(e.target.value)} className="w-full bg-transparent text-xs text-slate-700 outline-none placeholder:text-slate-400" />
           </div>
         </div>
-        <div className="hc-faq-list">
+        <div className="flex flex-col gap-1.5">
           {filteredFaqs.length === 0 && (
-            <div className="hc-faq-empty">No matching questions found.</div>
+            <div className="text-center py-6 text-xs text-slate-400">No matching questions found.</div>
           )}
           {filteredFaqs.map((faq, i) => (
-            <div key={i} className={`hc-faq-item${openFaq === i ? ' open' : ''}`}>
-              <button className="hc-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                <span>{faq.q}</span>
-                <span className={`hc-faq-chevron${openFaq === i ? ' rotated' : ''}`}><FaChevronRight /></span>
+            <div key={i} className={cn('rounded-xl border bg-white transition-all', openFaq === i ? 'border-slate-300 shadow-sm' : 'border-slate-200')}>
+              <button className="flex items-center justify-between gap-3 w-full px-4 py-3 text-left" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                <span className="text-xs font-semibold text-slate-800">{faq.q}</span>
+                <FaChevronRight className={cn('h-3 w-3 text-slate-400 shrink-0 transition-transform', openFaq === i && 'rotate-90')} />
               </button>
-              <div className="hc-faq-answer-wrap">
-                {openFaq === i && <div className="hc-faq-a">{faq.a}</div>}
-              </div>
+              {openFaq === i && (
+                <div className="px-4 pb-3 text-xs text-slate-500 leading-relaxed border-t border-slate-100 pt-2">{faq.a}</div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="hc-section">
-        <h3 className="hc-section-title"><FaRocket /> Services We Offer</h3>
-        <div className="hc-services-grid">
+      <div className="mb-4">
+        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><FaRocket /> Services We Offer</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {services.map((svc) => (
-            <div key={svc.name} className="hc-service-card">
-              <div className="hc-service-icon" style={{ background: `${svc.color}12`, color: svc.color }}>{svc.icon}</div>
-              <div className="hc-service-text">
-                <strong>{svc.name}</strong>
-                <span>{svc.desc}</span>
+            <div key={svc.name} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 text-sm">{svc.icon}</div>
+              <div className="min-w-0">
+                <strong className="block text-xs font-semibold text-slate-800">{svc.name}</strong>
+                <span className="block text-[10px] text-slate-500 leading-relaxed">{svc.desc}</span>
               </div>
             </div>
           ))}
@@ -1327,18 +1404,19 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans">
-      <TooltipProvider delayDuration={0}>
-        {sidebarOpen && isMobile && (
-          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
-        )}
 
-        <aside className={cn(
+      {sidebarOpen && isMobile && (
+        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      <aside className={cn(
           'fixed top-0 left-0 bottom-0 z-50 flex flex-col bg-slate-950 text-white transition-all duration-300 ease-in-out',
           'border-r border-white/5',
           collapsed ? 'w-[68px]' : 'w-[280px]',
           'max-lg:-translate-x-full max-lg:shadow-2xl',
           sidebarOpen && 'max-lg:translate-x-0',
         )}>
+          <TooltipProvider delayDuration={0}>
           {/* Header */}
           <div className={cn('flex items-center gap-3 border-b border-white/5', collapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3')}>
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 shadow-lg shadow-black/20">
@@ -1370,17 +1448,6 @@ export default function Dashboard() {
               >
                 <ChevronRight className="h-3 w-3" />
               </button>
-            </div>
-          )}
-
-          {/* User info (expanded only) */}
-          {!collapsed && (
-            <div className="mx-3 mt-3 flex items-center gap-3 rounded-lg bg-white/[0.04] px-3 py-2.5 border border-white/5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-yellow-400 text-xs font-bold text-slate-900">{initials}</div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-semibold text-white truncate">{user?.name || 'User'}</div>
-                <div className="text-[10px] text-slate-500">{teamData?.isTeamMember ? 'Team Member' : 'User'}</div>
-              </div>
             </div>
           )}
 
@@ -1463,11 +1530,11 @@ export default function Dashboard() {
               </Tooltip>
             )}
           </div>
+          </TooltipProvider>
         </aside>
-      </TooltipProvider>
 
-      <div className={cn('flex flex-1 flex-col transition-all duration-300', collapsed ? 'lg:ml-[68px]' : 'lg:ml-[280px]')}>
-        <header className="sticky top-[80px] z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-lg lg:px-5">
+      <div className={cn('flex flex-1 flex-col lg:ml-[280px] transition-all duration-300', collapsed && 'lg:ml-[68px]')}>
+        <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-lg lg:px-5">
           <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 lg:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <FaBars />
           </button>
@@ -1547,17 +1614,15 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-5 bg-slate-50">
+        <main className="flex-1 p-3 lg:p-4">
           {teamData?.application && !teamData.isTeamMember && (
-            <div className="dash-card" style={{ marginBottom: '1rem', padding: '1rem 1.2rem', borderLeft: `4px solid ${teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b'}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
-                <FaUserTie style={{ fontSize: '1.2rem', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }} />
-                <div>
-                  <strong style={{ fontSize: '0.95rem' }}>Team Application — <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
-                  <p style={{ fontSize: '0.82rem', color: '#6b7280', margin: '2px 0 0' }}>
-                    {teamData.application.status === 'pending' ? 'Your application is being reviewed.' : 'Your application was not approved at this time.'}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 mb-4" style={{ borderLeft: `4px solid ${teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b'}` }}>
+              <FaUserTie className="h-4 w-4 shrink-0" style={{ color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }} />
+              <div>
+                <strong className="text-xs font-bold text-slate-800">Team Application — <span style={{ textTransform: 'uppercase', color: teamData.application.status === 'rejected' ? '#ef4444' : '#f59e0b' }}>{teamData.application.status}</span></strong>
+                <p className="text-[11px] text-slate-500">
+                  {teamData.application.status === 'pending' ? 'Your application is being reviewed.' : 'Your application was not approved at this time.'}
+                </p>
               </div>
             </div>
           )}
@@ -1586,37 +1651,49 @@ export default function Dashboard() {
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
 
       {profileEditOpen && (
-        <div className="adm-modal-overlay" onClick={() => setProfileEditOpen(false)}>
-          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="adm-modal-header">
-              <h3>{profileTab === 'password' ? 'Change Password' : 'Edit Profile'}</h3>
-              <button className="adm-modal-close" onClick={() => setProfileEditOpen(false)}><FaTimes /></button>
+        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setProfileEditOpen(false)}>
+          <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-2xl animate-in fade-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+              <h3 className="text-sm font-bold text-slate-900">{profileTab === 'password' ? 'Change Password' : 'Edit Profile'}</h3>
+              <button onClick={() => setProfileEditOpen(false)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200">
+                <FaTimes />
+              </button>
             </div>
-            <div className="adm-modal-body">
-              <div className="adm-profile-tabs">
-                <button className={`adm-profile-tab${profileTab === 'profile' ? ' active' : ''}`} onClick={() => setProfileTab('profile')}>Profile</button>
-                <button className={`adm-profile-tab${profileTab === 'password' ? ' active' : ''}`} onClick={() => setProfileTab('password')}>Password</button>
+            <div className="px-5 py-4">
+              <div className="mb-4 flex gap-0.5 rounded-lg bg-slate-100 p-0.5">
+                <button className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-all ${profileTab === 'profile' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`} onClick={() => setProfileTab('profile')}>Profile</button>
+                <button className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-all ${profileTab === 'password' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`} onClick={() => setProfileTab('password')}>Password</button>
               </div>
               {profileTab === 'profile' ? (
-                <div className="adm-profile-form">
-                  <div className="adm-profile-avatar-large">{initials}</div>
-                  <label className="adm-form-label">Full Name</label>
-                  <input className="adm-form-input" type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
-                  <label className="adm-form-label">Email</label>
-                  <input className="adm-form-input" type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
-                  <button className="adm-btn adm-btn-primary" onClick={handleProfileSave} disabled={profileLoading}>
+                <div className="flex flex-col gap-3">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cshub-yellow to-amber-500 text-sm font-bold text-slate-900">{initials}</div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">Full Name</label>
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">Email</label>
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                  </div>
+                  <button className="mt-0.5 w-full rounded-lg bg-cshub-yellow py-2 text-xs font-bold text-slate-900 transition-colors hover:bg-amber-400 disabled:opacity-50" onClick={handleProfileSave} disabled={profileLoading}>
                     {profileLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               ) : (
-                <div className="adm-profile-form">
-                  <label className="adm-form-label">Current Password</label>
-                  <input className="adm-form-input" type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} />
-                  <label className="adm-form-label">New Password</label>
-                  <input className="adm-form-input" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
-                  <label className="adm-form-label">Confirm New Password</label>
-                  <input className="adm-form-input" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
-                  <button className="adm-btn adm-btn-primary" onClick={handlePasswordChange} disabled={profileLoading}>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">Current Password</label>
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">New Password</label>
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">Confirm New Password</label>
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
+                  </div>
+                  <button className="mt-0.5 w-full rounded-lg bg-cshub-yellow py-2 text-xs font-bold text-slate-900 transition-colors hover:bg-amber-400 disabled:opacity-50" onClick={handlePasswordChange} disabled={profileLoading}>
                     {profileLoading ? 'Updating...' : 'Update Password'}
                   </button>
                 </div>

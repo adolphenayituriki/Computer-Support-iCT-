@@ -37,7 +37,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const SetupAccount = lazy(() => import('./components/SetupAccount'));
 const CollaboratorsPage = lazy(() => import('./components/CollaboratorsPage'));
 const LiveSessionsStudent = lazy(() => import('./components/LiveSessionsStudent'));
-const CoursePlayer = lazy(() => import('./components/CoursePlayer'));
+const CoursePlayer = lazy(() => import('./components/course-player/CoursePlayer'));
 
 function PageSpinner() {
   return (
@@ -100,6 +100,7 @@ export default function App() {
     const isAdmin = location.pathname === '/admin';
     const isGamePlay = location.pathname === '/play' || location.pathname.startsWith('/play/');
     const isCollaborators = location.pathname === '/collaborators';
+    const isCoursePlayer = /^\/courses\/[^/]+$/.test(location.pathname);
     const [waVisible, setWaVisible] = useState(false);
 
     useEffect(() => {
@@ -112,7 +113,7 @@ export default function App() {
 
     return (
       <>
-        {!isAdmin && !isDashboard && !isGamePlay && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
+        {!isAdmin && !isDashboard && !isGamePlay && !isCoursePlayer && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/contact" element={<Suspense fallback={<PageSpinner />}><main><Contact /></main></Suspense>} />
@@ -129,10 +130,10 @@ export default function App() {
           <Route path="/collaborators" element={<Suspense fallback={<PageSpinner />}><CollaboratorsPage /></Suspense>} />
           <Route path="/live-sessions" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><main className="pt-24 pb-12 px-4 max-w-3xl mx-auto"><LiveSessionsStudent /></main></ProtectedRoute></Suspense>} />
         </Routes>
-        {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
-        {!isDashboard && !isAdmin && !isGamePlay && <EmergencyButton />}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && !isCoursePlayer && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && <EmergencyButton />}
         <NewsletterPopup open={showNewsletter} onClose={() => setShowNewsletter(false)} />
-        {!isDashboard && !isAdmin && !isGamePlay && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} message={loginMessage} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
         <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>

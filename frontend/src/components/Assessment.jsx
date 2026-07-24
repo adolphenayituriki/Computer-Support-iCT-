@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FaCheckCircle, FaTimesCircle, FaArrowLeft, FaArrowRight, FaCertificate, FaRedo, FaSpinner } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaArrowLeft, FaArrowRight, FaRedo, FaSpinner, FaTimes, FaClipboardCheck, FaAward } from 'react-icons/fa';
+import Certificate from './course-player/Certificate';
 
 const QUESTIONS = {
   general: [
@@ -76,13 +77,14 @@ const QUESTIONS = {
   ],
 };
 
-export default function Assessment({ course, userName, onComplete }) {
+export default function Assessment({ course, userName, onComplete, onClose, onPass, onFinalize, assessmentPassed, assessmentFinalized }) {
   const category = course.category || 'general';
   const questions = QUESTIONS[category] || QUESTIONS.general;
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [showCert, setShowCert] = useState(false);
+  const [finalized, setFinalized] = useState(false);
 
   const correct = questions.filter((q, i) => answers[i] === q.answer).length;
   const score = Math.round((correct / questions.length) * 100);
@@ -93,28 +95,50 @@ export default function Assessment({ course, userName, onComplete }) {
     setAnswers((prev) => ({ ...prev, [current]: idx }));
   };
 
-  const handleSubmit = () => setSubmitted(true);
+  const handleSubmit = () => {
+    setSubmitted(true);
+    if (score >= 70) {
+      try { localStorage.setItem(`cshub-assessment-score-${course?._id}`, String(score)); } catch { /* ignore */ }
+      onPass?.();
+    }
+  };
 
   if (showCert) {
     return (
-      <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl max-w-lg w-full p-8 text-center shadow-2xl">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-400 to-yellow-300 flex items-center justify-center">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>
+      <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-sm overflow-y-auto">
+        <div className="min-h-full flex flex-col">
+          {/* Close bar */}
+          <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-yellow-300 flex items-center justify-center">
+                <FaAward size={14} className="text-amber-800" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Your Certificate is Ready</h2>
+                <p className="text-[11px] text-slate-400">Congratulations on completing the course!</p>
+              </div>
+            </div>
+            <button
+              onClick={() => onComplete?.()}
+              className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              Done
+            </button>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-1">Certificate of Completion</h2>
-          <p className="text-sm text-slate-500 mb-4">CS Hub (iCT) — Computer Support</p>
-          <div className="border-2 border-amber-300 rounded-xl p-6 mb-4 bg-gradient-to-br from-amber-50 to-white">
-            <p className="text-sm text-slate-600 mb-2">This certifies that</p>
-            <p className="text-xl font-bold text-slate-900 mb-2">{userName || 'Student'}</p>
-            <p className="text-sm text-slate-600 mb-1">has successfully completed the course</p>
-            <p className="text-lg font-bold text-[#FFCE08] mb-2">"{course.title}"</p>
-            <p className="text-xs text-slate-400">Score: {score}% | {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </div>
-          <div className="flex gap-3 justify-center">
-            <button onClick={() => window.print()} className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-bold hover:from-blue-600 hover:to-blue-700 transition-all">Print Certificate</button>
-            <button onClick={() => onComplete?.()} className="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all">Done</button>
-          </div>
+
+          {/* Certificate */}
+          <Certificate
+            course={course}
+            userName={userName}
+            assessmentScore={score}
+            curriculum={{
+              modules: [],
+              totalLessons: 10,
+              completedLessons: 10,
+            }}
+            assessmentPassed={true}
+            completedAt={new Date().toISOString()}
+          />
         </div>
       </div>
     );
@@ -123,27 +147,46 @@ export default function Assessment({ course, userName, onComplete }) {
   if (submitted) {
     return (
       <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl">
+        <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl relative animate-fade-in">
+          {onClose && (
+            <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+              <FaTimes size={14} />
+            </button>
+          )}
           {passed ? (
             <>
-              <FaCheckCircle className="mx-auto h-14 w-14 text-emerald-500 mb-3" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                <FaCheckCircle size={32} className="text-emerald-500" />
+              </div>
               <h2 className="text-xl font-bold text-slate-900 mb-1">Congratulations!</h2>
-              <p className="text-sm text-slate-500 mb-4">You passed the assessment</p>
+              <p className="text-sm text-slate-400 mb-5">You passed the assessment</p>
               <div className="text-5xl font-black text-emerald-500 mb-2">{score}%</div>
               <p className="text-xs text-slate-400 mb-6">{correct} of {questions.length} correct</p>
-              <button onClick={() => setShowCert(true)} className="w-full py-3 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 rounded-xl text-sm font-bold hover:from-amber-500 hover:to-yellow-500 transition-all flex items-center justify-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>
-                Get Certificate
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setSubmitted(false); setAnswers({}); setCurrent(0); }}
+                  className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <FaRedo /> Retake
+                </button>
+                <button
+                  onClick={() => { try { localStorage.setItem(`cshub-assessment-score-${course?._id}`, String(score)); } catch { /* ignore */ } onPass?.(); onFinalize?.(); setFinalized(true); setShowCert(true); }}
+                  className="flex-1 py-3 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 rounded-xl text-sm font-bold hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <FaAward /> Final Submit
+                </button>
+              </div>
             </>
           ) : (
             <>
-              <FaTimesCircle className="mx-auto h-14 w-14 text-red-400 mb-3" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+                <FaTimesCircle size={32} className="text-slate-400" />
+              </div>
               <h2 className="text-xl font-bold text-slate-900 mb-1">Not Quite There Yet</h2>
-              <p className="text-sm text-slate-500 mb-4">You need 70% to pass</p>
-              <div className="text-5xl font-black text-red-400 mb-2">{score}%</div>
+              <p className="text-sm text-slate-400 mb-5">You need 70% to pass</p>
+              <div className="text-5xl font-black text-slate-400 mb-2">{score}%</div>
               <p className="text-xs text-slate-400 mb-6">{correct} of {questions.length} correct</p>
-              <button onClick={() => { setSubmitted(false); setAnswers({}); setCurrent(0); }} className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-bold hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center gap-2">
+              <button onClick={() => { setSubmitted(false); setAnswers({}); setCurrent(0); }} className="w-full py-3 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-xl text-sm font-bold hover:from-slate-800 hover:to-slate-900 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <FaRedo /> Try Again
               </button>
             </>
@@ -154,33 +197,51 @@ export default function Assessment({ course, userName, onComplete }) {
   }
 
   const q = questions[current];
+  const answeredCount = Object.keys(answers).length;
 
   return (
     <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
+      <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden relative animate-fade-in">
+        {onClose && (
+          <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors cursor-pointer">
+            <FaTimes size={14} />
+          </button>
+        )}
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 text-white">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-bold text-sm">Course Assessment</h3>
-            <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full">{current + 1}/{questions.length}</span>
+        <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-6 py-5 text-white">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-9 w-9 rounded-xl bg-white/10 flex items-center justify-center">
+              <FaClipboardCheck size={16} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-sm">Course Assessment</h3>
+              <p className="text-[11px] text-slate-400">{course.title}</p>
+            </div>
+            <span className="text-[11px] font-bold bg-white/10 px-3 py-1 rounded-full tabular-nums">
+              {current + 1}/{questions.length}
+            </span>
           </div>
-          <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full transition-all duration-300" style={{ width: `${((current + 1) / questions.length) * 100}%` }} />
+          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-400 rounded-full transition-all duration-300" style={{ width: `${((current + 1) / questions.length) * 100}%` }} />
           </div>
         </div>
 
         {/* Question */}
         <div className="p-6">
-          <p className="text-sm font-semibold text-slate-800 mb-4">{q.q}</p>
-          <div className="space-y-2">
+          <p className="text-sm font-semibold text-slate-800 mb-5 leading-relaxed">{q.q}</p>
+          <div className="space-y-2.5">
             {q.options.map((opt, i) => (
               <button key={i} onClick={() => handleAnswer(i)}
-                className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                className={`w-full text-left px-4 py-3.5 rounded-xl border-2 text-sm font-medium transition-all cursor-pointer ${
                   answers[current] === i
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    ? 'border-amber-400 bg-amber-50 text-amber-800 shadow-sm shadow-amber-100'
                     : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                 }`}>
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 mr-3">{String.fromCharCode(65 + i)}</span>
+                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold mr-3 ${
+                  answers[current] === i
+                    ? 'bg-amber-400 text-white'
+                    : 'bg-slate-100 text-slate-500'
+                }`}>{String.fromCharCode(65 + i)}</span>
                 {opt}
               </button>
             ))}
@@ -190,20 +251,23 @@ export default function Assessment({ course, userName, onComplete }) {
         {/* Footer */}
         <div className="px-6 pb-5 flex items-center justify-between">
           <button onClick={() => setCurrent((c) => c - 1)} disabled={current === 0}
-            className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-colors flex items-center gap-1">
+            className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-colors flex items-center gap-1 cursor-pointer">
             <FaArrowLeft size={10} /> Back
           </button>
-          {current < questions.length - 1 ? (
-            <button onClick={() => setCurrent((c) => c + 1)}
-              className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-bold hover:from-blue-600 hover:to-blue-700 transition-all flex items-center gap-1">
-              Next <FaArrowRight size={10} />
-            </button>
-          ) : (
-            <button onClick={handleSubmit} disabled={Object.keys(answers).length < questions.length}
-              className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-bold hover:from-emerald-600 hover:to-emerald-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-              Submit
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-medium text-slate-300 tabular-nums">{answeredCount}/{questions.length} answered</span>
+            {current < questions.length - 1 ? (
+              <button onClick={() => setCurrent((c) => c + 1)}
+                className="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-xl text-sm font-bold hover:from-slate-800 hover:to-slate-900 transition-all flex items-center gap-1 cursor-pointer">
+                Next <FaArrowRight size={10} />
+              </button>
+            ) : (
+              <button onClick={handleSubmit} disabled={answeredCount < questions.length}
+                className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl text-sm font-bold hover:from-emerald-600 hover:to-emerald-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+                Submit
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
