@@ -87,10 +87,31 @@ export default function CoursePlayer() {
     try { return parseInt(localStorage.getItem(`cshub-assessment-score-${id}`) || '0', 10); } catch { return 0; }
   });
 
-  const markLessonLocal = useCallback((lessonId) => {
+  const syncToBackend = useCallback((section, resourceId) => {
+    if (!user) return;
+    fetch(`${API_BASE}/api/enrollments/${id}/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ section, resourceId }),
+    }).then(r => r.json()).then(data => {
+      if (data.progress !== undefined) setProgress(prev => ({ ...prev, ...data }));
+    }).catch(() => {});
+  }, [id, user]);
+
+  const markLessonLocal = useCallback((lessonId, lessonType, resourceId) => {
     markLessonComplete(id, lessonId);
     setCompletedLessons(getCompletedLessonIds(id));
-  }, [id]);
+
+    const sectionMap = {
+      'overview': 'content',
+      'content': 'content',
+      'intro-video': 'introVideo',
+      'video': 'video',
+      'resource': 'resource',
+    };
+    const section = sectionMap[lessonType];
+    if (section) syncToBackend(section, resourceId);
+  }, [id, syncToBackend]);
 
   const markAssessmentPassed = useCallback(() => {
     localStorage.setItem(`cshub-assessment-${id}`, 'true');

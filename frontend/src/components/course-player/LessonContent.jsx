@@ -285,7 +285,7 @@ function ContentLesson({ lesson, moduleName, marking, markLessonLocal, highlight
   const contentRef = useRef(null);
   const remaining = useReadingTimer(lesson.readingTime, lesson.id, () => {
     if (!lesson.completed) {
-      markLessonLocal(lesson.id);
+      markLessonLocal(lesson.id, lesson.type);
       if (onAutoNext) setTimeout(() => onAutoNext(), 500);
     }
   });
@@ -381,7 +381,7 @@ function ContentLesson({ lesson, moduleName, marking, markLessonLocal, highlight
       footer={
         <MarkCompleteButton
           isComplete={lesson.completed}
-          onMark={() => markLessonLocal(lesson.id)}
+          onMark={() => markLessonLocal(lesson.id, lesson.type)}
           marking={marking}
           markKey={lesson.id}
           disabled={!lesson.completed && remaining > 0}

@@ -1042,14 +1042,37 @@ function MyCoursesView() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [fetchCourses]);
 
-  const enriched = enrollments.map((e) => ({
-    enrollment: e.enrollment,
-    course: e.enrollment?.courseId,
-    progress: e.progress?.progress || 0,
-    completed: e.progress?.completed || false,
-    sections: e.progress?.sections || {},
-    enrolledAt: e.enrollment?.enrolledAt,
-  })).filter((e) => e.course);
+  const enriched = enrollments.map((e) => {
+    const courseId = e.enrollment?.courseId?._id || e.enrollment?.courseId;
+    const backendProgress = e.progress?.progress || 0;
+    const backendCompleted = e.progress?.completed || false;
+
+    let localStorageProgress = 0;
+    let localStorageCompleted = false;
+    try {
+      const lessonsData = localStorage.getItem(`cshub-lessons-${courseId}`);
+      const assessmentPassed = localStorage.getItem(`cshub-assessment-${courseId}`) === 'true';
+      if (lessonsData) {
+        const completedIds = JSON.parse(lessonsData);
+        if (Array.isArray(completedIds) && completedIds.length > 0) {
+          localStorageProgress = Math.min(95, completedIds.length * 8);
+          if (assessmentPassed) localStorageProgress = 100;
+        }
+      }
+    } catch { /* ignore */ }
+
+    const progress = Math.max(backendProgress, localStorageProgress);
+    const completed = backendCompleted || localStorageCompleted || progress >= 100;
+
+    return {
+      enrollment: e.enrollment,
+      course: e.enrollment?.courseId,
+      progress,
+      completed,
+      sections: e.progress?.sections || {},
+      enrolledAt: e.enrollment?.enrolledAt,
+    };
+  }).filter((e) => e.course);
 
   const filtered = filter === 'all' ? enriched
     : filter === 'completed' ? enriched.filter((e) => e.completed)
