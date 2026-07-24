@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { FaPrint, FaDownload, FaTrophy, FaCheckCircle } from 'react-icons/fa';
 import QRCode from 'qrcode';
-import { generateCertificateCanvas } from '../../utils/qrcode';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import './CertificatePrint.css';
 
 function generateCertNumber(courseCategory, userId, courseId) {
@@ -90,34 +91,34 @@ export default function Certificate({
   }, [course, userName, userId, assessmentPassed, completedAt]);
 
   const displayScore = assessmentScore || 0;
+  const certRef = useRef(null);
 
   const handlePrint = () => window.print();
 
-  const handleDownloadPNG = useCallback(async () => {
+  const handleDownloadPDF = useCallback(async () => {
+    if (!certRef.current) return;
     try {
-      const canvas = await generateCertificateCanvas({
-        userName: userName || 'Student',
-        courseTitle: course?.title || 'Course',
-        score: displayScore,
-        certId: certData.certNumber,
-        dateStr: certData.issueDate,
-        logoSrc: '/LOGO IMAGE.png',
+      const canvas = await html2canvas(certRef.current, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
       });
-      const link = document.createElement('a');
-      link.download = `Certificate-${(course?.title || 'Course').replace(/\s+/g, '_')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+      pdf.save(`Certificate-${(course?.title || 'Course').replace(/\s+/g, '_')}.pdf`);
     } catch {
       window.print();
     }
-  }, [userName, course?.title, certData.certNumber, certData.issueDate, displayScore]);
+  }, [course?.title]);
 
   return (
     <div className="cert-page-wrapper bg-slate-100 min-h-screen flex flex-col items-center justify-start py-6 px-4 sm:px-6 lg:px-8">
       {/* Certificate — landscape on screen */}
-      <div className="cert-print-container cert-landscape cert-border-outer bg-white relative w-full max-w-[960px] shadow-2xl shadow-blue-900/10 rounded-sm overflow-hidden flex flex-col cert-bg-gradient">
+      <div ref={certRef} className="cert-print-container cert-landscape cert-border-outer bg-white relative w-full max-w-[960px] shadow-2xl shadow-blue-900/10 rounded-sm overflow-hidden flex flex-col cert-bg-gradient">
         {/* Decorative corners */}
         <div className="cert-corner cert-corner-tl" />
         <div className="cert-corner cert-corner-tr" />
@@ -260,13 +261,13 @@ export default function Certificate({
       {/* Print / Download buttons — hidden when printing */}
       <div className="cert-no-print flex items-center gap-3 mt-5 mb-8">
         <button
-          onClick={handleDownloadPNG}
+          onClick={handleDownloadPDF}
           className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer"
           style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: '0 4px 14px rgba(252,207,53,0.4)' }}
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6b800'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(252,207,53,0.5)'; }}
           onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FCCF35'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(252,207,53,0.4)'; }}
         >
-          <FaDownload size={14} /> Download Certificate
+          <FaDownload size={14} /> Download PDF
         </button>
         <button
           onClick={handlePrint}
