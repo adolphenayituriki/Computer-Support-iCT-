@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
@@ -1006,7 +1006,7 @@ function MyCoursesView() {
   const [filter, setFilter] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState(null);
 
-  useEffect(() => {
+  const fetchCourses = useCallback(() => {
     const tokenVal = localStorage.getItem('cshub_token');
     if (!tokenVal) { setLoading(false); return; }
 
@@ -1023,6 +1023,24 @@ function MyCoursesView() {
       })
       .catch((err) => { setError(err.message); setLoading(false); });
   }, []);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchCourses();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [fetchCourses]);
+
+  useEffect(() => {
+    const handleFocus = () => fetchCourses();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchCourses]);
 
   const enriched = enrollments.map((e) => ({
     enrollment: e.enrollment,

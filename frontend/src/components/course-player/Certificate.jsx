@@ -78,6 +78,7 @@ export default function Certificate({
   completedAt,
 }) {
   const [logoError, setLogoError] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const certData = useMemo(() => {
     const cat = course?.category || 'general';
@@ -96,22 +97,92 @@ export default function Certificate({
   const handlePrint = () => window.print();
 
   const handleDownloadPDF = useCallback(async () => {
-    if (!certRef.current) return;
+    if (!certRef.current || exporting) return;
+    setExporting(true);
+
+    const el = certRef.current;
+
+    await document.fonts.ready;
+
+    const imgs = el.querySelectorAll('img');
+    await Promise.all(Array.from(imgs).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    }));
+
+    const origStyle = {
+      overflow: el.style.overflow,
+      aspectRatio: el.style.aspectRatio,
+      width: el.style.width,
+      maxWidth: el.style.maxWidth,
+      height: el.style.height,
+      boxShadow: el.style.boxShadow,
+      borderRadius: el.style.borderRadius,
+      transform: el.style.transform,
+      position: el.style.position,
+    };
+
+    el.style.overflow = 'visible';
+    el.style.aspectRatio = 'auto';
+    el.style.width = '1122px';
+    el.style.maxWidth = '1122px';
+    el.style.height = '794px';
+    el.style.boxShadow = 'none';
+    el.style.borderRadius = '0';
+    el.style.transform = 'none';
+
     try {
-      const canvas = await html2canvas(certRef.current, {
+      const canvas = await html2canvas(el, {
         scale: 3,
         useCORS: true,
+        allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
+        width: 1122,
+        height: 794,
+        windowWidth: 1122,
+        windowHeight: 794,
+        onclone: (doc) => {
+          const clone = doc.querySelector('.cert-print-container');
+          if (clone) {
+            clone.style.overflow = 'visible';
+            clone.style.aspectRatio = 'auto';
+            clone.style.width = '1122px';
+            clone.style.maxWidth = '1122px';
+            clone.style.height = '794px';
+            clone.style.boxShadow = 'none';
+            clone.style.borderRadius = '0';
+            clone.style.transform = 'none';
+            clone.style.margin = '0';
+            clone.style.position = 'relative';
+          }
+          const wrapper = doc.querySelector('.cert-page-wrapper');
+          if (wrapper) {
+            wrapper.style.background = 'white';
+            wrapper.style.padding = '0';
+            wrapper.style.margin = '0';
+            wrapper.style.minHeight = 'auto';
+          }
+        },
       });
-      const imgData = canvas.toDataURL('image/png');
+
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL('image/png', 1.0);
       pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save(`Certificate-${(course?.title || 'Course').replace(/\s+/g, '_')}.pdf`);
-    } catch {
+    } catch (err) {
+      console.error('PDF export failed:', err);
       window.print();
+    } finally {
+      Object.entries(origStyle).forEach(([key, val]) => {
+        el.style[key] = val || '';
+      });
+      setExporting(false);
     }
   }, [course?.title]);
 
@@ -262,12 +333,13 @@ export default function Certificate({
       <div className="cert-no-print flex items-center gap-3 mt-5 mb-8">
         <button
           onClick={handleDownloadPDF}
-          className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer"
-          style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: '0 4px 14px rgba(252,207,53,0.4)' }}
-          onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6b800'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(252,207,53,0.5)'; }}
-          onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FCCF35'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(252,207,53,0.4)'; }}
+          disabled={exporting}
+          className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+          style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: exporting ? 'none' : '0 4px 14px rgba(252,207,53,0.4)' }}
+          onMouseEnter={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#e6b800'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(252,207,53,0.5)'; }}}
+          onMouseLeave={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#FCCF35'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(252,207,53,0.4)'; }}}
         >
-          <FaDownload size={14} /> Download PDF
+          {exporting ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Generating...</> : <><FaDownload size={14} /> Download PDF</>}
         </button>
         <button
           onClick={handlePrint}

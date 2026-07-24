@@ -99,6 +99,20 @@
 /* Landscape on screen */
 .cert-landscape {
   aspect-ratio: 297 / 210;
+  overflow: visible;
+}
+
+/* Export mode — applied temporarily during PDF capture */
+.cert-export-mode {
+  overflow: visible !important;
+  aspect-ratio: auto !important;
+  width: 1122px !important;
+  height: 794px !important;
+  max-width: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transform: none !important;
+  position: relative !important;
 }
 
 /* Print Styles */
