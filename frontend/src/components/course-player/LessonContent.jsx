@@ -243,7 +243,7 @@ function OverviewLesson({ lesson, course, moduleName, progress, marking, onMark 
       {course.introVideo && (
         <div className="mt-4">
           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Course Summary</h4>
-          <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
+          <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg" style={{ height: '400px' }}>
             <iframe
               src={getYouTubeEmbedUrl(course.introVideo)}
               className="w-full h-full"
@@ -288,7 +288,7 @@ function IntroVideoLesson({ lesson, moduleName, progress, marking, onMark }) {
         />
       }
     >
-      <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
+      <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg" style={{ height: '400px' }}>
         <iframe
           src={getYouTubeEmbedUrl(lesson.videoUrl)}
           className="w-full h-full"
@@ -448,7 +448,7 @@ function VideoLesson({ lesson, moduleName, progress, marking, onMark }) {
         />
       }
     >
-      <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
+      <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg" style={{ height: '400px' }}>
         <iframe
           src={getYouTubeEmbedUrl(lesson.videoUrl)}
           className="w-full h-full"
