@@ -263,7 +263,7 @@ function drawRest(ctx, W, H, userName, courseTitle, score, certId, dateStr, hasL
   ctx.font = 'bold 13px monospace';
   ctx.fillText(verCode, 100, certInfoY + 58);
 
-  const qrPayload = `https://cshub.rw/verify/${certId}?code=${verCode}&d=${encodeURIComponent(dateStr)}`;
+  const qrPayload = `https://computer-support-ict.vercel.app/verify/${certId}?code=${verCode}&d=${encodeURIComponent(dateStr)}`;
   const qrCanvas = document.createElement('canvas');
   QRCode.toCanvas(qrCanvas, qrPayload, {
     width: 160,

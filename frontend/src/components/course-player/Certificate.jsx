@@ -103,7 +103,7 @@ export default function Certificate({
     const verificationCode = generateVerificationCode(userId, course?._id);
     const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const qrPayload = `https://cshub.rw/verify/${certNumber}?code=${verificationCode}&d=${encodeURIComponent(issueDate)}`;
+    const qrPayload = `https://computer-support-ict.vercel.app/verify/${certNumber}?code=${verificationCode}&d=${encodeURIComponent(issueDate)}`;
 
     return { certNumber, verificationCode, issueDate, qrPayload };
   }, [course, userName, userId, assessmentPassed, completedAt]);
