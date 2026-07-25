@@ -233,6 +233,21 @@ function OverviewLesson({ lesson, course, moduleName, progress, marking, onMark 
     >
       <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{lesson.description}</p>
 
+      {course.introVideo && (
+        <div className="mt-4">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Course Summary</h4>
+          <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
+            <iframe
+              src={course.introVideo.includes('embed') ? course.introVideo : course.introVideo.replace('watch?v=', 'embed/')}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="Course Summary Video"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
         {[
           { label: 'Category', value: course.category, capitalize: true },

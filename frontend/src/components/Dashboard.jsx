@@ -1005,6 +1005,7 @@ function MyCoursesView() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [unenrolling, setUnenrolling] = useState(null);
 
   const fetchCourses = useCallback(() => {
     const tokenVal = localStorage.getItem('cshub_token');
@@ -1041,6 +1042,27 @@ function MyCoursesView() {
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [fetchCourses]);
+
+  const handleUnenroll = async (courseId) => {
+    const tokenVal = localStorage.getItem('cshub_token');
+    setUnenrolling(courseId);
+    try {
+      const res = await fetch(`${API_BASE}/api/enrollments/${courseId}/unenroll`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${tokenVal}` },
+      });
+      if (res.ok) {
+        localStorage.removeItem(`cshub-lessons-${courseId}`);
+        localStorage.removeItem(`cshub-assessment-${courseId}`);
+        localStorage.removeItem(`cshub-assessment-finalized-${courseId}`);
+        localStorage.removeItem(`cshub-assessment-score-${courseId}`);
+        localStorage.removeItem(`cshub-cert-seq-${new Date().getFullYear()}`);
+        fetchCourses();
+        setSelectedCourse(null);
+      }
+    } catch { /* ignore */ }
+    setUnenrolling(null);
+  };
 
   const enriched = enrollments.map((e) => {
     const courseId = e.enrollment?.courseId?._id || e.enrollment?.courseId;
