@@ -65,12 +65,14 @@ export default function Courses({ onLoginClick }) {
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [enrolling, setEnrolling] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/courses`)
       .then((r) => r.json())
       .then((data) => {
         setCourses(data);
+        setLoading(false);
         const likes = {};
         const comments = {};
         data.forEach((item) => {
@@ -80,7 +82,7 @@ export default function Courses({ onLoginClick }) {
         setLocalLikes(likes);
         setLocalComments(comments);
       })
-      .catch(() => {});
+      .catch(() => { setLoading(false); });
   }, [user]);
 
   const fetchEnrollments = useCallback(() => {
@@ -215,7 +217,12 @@ export default function Courses({ onLoginClick }) {
             )}
           </div>
 
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+              <FaSpinner size={32} className="text-slate-300 mb-3 animate-spin" />
+              <p className="text-sm text-slate-400">Loading courses...</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
               <FaBookOpen size={40} className="text-slate-200 mb-3" />
               <p className="text-sm text-slate-400">No courses found. Check back later for new guides.</p>
@@ -410,7 +417,12 @@ export default function Courses({ onLoginClick }) {
           )}
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+            <FaSpinner size={32} className="text-slate-300 mb-3 animate-spin" />
+            <p className="text-sm text-slate-400">Loading courses...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
             <FaBookOpen size={40} className="text-slate-200 mb-3" />
             <p className="text-sm text-slate-400">No courses found. Check back later for new guides.</p>
