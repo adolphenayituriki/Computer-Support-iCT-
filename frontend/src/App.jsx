@@ -39,6 +39,7 @@ const CollaboratorsPage = lazy(() => import('./components/CollaboratorsPage'));
 const LiveSessionsStudent = lazy(() => import('./components/LiveSessionsStudent'));
 const CoursePlayer = lazy(() => import('./components/course-player/CoursePlayer'));
 const CertificateVerify = lazy(() => import('./components/CertificateVerify'));
+const PaymentCallback = lazy(() => import('./components/PaymentCallback'));
 
 function PageSpinner() {
   return (
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="/courses" element={<Suspense fallback={<PageSpinner />}><Courses onLoginClick={openLogin} /></Suspense>} />
           <Route path="/courses/:id" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><CoursePlayer /></ProtectedRoute></Suspense>} />
           <Route path="/verify/:code" element={<Suspense fallback={<PageSpinner />}><CertificateVerify /></Suspense>} />
+          <Route path="/payment-callback" element={<Suspense fallback={<PageSpinner />}><PaymentCallback /></Suspense>} />
           <Route path="/ai-learning" element={<Suspense fallback={<PageSpinner />}><AILearning /></Suspense>} />
           <Route path="/play" element={<Suspense fallback={<PageSpinner />}><GameHub /></Suspense>} />
           <Route path="/play/:category" element={<Suspense fallback={<PageSpinner />}><GamePlay /></Suspense>} />

@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { FaPrint, FaDownload, FaTrophy, FaCheckCircle } from 'react-icons/fa';
+import { FaPrint, FaDownload, FaTrophy, FaCheckCircle, FaLock } from 'react-icons/fa';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import PaymentModal from '../PaymentModal';
+import API_BASE from '../../api';
 import './CertificatePrint.css';
+
+function token() { return localStorage.getItem('cshub_token'); }
 
 function generateCertNumber(courseCategory, userId, courseId) {
   const catAbbr = { general: 'GN', hardware: 'HW', software: 'SW', network: 'NW', virus: 'VS', training: 'TR' };
@@ -79,6 +83,19 @@ export default function Certificate({
 }) {
   const [logoError, setLogoError] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [paid, setPaid] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(true);
+
+  useEffect(() => {
+    if (!course?._id || !token()) { setCheckingPayment(false); return; }
+    fetch(`${API_BASE}/api/payments/status/${course._id}`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    })
+      .then(r => r.json())
+      .then(d => { setPaid(d.paid); setCheckingPayment(false); })
+      .catch(() => setCheckingPayment(false));
+  }, [course?._id]);
 
   const certData = useMemo(() => {
     const cat = course?.category || 'general';
@@ -331,16 +348,27 @@ export default function Certificate({
 
       {/* Print / Download buttons — hidden when printing */}
       <div className="cert-no-print flex items-center gap-3 mt-5 mb-8">
-        <button
-          onClick={handleDownloadPDF}
-          disabled={exporting}
-          className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-          style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: exporting ? 'none' : '0 4px 14px rgba(252,207,53,0.4)' }}
-          onMouseEnter={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#e6b800'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(252,207,53,0.5)'; }}}
-          onMouseLeave={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#FCCF35'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(252,207,53,0.4)'; }}}
-        >
-          {exporting ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Generating...</> : <><FaDownload size={14} /> Download PDF</>}
-        </button>
+        {!paid ? (
+          <button
+            onClick={() => setShowPayment(true)}
+            disabled={checkingPayment}
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer"
+            style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: '0 4px 14px rgba(252,207,53,0.4)' }}
+          >
+            {checkingPayment ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Checking...</> : <><FaLock size={14} /> Pay 1,000 RWF to Download</>}
+          </button>
+        ) : (
+          <button
+            onClick={handleDownloadPDF}
+            disabled={exporting}
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+            style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: exporting ? 'none' : '0 4px 14px rgba(252,207,53,0.4)' }}
+            onMouseEnter={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#e6b800'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(252,207,53,0.5)'; }}}
+            onMouseLeave={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#FCCF35'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(252,207,53,0.4)'; }}}
+          >
+            {exporting ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Generating...</> : <><FaDownload size={14} /> Download PDF</>}
+          </button>
+        )}
         <button
           onClick={handlePrint}
           className="inline-flex items-center gap-2 px-7 py-3 bg-slate-700 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg cursor-pointer"
@@ -348,6 +376,15 @@ export default function Certificate({
           <FaPrint size={14} /> Print / Save as PDF
         </button>
       </div>
+
+      {showPayment && (
+        <PaymentModal
+          courseId={course?._id}
+          courseTitle={course?.title}
+          onClose={() => setShowPayment(false)}
+          onPaid={() => { setPaid(true); setShowPayment(false); }}
+        />
+      )}
     </div>
   );
 }

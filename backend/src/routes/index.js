@@ -13,6 +13,7 @@ import testimonialRoutes from './testimonials.js';
 import sessionInviteRoutes from './sessionInvites.js';
 import liveSessionRoutes from './liveSessions.js';
 import enrollmentRoutes from './enrollments.js';
+import paymentRoutes from './payments.js';
 import adminRoutes from './admin.js';
 
 const router = Router();
@@ -31,6 +32,7 @@ router.use('/testimonials', testimonialRoutes);
 router.use('/session-invites', sessionInviteRoutes);
 router.use('/live-sessions', liveSessionRoutes);
 router.use('/enrollments', enrollmentRoutes);
+router.use('/payments', paymentRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;
