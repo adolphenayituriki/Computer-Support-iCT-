@@ -46,7 +46,6 @@ function CourseInfoPanel({ course }) {
           ['Category', course.category, true],
           ['Difficulty', course.difficulty, true],
           course.estimatedTime && ['Duration', course.estimatedTime],
-          ['Published', new Date(course.createdAt).toLocaleDateString()],
         ].filter(Boolean).map(([label, value, cap]) => (
           <div key={label} className="flex items-center gap-1.5">
             <span className="text-slate-400 font-medium">{label}</span>
