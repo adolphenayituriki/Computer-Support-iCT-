@@ -7,6 +7,13 @@ import { FaCheckCircle, FaSpinner, FaHighlighter, FaPrint, FaMinus, FaPlus, FaTi
 } from 'react-icons/fa';
 import Certificate from './Certificate';
 
+function getYouTubeEmbedUrl(url) {
+  if (!url) return '';
+  if (url.includes('/embed/')) return url;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^&?#]+)/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+}
+
 function useReadingTimer(readingTime, lessonId, onExpired) {
   const [remaining, setRemaining] = useState(0);
   const firedRef = useRef(false);
@@ -238,7 +245,7 @@ function OverviewLesson({ lesson, course, moduleName, progress, marking, onMark 
           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Course Summary</h4>
           <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
             <iframe
-              src={course.introVideo.includes('embed') ? course.introVideo : course.introVideo.replace('watch?v=', 'embed/')}
+              src={getYouTubeEmbedUrl(course.introVideo)}
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -283,7 +290,7 @@ function IntroVideoLesson({ lesson, moduleName, progress, marking, onMark }) {
     >
       <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
         <iframe
-          src={lesson.videoUrl?.includes('embed') ? lesson.videoUrl : lesson.videoUrl?.replace('watch?v=', 'embed/')}
+          src={getYouTubeEmbedUrl(lesson.videoUrl)}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -443,7 +450,7 @@ function VideoLesson({ lesson, moduleName, progress, marking, onMark }) {
     >
       <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-lg">
         <iframe
-          src={lesson.videoUrl?.includes('embed') ? lesson.videoUrl : lesson.videoUrl?.replace('watch?v=', 'embed/')}
+          src={getYouTubeEmbedUrl(lesson.videoUrl)}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
