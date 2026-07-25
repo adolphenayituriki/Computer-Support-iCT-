@@ -26,6 +26,7 @@ const courseSchema = new mongoose.Schema({
   thumbnail: { type: String, default: '' },
   introVideo: { type: String, default: '' },
   videoUrl: { type: String, default: '' },
+  certificateFee: { type: Number, default: 1000 },
   resources: [resourceSchema],
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [commentSchema],

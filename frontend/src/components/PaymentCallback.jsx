@@ -1,25 +1,52 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FaSpinner, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import API_BASE from '../api';
+
+function token() { return localStorage.getItem('cshub_token'); }
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState('verifying');
+  const verified = useRef(false);
 
   useEffect(() => {
-    const txRef = searchParams.get('tx_ref') || searchParams.get('transaction_id');
-    if (!txRef) {
+    const txRef = searchParams.get('tx_ref');
+    if (!txRef || !token()) {
       setStatus('failed');
       return;
     }
 
-    const timer = setTimeout(() => {
-      setStatus('success');
-      setTimeout(() => navigate('/dashboard'), 2000);
-    }, 2000);
+    if (verified.current) return;
+    verified.current = true;
 
-    return () => clearTimeout(timer);
+    let attempts = 0;
+    const maxAttempts = 15;
+
+    const check = async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        setStatus('failed');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/payments/verify/${encodeURIComponent(txRef)}`, {
+          headers: { Authorization: `Bearer ${token()}` },
+        });
+        const data = await res.json();
+        if (data.status === 'successful') {
+          setStatus('success');
+          setTimeout(() => navigate('/dashboard'), 2000);
+          return;
+        }
+        setTimeout(check, 2000);
+      } catch {
+        setTimeout(check, 2000);
+      }
+    };
+
+    check();
   }, [searchParams, navigate]);
 
   return (

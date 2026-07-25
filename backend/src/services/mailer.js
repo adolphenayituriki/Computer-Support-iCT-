@@ -290,6 +290,51 @@ export async function sendSessionInviteAdminNotification(invite) {
   );
 }
 
+export async function sendPaymentReceipt(toEmail, name, courseTitle, amount, currency, method, txRef, date) {
+  const methodLabel = method === 'momo' ? 'MTN Mobile Money' : 'Credit/Debit Card';
+  await send({
+    to: toEmail,
+    subject: `Payment Receipt — ${courseTitle}`,
+    html: baseHtml(`
+      <h2 style="color: #6ee7b7; text-align: center; margin: 0 0 8px;">Payment Confirmed!</h2>
+      <p style="color: #cbd5e1; text-align: center; margin: 0 0 20px;">
+        Hi <strong style="color:#f8fafc;">${name}</strong>, your payment for the course certificate has been received.
+      </p>
+      <div style="background: #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+        <p style="margin: 0 0 10px; color: #94a3b8; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px;">Payment Details</p>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Course</td>
+            <td style="padding: 6px 0; color: #f8fafc; font-weight: 700; font-size: 0.9rem; text-align: right;">${courseTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Amount</td>
+            <td style="padding: 6px 0; color: #ffce08; font-weight: 700; font-size: 1rem; text-align: right;">${amount.toLocaleString()} ${currency}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Method</td>
+            <td style="padding: 6px 0; color: #f8fafc; font-size: 0.9rem; text-align: right;">${methodLabel}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Reference</td>
+            <td style="padding: 6px 0; color: #38bdf8; font-size: 0.85rem; text-align: right; font-family: monospace;">${txRef}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #94a3b8; font-size: 0.85rem;">Date</td>
+            <td style="padding: 6px 0; color: #f8fafc; font-size: 0.9rem; text-align: right;">${date}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="text-align: center; margin-bottom: 8px;">
+        <span style="display: inline-block; padding: 6px 20px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; background: #065f46; color: #6ee7b7; text-transform: uppercase;">Paid</span>
+      </div>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin: 0;">
+        You can now download your certificate from the <a href="https://computer-support-ict.vercel.app/dashboard" style="color: #38bdf8;">dashboard</a>.
+      </p>
+    `),
+  });
+}
+
 export async function sendSessionStatusUpdate(toEmail, name, status, suggestion) {
   const statusMap = {
     contacted: { title: 'We\'ve Reached Out!', color: '#3b82f6', message: 'Our team has reviewed your registration and is ready to connect with you. Expect a call or message soon to discuss your session details.' },

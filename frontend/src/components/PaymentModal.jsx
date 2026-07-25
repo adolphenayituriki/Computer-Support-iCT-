@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { FaTimes, FaSpinner, FaMobileAlt, FaCreditCard, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import API_BASE from '../api';
+import API_BASE, { fetchWithTimeout } from '../api';
 
 function token() { return localStorage.getItem('cshub_token'); }
 
-export default function PaymentModal({ courseId, courseTitle, onClose, onPaid }) {
+export default function PaymentModal({ courseId, courseTitle, courseFee, onClose, onPaid }) {
   const [method, setMethod] = useState(null);
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -12,20 +12,37 @@ export default function PaymentModal({ courseId, courseTitle, onClose, onPaid })
   const [success, setSuccess] = useState(false);
   const [polling, setPolling] = useState(false);
 
+  const amount = courseFee || 1000;
+  const formattedAmount = amount.toLocaleString();
+
   const handleInitiate = async () => {
     setError('');
     if (method === 'momo' && !phone.trim()) {
       setError('Please enter your MoMo phone number.');
       return;
     }
+    if (method === 'momo') {
+      const cleaned = phone.replace(/\s/g, '');
+      if (!/^07\d{8}$/.test(cleaned)) {
+        setError('Please enter a valid MTN MoMo number (e.g. 0780505948).');
+        return;
+      }
+    }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/payments/initiate`, {
+      const res = await fetchWithTimeout(`${API_BASE}/api/payments/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ courseId, method, phone: phone.trim() }),
-      });
-      const data = await res.json();
+      }, 30000);
+      const data = await res.json().catch(() => null);
+      if (!data) {
+        const text = await res.text().catch(() => '');
+        console.error('Payment API error:', res.status, text.slice(0, 300));
+        setError(`Server error (${res.status}). Please try again.`);
+        setLoading(false);
+        return;
+      }
 
       if (data.status === 'already_paid') {
         setSuccess(true);
@@ -46,8 +63,11 @@ export default function PaymentModal({ courseId, courseTitle, onClose, onPaid })
       }
 
       setError(data.error || 'Payment failed.');
-    } catch {
-      setError('Network error. Please try again.');
+    } catch (e) {
+      const msg = e.name === 'AbortError'
+        ? 'Server is waking up, please try again in 30 seconds.'
+        : 'Network error. Please try again.';
+      setError(msg);
     }
     setLoading(false);
   };
@@ -64,9 +84,9 @@ export default function PaymentModal({ courseId, courseTitle, onClose, onPaid })
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/api/payments/verify/${txRef}`, {
+        const res = await fetchWithTimeout(`${API_BASE}/api/payments/verify/${txRef}`, {
           headers: { Authorization: `Bearer ${token()}` },
-        });
+        }, 15000);
         const data = await res.json();
         if (data.status === 'successful') {
           clearInterval(interval);
@@ -108,7 +128,7 @@ export default function PaymentModal({ courseId, courseTitle, onClose, onPaid })
         <div className="p-5">
           <div className="bg-slate-50 rounded-xl p-4 mb-5 text-center">
             <p className="text-xs text-slate-500 mb-1">Amount to Pay</p>
-            <p className="text-2xl font-black text-slate-900">1,000 <span className="text-sm font-bold text-slate-500">RWF</span></p>
+            <p className="text-2xl font-black text-slate-900">{formattedAmount} <span className="text-sm font-bold text-slate-500">RWF</span></p>
           </div>
 
           {!method && (
@@ -148,9 +168,10 @@ export default function PaymentModal({ courseId, courseTitle, onClose, onPaid })
                 placeholder="07XXXXXXXX"
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
               />
+              <p className="text-[10px] text-slate-400">Enter your MTN MoMo number (e.g. 0780505948)</p>
               <button onClick={handleInitiate} disabled={loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 text-sm font-bold hover:from-amber-500 hover:to-amber-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                {loading ? <><FaSpinner className="animate-spin" /> Processing...</> : 'Pay 1,000 RWF'}
+                {loading ? <><FaSpinner className="animate-spin" /> Processing...</> : `Pay ${formattedAmount} RWF`}
               </button>
             </div>
           )}

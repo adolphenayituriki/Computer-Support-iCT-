@@ -8,6 +8,7 @@ import TeamApp from '../models/TeamApp.js';
 import News from '../models/News.js';
 import Conversation from '../models/Conversation.js';
 import Course from '../models/Course.js';
+import Payment from '../models/Payment.js';
 import { sendTicketReplyNotification, sendTeamStatusUpdate, sendAdminNotification, sendAccountSetupEmail } from '../services/mailer.js';
 // ── Users ──
 
@@ -405,7 +406,7 @@ export async function getAllCoursesAdmin(_req, res) {
 
 export async function createCourseAdmin(req, res) {
   try {
-    const { title, description, content, category, difficulty, estimatedTime, published, tags, thumbnail, introVideo, videoUrl, resources } = req.body;
+    const { title, description, content, category, difficulty, estimatedTime, published, tags, thumbnail, introVideo, videoUrl, resources, certificateFee } = req.body;
     if (!title || !description) return res.status(400).json({ error: 'Title and description are required.' });
     const course = await Course.create({
       title, description,
@@ -420,6 +421,7 @@ export async function createCourseAdmin(req, res) {
       introVideo: introVideo || '',
       videoUrl: videoUrl || '',
       resources: resources || [],
+      certificateFee: certificateFee != null ? Number(certificateFee) : 1000,
     });
     res.status(201).json(course);
   } catch (err) {
@@ -440,6 +442,79 @@ export async function updateCourseAdmin(req, res) {
 export async function deleteCourseAdmin(req, res) {
   try {
     await Course.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+// ── Payments (Admin) ──
+
+export async function getAllPayments(_req, res) {
+  try {
+    const payments = await Payment.find()
+      .populate('userId', 'name email')
+      .populate('courseId', 'title')
+      .sort({ createdAt: -1 });
+    res.json(payments);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function getPaymentStats(_req, res) {
+  try {
+    const total = await Payment.countDocuments();
+    const successful = await Payment.countDocuments({ status: 'successful' });
+    const pending = await Payment.countDocuments({ status: 'pending' });
+    const processing = await Payment.countDocuments({ status: 'processing' });
+    const failed = await Payment.countDocuments({ status: 'failed' });
+
+    const revenueAgg = await Payment.aggregate([
+      { $match: { status: 'successful' } },
+      { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } },
+    ]);
+    const revenue = revenueAgg[0] || { total: 0, count: 0 };
+
+    const byMethod = await Payment.aggregate([
+      { $match: { status: 'successful' } },
+      { $group: { _id: '$method', count: { $sum: 1 }, total: { $sum: '$amount' } } },
+    ]);
+
+    const recent = await Payment.find()
+      .populate('userId', 'name email')
+      .populate('courseId', 'title')
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    res.json({
+      total,
+      successful,
+      pending,
+      processing,
+      failed,
+      revenue: revenue.total,
+      byMethod,
+      recent,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function updatePaymentAdmin(req, res) {
+  try {
+    const payment = await Payment.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    if (!payment) return res.status(404).json({ error: 'Payment not found.' });
+    res.json(payment);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function deletePaymentAdmin(req, res) {
+  try {
+    await Payment.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });

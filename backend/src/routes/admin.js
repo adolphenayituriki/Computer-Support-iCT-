@@ -71,6 +71,12 @@ router.post('/courses', adminCtrl.createCourseAdmin);
 router.put('/courses/:id', adminCtrl.updateCourseAdmin);
 router.delete('/courses/:id', adminCtrl.deleteCourseAdmin);
 
+// Payments
+router.get('/payments', adminCtrl.getAllPayments);
+router.get('/payments/stats', adminCtrl.getPaymentStats);
+router.put('/payments/:id', adminCtrl.updatePaymentAdmin);
+router.delete('/payments/:id', adminCtrl.deletePaymentAdmin);
+
 // Conversations
 router.get('/conversations', adminCtrl.getAllConversationsAdmin);
 router.post('/conversations', adminCtrl.createConversationAdmin);

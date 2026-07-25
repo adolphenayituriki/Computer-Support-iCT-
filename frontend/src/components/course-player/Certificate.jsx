@@ -355,7 +355,7 @@ export default function Certificate({
             className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer"
             style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: '0 4px 14px rgba(252,207,53,0.4)' }}
           >
-            {checkingPayment ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Checking...</> : <><FaLock size={14} /> Pay 1,000 RWF to Download</>}
+            {checkingPayment ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Checking...</> : <><FaLock size={14} /> Pay {(course?.certificateFee || 1000).toLocaleString()} RWF to Download</>}
           </button>
         ) : (
           <button
@@ -381,6 +381,7 @@ export default function Certificate({
         <PaymentModal
           courseId={course?._id}
           courseTitle={course?.title}
+          courseFee={course?.certificateFee}
           onClose={() => setShowPayment(false)}
           onPaid={() => { setPaid(true); setShowPayment(false); }}
         />

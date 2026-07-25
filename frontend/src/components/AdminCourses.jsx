@@ -55,7 +55,7 @@ const DIFFICULTY_COLORS = {
 const emptyForm = () => ({
   title: '', description: '', content: '', category: 'general',
   difficulty: 'beginner', estimatedTime: '', published: true,
-  tags: '', thumbnail: '', introVideo: '', videoUrl: '', resources: [],
+  tags: '', thumbnail: '', introVideo: '', videoUrl: '', resources: [], certificateFee: 1000,
 });
 
 function getYouTubeId(url) {
@@ -161,7 +161,7 @@ function CourseModal({ course, onClose, onSaved }) {
       estimatedTime: course.estimatedTime || '', published: course.published !== false,
       tags: course.tags?.join(', ') || '', thumbnail: course.thumbnail || '',
       introVideo: course.introVideo || '', videoUrl: course.videoUrl || '',
-      resources: course.resources || [],
+      resources: course.resources || [], certificateFee: course.certificateFee ?? 1000,
     };
     return emptyForm();
   });
@@ -321,6 +321,12 @@ function CourseModal({ course, onClose, onSaved }) {
                   <div className="col-span-2 sm:col-span-2">
                     <label className="mb-1 block text-[11px] font-semibold text-slate-600">Estimated Time</label>
                     <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="e.g. 5 min read" value={form.estimatedTime} onChange={(e) => update('estimatedTime', e.target.value)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-slate-600">Certificate Fee (RWF)</label>
+                    <input type="number" min="0" step="100" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="1000" value={form.certificateFee} onChange={(e) => update('certificateFee', Number(e.target.value))} />
                   </div>
                 </div>
                 <div>

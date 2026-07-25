@@ -27,6 +27,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 
 app.use('/api', apiRoutes);
 
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.get('*', (_req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
