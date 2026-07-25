@@ -131,6 +131,7 @@ export default function Courses({ onLoginClick }) {
       if (res.ok) {
         showToast('Enrolled successfully!');
         fetchEnrollments();
+        navigate('/dashboard');
       } else {
         showToast(data.error || 'Failed to enroll.', 'error');
       }
