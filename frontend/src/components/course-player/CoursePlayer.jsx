@@ -88,14 +88,16 @@ export default function CoursePlayer() {
 
   const syncToBackend = useCallback((section, resourceId) => {
     if (!user) return;
+    const body = { section, resourceId };
+    if (assessmentScore > 0) body.assessmentScore = assessmentScore;
     fetch(`${API_BASE}/api/enrollments/${id}/complete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-      body: JSON.stringify({ section, resourceId }),
+      body: JSON.stringify(body),
     }).then(r => r.json()).then(data => {
       if (data.progress !== undefined) setProgress(prev => ({ ...prev, ...data }));
     }).catch(() => {});
-  }, [id, user]);
+  }, [id, user, assessmentScore]);
 
   const markLessonLocal = useCallback((lessonId, lessonType, resourceId) => {
     markLessonComplete(id, lessonId);

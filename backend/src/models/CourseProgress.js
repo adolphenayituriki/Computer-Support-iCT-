@@ -12,6 +12,7 @@ const courseProgressSchema = new mongoose.Schema({
   progress: { type: Number, default: 0, min: 0, max: 100 },
   completed: { type: Boolean, default: false },
   completedAt: { type: Date, default: null },
+  assessmentScore: { type: Number, default: null },
   lastAccessedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 

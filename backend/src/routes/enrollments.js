@@ -2,11 +2,12 @@ import { Router } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import {
   enrollInCourse, unenrollFromCourse, getMyEnrollments,
-  getCourseProgress, markSectionComplete, getMyCourseProgress,
+  getCourseProgress, markSectionComplete, getMyCourseProgress, verifyCertificate,
 } from '../controllers/enrollmentController.js';
 
 const router = Router();
 
+router.get('/verify/:code', verifyCertificate);
 router.get('/my', authenticate, getMyEnrollments);
 router.get('/my-progress', authenticate, getMyCourseProgress);
 router.post('/:courseId/enroll', authenticate, enrollInCourse);

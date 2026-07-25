@@ -38,6 +38,7 @@ const SetupAccount = lazy(() => import('./components/SetupAccount'));
 const CollaboratorsPage = lazy(() => import('./components/CollaboratorsPage'));
 const LiveSessionsStudent = lazy(() => import('./components/LiveSessionsStudent'));
 const CoursePlayer = lazy(() => import('./components/course-player/CoursePlayer'));
+const CertificateVerify = lazy(() => import('./components/CertificateVerify'));
 
 function PageSpinner() {
   return (
@@ -101,6 +102,7 @@ export default function App() {
     const isGamePlay = location.pathname === '/play' || location.pathname.startsWith('/play/');
     const isCollaborators = location.pathname === '/collaborators';
     const isCoursePlayer = /^\/courses\/[^/]+$/.test(location.pathname);
+    const isVerify = /^\/verify\//.test(location.pathname);
     const [waVisible, setWaVisible] = useState(false);
 
     useEffect(() => {
@@ -113,13 +115,14 @@ export default function App() {
 
     return (
       <>
-        {!isAdmin && !isDashboard && !isGamePlay && !isCoursePlayer && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
+        {!isAdmin && !isDashboard && !isGamePlay && !isCoursePlayer && !isVerify && <Navbar onLoginClick={openLogin} onRegisterClick={openRegister} />}
         <Routes>
           <Route path="/" element={<HomePage onLoginClick={openLogin} onRegisterClick={openRegister} onTeamClick={openTeam} />} />
           <Route path="/contact" element={<Suspense fallback={<PageSpinner />}><main><Contact /></main></Suspense>} />
           <Route path="/news" element={<Suspense fallback={<PageSpinner />}><News /></Suspense>} />
           <Route path="/courses" element={<Suspense fallback={<PageSpinner />}><Courses onLoginClick={openLogin} /></Suspense>} />
           <Route path="/courses/:id" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><CoursePlayer /></ProtectedRoute></Suspense>} />
+          <Route path="/verify/:code" element={<Suspense fallback={<PageSpinner />}><CertificateVerify /></Suspense>} />
           <Route path="/ai-learning" element={<Suspense fallback={<PageSpinner />}><AILearning /></Suspense>} />
           <Route path="/play" element={<Suspense fallback={<PageSpinner />}><GameHub /></Suspense>} />
           <Route path="/play/:category" element={<Suspense fallback={<PageSpinner />}><GamePlay /></Suspense>} />
@@ -130,10 +133,10 @@ export default function App() {
           <Route path="/collaborators" element={<Suspense fallback={<PageSpinner />}><CollaboratorsPage /></Suspense>} />
           <Route path="/live-sessions" element={<Suspense fallback={<PageSpinner />}><ProtectedRoute><main className="pt-24 pb-12 px-4 max-w-3xl mx-auto"><LiveSessionsStudent /></main></ProtectedRoute></Suspense>} />
         </Routes>
-        {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && !isCoursePlayer && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
-        {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && <EmergencyButton />}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCollaborators && !isCoursePlayer && !isVerify && <Footer onNewsletterClick={() => setShowNewsletter(true)} />}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && !isVerify && <EmergencyButton />}
         <NewsletterPopup open={showNewsletter} onClose={() => setShowNewsletter(false)} />
-        {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
+        {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && !isVerify && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} message={loginMessage} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
         <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>
