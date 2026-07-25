@@ -1006,6 +1006,7 @@ function MyCoursesView() {
   const [filter, setFilter] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [unenrolling, setUnenrolling] = useState(null);
+  const [confirmUnenroll, setConfirmUnenroll] = useState(null);
 
   const fetchCourses = useCallback(() => {
     const tokenVal = localStorage.getItem('cshub_token');
@@ -1220,10 +1221,10 @@ function MyCoursesView() {
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                   {!e.completed && (
                     <button
-                      onClick={(ev) => { ev.stopPropagation(); handleUnenroll(c._id || c.id); }}
+                      onClick={(ev) => { ev.stopPropagation(); setConfirmUnenroll(c._id || c.id); }}
                       disabled={unenrolling === (c._id || c.id)}
                       className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-[10px] font-semibold text-red-600 hover:bg-red-100 transition-colors">
-                      {unenrolling === (c._id || c.id) ? <FaSpinner className="animate-spin" size={8} /> : <FaTimes size={8} />}
+                      <FaTimes size={8} />
                       Cancel
                     </button>
                   )}
@@ -1294,14 +1295,43 @@ function MyCoursesView() {
                   </button>
                   {!modalItem.completed && (
                     <button
-                      onClick={() => handleUnenroll(modalItem.course._id || modalItem.course.id)}
+                      onClick={() => setConfirmUnenroll(modalItem.course._id || modalItem.course.id)}
                       disabled={unenrolling === (modalItem.course._id || modalItem.course.id)}
                       className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
-                      {unenrolling === (modalItem.course._id || modalItem.course.id) ? <FaSpinner className="animate-spin" size={10} /> : <FaTimes size={10} />}
+                      <FaTimes size={10} />
                       Cancel
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmUnenroll && (
+        <div className="adm-modal-overlay" onClick={() => setConfirmUnenroll(null)}>
+          <div className="adm-modal" style={{ maxWidth: '380px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                <FaExclamationTriangle style={{ color: '#ef4444', fontSize: '1.25rem' }} />
+              </div>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>Cancel Enrollment?</h3>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+                Are you sure you want to cancel this enrollment? Your progress and completed lessons will be lost. This action cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => setConfirmUnenroll(null)}
+                  style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#fff', color: '#475569', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+                  Keep Enrollment
+                </button>
+                <button
+                  onClick={() => { handleUnenroll(confirmUnenroll); setConfirmUnenroll(null); }}
+                  disabled={unenrolling === confirmUnenroll}
+                  style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', border: 'none', background: '#ef4444', color: '#fff', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', opacity: unenrolling === confirmUnenroll ? 0.6 : 1 }}>
+                  {unenrolling === confirmUnenroll ? 'Cancelling...' : 'Yes, Cancel'}
+                </button>
               </div>
             </div>
           </div>
