@@ -1217,7 +1217,16 @@ function MyCoursesView() {
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  {!e.completed && (
+                    <button
+                      onClick={(ev) => { ev.stopPropagation(); handleUnenroll(c._id || c.id); }}
+                      disabled={unenrolling === (c._id || c.id)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-[10px] font-semibold text-red-600 hover:bg-red-100 transition-colors">
+                      {unenrolling === (c._id || c.id) ? <FaSpinner className="animate-spin" size={8} /> : <FaTimes size={8} />}
+                      Cancel
+                    </button>
+                  )}
                   <button className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-slate-800 transition-colors">
                     {e.completed ? <><FaCheckCircle size={9} /> Review</> : pct > 0 ? <><FaPlay size={9} /> Continue</> : <><FaPlay size={9} /> Start</>}
                   </button>
@@ -1283,6 +1292,15 @@ function MyCoursesView() {
                     style={{ background: getActionButton(modalItem).bg, color: getActionButton(modalItem).color }}>
                     {getActionButton(modalItem).label}
                   </button>
+                  {!modalItem.completed && (
+                    <button
+                      onClick={() => handleUnenroll(modalItem.course._id || modalItem.course.id)}
+                      disabled={unenrolling === (modalItem.course._id || modalItem.course.id)}
+                      className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
+                      {unenrolling === (modalItem.course._id || modalItem.course.id) ? <FaSpinner className="animate-spin" size={10} /> : <FaTimes size={10} />}
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
