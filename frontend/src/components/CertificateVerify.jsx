@@ -1,25 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { FaSpinner, FaExclamationCircle, FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
 import API_BASE from '../api';
 
 export default function CertificateVerify() {
   const { code } = useParams();
+  const [searchParams] = useSearchParams();
+  const verifyCode = searchParams.get('code') || code;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!code) return;
+    if (!verifyCode) { setError('No verification code provided.'); setLoading(false); return; }
     setLoading(true);
-    fetch(`${API_BASE}/api/enrollments/verify/${code}`)
+    fetch(`${API_BASE}/api/enrollments/verify/${verifyCode}`)
       .then(r => {
         if (!r.ok) throw new Error('Certificate not found');
         return r.json();
       })
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, [code]);
+  }, [verifyCode]);
 
   if (loading) {
     return (
