@@ -25,7 +25,8 @@ async function getAccessToken() {
 
   const data = await res.json();
   if (!data.access_token) {
-    throw new Error('Failed to obtain Flutterwave access token');
+    console.error('Flutterwave OAuth failed:', JSON.stringify(data));
+    throw new Error(`Failed to obtain Flutterwave access token: ${data.error || data.message || 'unknown'}`);
   }
 
   cachedToken = data.access_token;
@@ -152,9 +153,9 @@ export async function initiatePayment(req, res) {
       }
     }
   } catch (e) {
-    console.error('Payment initiation error:', e.message);
-    sendAdminNotification('Payment Initiation Failed', `Error: ${e.message}`).catch(() => {});
-    res.status(500).json({ error: 'Payment service unavailable.' });
+    console.error('Payment initiation error:', e.message, e.stack);
+    sendAdminNotification('Payment Initiation Failed', `Error: ${e.message}\n\nStack: ${e.stack}`).catch(() => {});
+    res.status(500).json({ error: 'Payment service unavailable.', detail: e.message });
   }
 }
 
