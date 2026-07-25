@@ -66,19 +66,6 @@ export default function useCourseCurriculum(course, progress, completedLessonIds
       readingTime: estimateReadingTime(course.description),
     });
 
-    if (course.introVideo) {
-      introLessons.push({
-        id: 'intro-video',
-        title: 'Introduction Video',
-        type: 'intro-video',
-        videoUrl: course.introVideo,
-        completed: completed.has('intro-video') || sections.introVideoWatched || false,
-        locked: false,
-        index: lessonIndex++,
-        readingTime: '2 min watch',
-      });
-    }
-
     if (introLessons.length > 0) {
       modules.push({
         id: 'introduction',
