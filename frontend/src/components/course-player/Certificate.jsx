@@ -38,7 +38,7 @@ function generateVerificationCode(userId, courseId) {
 function SealStamp() {
   return (
     <div className="flex items-center justify-center">
-      <FaCheckCircle size={70} style={{ color: '#FCCF35' }} />
+      <FaCheckCircle size={70} style={{ color: '#b8960c' }} />
     </div>
   );
 }
@@ -197,8 +197,8 @@ export default function Certificate({
   return (
     <div className="cert-page-wrapper bg-slate-100 min-h-screen flex flex-col items-center justify-start py-6 px-4 sm:px-6 lg:px-8">
       <div className="cert-scale-wrapper">
-        <div ref={certRef} className="cert-print-container cert-border-outer bg-white relative shadow-2xl shadow-blue-900/10 rounded-sm overflow-hidden flex flex-col cert-bg-gradient">
-          {/* Decorative corners */}
+        <div ref={certRef} className="cert-print-container cert-border-outer bg-white relative shadow-2xl rounded-sm overflow-hidden flex flex-col cert-bg-gradient">
+          {/* Corner ornaments */}
           <div className="cert-corner cert-corner-tl" />
           <div className="cert-corner cert-corner-tr" />
           <div className="cert-corner cert-corner-bl" />
@@ -208,6 +208,9 @@ export default function Certificate({
           <div className="cert-corner cert-corner-inner-bl" />
           <div className="cert-corner cert-corner-inner-br" />
 
+          {/* Subtle gold glow at top center */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center top, rgba(252,207,53,0.06) 0%, transparent 70%)' }} />
+
           <div className="cert-border-inner m-4 flex-1 flex flex-col">
             <div className="pt-5 px-8 pb-4 flex flex-col items-center h-full relative">
 
@@ -216,13 +219,13 @@ export default function Certificate({
                 {!logoError ? (
                   <img src="/LOGO IMAGE.png" alt="CS Hub Logo" className="w-16 h-16 object-contain" onError={() => setLogoError(true)} />
                 ) : (
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FCCF3520', border: '2px solid #FCCF3550' }}>
-                    <span className="cert-serif text-2xl font-bold" style={{ color: '#FCCF35' }}>CS</span>
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(184,150,12,0.1)', border: '2px solid rgba(184,150,12,0.3)' }}>
+                    <span className="cert-serif text-2xl font-bold" style={{ color: '#b8960c' }}>CS</span>
                   </div>
                 )}
                 <div className="flex flex-col">
                   <h2 className="cert-serif text-lg font-bold text-slate-800 tracking-wide leading-tight">CS Hub (iCT)</h2>
-                  <p className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#FCCF35' }}>Computer Support</p>
+                  <p className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#b8960c' }}>Computer Support</p>
                 </div>
               </div>
 
@@ -238,11 +241,11 @@ export default function Certificate({
                 This certificate is proudly presented to
               </p>
 
-              <h2 className="cert-name text-[56px] leading-none mb-1 text-center" style={{ color: '#FCCF35' }}>
+              <h2 className="cert-name text-[56px] leading-none mb-1 text-center" style={{ color: '#b8960c' }}>
                 {userName || 'Student'}
               </h2>
 
-              <div className="w-[320px] h-[1px] mb-3" style={{ background: 'linear-gradient(90deg, transparent, #FCCF35, transparent)' }} />
+              <div className="w-[320px] h-[1px] mb-3" style={{ background: 'linear-gradient(90deg, transparent, #d4a843, #b8960c, #d4a843, transparent)' }} />
 
               <p className="cert-serif-body text-sm text-slate-500 mb-1 text-center">
                 for successfully completing the course
@@ -255,11 +258,11 @@ export default function Certificate({
                 The recipient has completed all required modules and lessons, and has successfully passed the final assessment.
               </p>
 
-              <div className="flex items-center gap-3 mb-2 rounded-lg px-5 py-1.5" style={{ backgroundColor: '#FCCF3515', border: '1px solid #FCCF3530' }}>
-                <FaTrophy size={14} style={{ color: '#FCCF35' }} />
+              <div className="flex items-center gap-3 mb-2 rounded-lg px-5 py-1.5" style={{ backgroundColor: 'rgba(184,150,12,0.08)', border: '1px solid rgba(184,150,12,0.2)' }}>
+                <FaTrophy size={14} style={{ color: '#b8960c' }} />
                 <div className="text-center">
-                  <p className="text-[8px] uppercase tracking-wider font-semibold" style={{ color: '#d4a017' }}>Assessment Score</p>
-                  <p className="cert-serif text-lg font-bold" style={{ color: '#d4a017' }}>{displayScore}%</p>
+                  <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: '#b8960c' }}>Assessment Score</p>
+                  <p className="cert-serif text-lg font-bold" style={{ color: '#8a6f08' }}>{displayScore}%</p>
                 </div>
               </div>
 
@@ -315,7 +318,7 @@ export default function Certificate({
               {/* === Footer === */}
               <div className="w-full text-center mt-1 pt-2 border-t border-slate-100">
                 <p className="text-[9px] text-slate-400">
-                  <span className="font-semibold" style={{ color: '#FCCF35' }}>cshub.rw@gmail.com</span>
+                  <span className="font-semibold" style={{ color: '#b8960c' }}>cshub.rw@gmail.com</span>
                   <span className="mx-2 text-slate-200">|</span>
                   <span className="italic">Empowering Digital Skills Through Practical Learning</span>
                 </p>

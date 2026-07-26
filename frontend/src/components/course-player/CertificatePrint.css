@@ -12,57 +12,80 @@
   font-family: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
 }
 
-/* Background pattern */
+/* ===== BACKGROUND ===== */
 .cert-bg-gradient {
-  background-color: #ffffff;
+  background-color: #fffcf5;
   background-image:
-    repeating-linear-gradient(135deg, transparent, transparent 40px, rgba(252,207,53,0.06) 40px, rgba(252,207,53,0.06) 41px),
-    repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(59,130,246,0.04) 40px, rgba(59,130,246,0.04) 41px);
+    radial-gradient(ellipse at 20% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
+    repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(252,207,53,0.03) 60px, rgba(252,207,53,0.03) 61px),
+    repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(180,160,100,0.02) 60px, rgba(180,160,100,0.02) 61px);
 }
 
+/* ===== OUTER FRAME — elegant double border ===== */
 .cert-border-outer {
-  border: 2px solid #cbd5e1;
-  outline: 1px solid #e2e8f0;
-  outline-offset: 3px;
+  border: 3px solid #b8960c;
+  box-shadow:
+    inset 0 0 0 6px #fffcf5,
+    inset 0 0 0 8px #d4a843,
+    inset 0 0 0 14px #fffcf5,
+    inset 0 0 0 15px rgba(212,168,67,0.3),
+    0 8px 32px rgba(0,0,0,0.12),
+    0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* ===== INNER BORDER ===== */
 .cert-border-inner {
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(212,168,67,0.25);
 }
 
-/* Corner decorations */
-.cert-corner { position: absolute; width: 45px; height: 45px; pointer-events: none; }
-.cert-corner-tl { top: 10px; left: 10px; border-top: 2px solid #94a3b8; border-left: 2px solid #94a3b8; }
-.cert-corner-tr { top: 10px; right: 10px; border-top: 2px solid #94a3b8; border-right: 2px solid #94a3b8; }
-.cert-corner-bl { bottom: 10px; left: 10px; border-bottom: 2px solid #94a3b8; border-left: 2px solid #94a3b8; }
-.cert-corner-br { bottom: 10px; right: 10px; border-bottom: 2px solid #94a3b8; border-right: 2px solid #94a3b8; }
-.cert-corner-inner-tl { top: 18px; left: 18px; border-top: 1px solid #d4d4d8; border-left: 1px solid #d4d4d8; width: 30px; height: 30px; }
-.cert-corner-inner-tr { top: 18px; right: 18px; border-top: 1px solid #d4d4d8; border-right: 1px solid #d4d4d8; width: 30px; height: 30px; }
-.cert-corner-inner-bl { bottom: 18px; left: 18px; border-bottom: 1px solid #d4d4d8; border-left: 1px solid #d4d4d8; width: 30px; height: 30px; }
-.cert-corner-inner-br { bottom: 18px; right: 18px; border-bottom: 1px solid #d4d4d8; border-right: 1px solid #d4d4d8; width: 30px; height: 30px; }
+/* ===== CORNER ORNAMENTS ===== */
+.cert-corner {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
 
+/* Outer gold corners — larger L-brackets */
+.cert-corner-tl { top: 16px; left: 16px; width: 60px; height: 60px; border-top: 3px solid #b8960c; border-left: 3px solid #b8960c; }
+.cert-corner-tr { top: 16px; right: 16px; width: 60px; height: 60px; border-top: 3px solid #b8960c; border-right: 3px solid #b8960c; }
+.cert-corner-bl { bottom: 16px; left: 16px; width: 60px; height: 60px; border-bottom: 3px solid #b8960c; border-left: 3px solid #b8960c; }
+.cert-corner-br { bottom: 16px; right: 16px; width: 60px; height: 60px; border-bottom: 3px solid #b8960c; border-right: 3px solid #b8960c; }
+
+/* Inner thin corners — second layer */
+.cert-corner-inner-tl { top: 28px; left: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(184,150,12,0.4); border-left: 1px solid rgba(184,150,12,0.4); }
+.cert-corner-inner-tr { top: 28px; right: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(184,150,12,0.4); border-right: 1px solid rgba(184,150,12,0.4); }
+.cert-corner-inner-bl { bottom: 28px; left: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(184,150,12,0.4); border-left: 1px solid rgba(184,150,12,0.4); }
+.cert-corner-inner-br { bottom: 28px; right: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(184,150,12,0.4); border-right: 1px solid rgba(184,150,12,0.4); }
+
+/* ===== DIVIDERS ===== */
 .cert-divider {
-  width: 60px; height: 1.5px;
-  background: linear-gradient(90deg, transparent, #94a3b8, transparent);
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #b8960c, transparent);
   margin: 0 auto;
 }
 
 .cert-divider-long {
-  width: 200px; height: 1px;
-  background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+  width: 220px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4a843, #b8960c, #d4a843, transparent);
   margin: 0 auto;
 }
 
+.cert-divider-full {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #d4a843 20%, #b8960c 50%, #d4a843 80%, transparent 100%);
+}
+
+/* ===== QR ===== */
 .cert-qr-wrapper {
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(212,168,67,0.3);
   padding: 4px;
   background: white;
 }
 
-/* ===== RESPONSIVE CERTIFICATE ===== */
-/* Internal size is always 960x676 (A4 landscape ratio) */
-/* The wrapper scales it down via transform to fit the viewport */
-
+/* ===== RESPONSIVE ===== */
 .cert-scale-wrapper {
   width: 100%;
   max-width: 960px;
@@ -91,10 +114,9 @@
   }
 }
 
-/* ===== PDF EXPORT (temporary override) ===== */
+/* ===== PDF EXPORT ===== */
 .cert-export-mode {
   overflow: visible !important;
-  aspect-ratio: auto !important;
   width: 1122px !important;
   height: 794px !important;
   max-width: none !important;
@@ -148,16 +170,24 @@
     overflow: hidden !important;
   }
 
-  .cert-border-outer { outline: none !important; }
+  .cert-border-outer {
+    border: 3px solid #b8960c !important;
+    box-shadow: inset 0 0 0 6px #fffcf5, inset 0 0 0 8px #d4a843, inset 0 0 0 14px #fffcf5, inset 0 0 0 15px rgba(212,168,67,0.3) !important;
+  }
 
   .cert-bg-gradient {
-    background-color: #ffffff !important;
+    background-color: #fffcf5 !important;
     background-image:
-      repeating-linear-gradient(135deg, transparent, transparent 40px, rgba(252,207,53,0.06) 40px, rgba(252,207,53,0.06) 41px),
-      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(59,130,246,0.04) 40px, rgba(59,130,246,0.04) 41px) !important;
+      radial-gradient(ellipse at 20% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
+      repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(252,207,53,0.03) 60px, rgba(252,207,53,0.03) 61px),
+      repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(180,160,100,0.02) 60px, rgba(180,160,100,0.02) 61px) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
+  .cert-corner-tl, .cert-corner-tr, .cert-corner-bl, .cert-corner-br { border-color: #b8960c !important; }
+  .cert-corner-inner-tl, .cert-corner-inner-tr, .cert-corner-inner-bl, .cert-corner-inner-br { border-color: rgba(184,150,12,0.4) !important; }
 
   .cert-name { font-family: 'Great Vibes', Georgia, cursive !important; }
   .cert-serif { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important; }
