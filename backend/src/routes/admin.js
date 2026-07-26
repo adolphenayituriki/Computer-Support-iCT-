@@ -74,6 +74,8 @@ router.delete('/courses/:id', adminCtrl.deleteCourseAdmin);
 // Payments
 router.get('/payments', adminCtrl.getAllPayments);
 router.get('/payments/stats', adminCtrl.getPaymentStats);
+router.put('/payments/:id/approve', adminCtrl.approvePaymentAdmin);
+router.put('/payments/:id/reject', adminCtrl.rejectPaymentAdmin);
 router.put('/payments/:id', adminCtrl.updatePaymentAdmin);
 router.delete('/payments/:id', adminCtrl.deletePaymentAdmin);
 

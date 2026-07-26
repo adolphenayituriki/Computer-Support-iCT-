@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import AdminCourses from './AdminCourses';
+import AdminPayments from './AdminPayments';
 import AdminChatView from './AdminChatView';
 import LiveSessionsAdmin from './LiveSessionsAdmin';
 import HelpModal from './HelpModal';
@@ -1090,6 +1091,7 @@ function AnalyticsView({ stats, ticketChart, appChart, onNavigate, user }) {
     { key: 'news', label: 'News', count: stats.news, icon: FaNewspaper, color: 'from-rose-500 to-pink-500', light: 'bg-rose-50 text-rose-600' },
     { key: 'courses', label: 'Courses', count: stats.courses, icon: FaBookOpen, color: 'from-sky-500 to-blue-600', light: 'bg-sky-50 text-sky-600' },
     { key: 'testimonials', label: 'Testimonials', count: stats.testimonials, icon: FaStar, color: 'from-yellow-500 to-amber-500', light: 'bg-yellow-50 text-yellow-600' },
+    { key: 'payments', label: 'Payments', count: stats.payments, icon: FaDownload, color: 'from-emerald-500 to-teal-500', light: 'bg-emerald-50 text-emerald-600' },
   ];
 
   const barMax = Math.max(...statCards.map((c) => c.count), 1);
@@ -1543,7 +1545,7 @@ export default function AdminDashboard() {
   const profileRef = useRef(null);
   const notifRef = useRef(null);
   const isMobile = useIsMobile();
-  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0, liveSessions: 0 });
+  const [stats, setStats] = useState({ users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0, liveSessions: 0, payments: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -1633,10 +1635,11 @@ export default function AdminDashboard() {
       ['beneficiaries', '/api/admin/beneficiaries'],
       ['testimonials', '/api/admin/testimonials'],
       ['liveSessions', '/api/admin/live-sessions'],
+      ['payments', '/api/admin/payments'],
     ];
     Promise.allSettled(endpoints.map(([_, url]) => api(url)))
       .then((results) => {
-        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0, liveSessions: 0 };
+        const s = { users: 0, tickets: 0, suggestions: 0, contacts: 0, teams: 0, news: 0, courses: 0, beneficiaries: 0, testimonials: 0, liveSessions: 0, payments: 0 };
         results.forEach((r, i) => {
           if (r.status === 'fulfilled' && Array.isArray(r.value)) s[endpoints[i][0]] = r.value.length;
         });
@@ -1735,6 +1738,7 @@ export default function AdminDashboard() {
     chat: { title: 'Chat', sub: 'Communicate with users in real-time' },
     news: { title: 'News', sub: 'Create and manage news articles' },
     courses: { title: 'Courses', sub: 'Manage courses and learning materials' },
+    payments: { title: 'Payments', sub: 'Review and manage certificate payments' },
     'live-sessions': { title: 'Live Sessions', sub: 'Manage live lectures and student rooms' },
     beneficiaries: { title: 'Beneficiaries', sub: 'Track and manage beneficiaries' },
     testimonials: { title: 'Testimonials', sub: 'Review and approve testimonials' },
@@ -1761,6 +1765,7 @@ export default function AdminDashboard() {
     if (tab === 'beneficiaries') return <AdminBeneficiaries />;
     if (tab === 'news') return <AdminNews />;
     if (tab === 'courses') return <AdminCourses />;
+    if (tab === 'payments') return <AdminPayments />;
     if (tab === 'testimonials') return <AdminTestimonials />;
     if (tab === 'invites') return <AdminInvites />;
     if (tab === 'live-sessions') return <LiveSessionsAdmin />;

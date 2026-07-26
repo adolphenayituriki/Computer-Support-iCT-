@@ -9,7 +9,7 @@ import News from '../models/News.js';
 import Conversation from '../models/Conversation.js';
 import Course from '../models/Course.js';
 import Payment from '../models/Payment.js';
-import { sendTicketReplyNotification, sendTeamStatusUpdate, sendAdminNotification, sendAccountSetupEmail } from '../services/mailer.js';
+import { sendTicketReplyNotification, sendTeamStatusUpdate, sendAdminNotification, sendAccountSetupEmail, sendPaymentReceipt } from '../services/mailer.js';
 // ── Users ──
 
 export async function getUsers(_req, res) {
@@ -465,21 +465,15 @@ export async function getAllPayments(_req, res) {
 export async function getPaymentStats(_req, res) {
   try {
     const total = await Payment.countDocuments();
-    const successful = await Payment.countDocuments({ status: 'successful' });
-    const pending = await Payment.countDocuments({ status: 'pending' });
-    const processing = await Payment.countDocuments({ status: 'processing' });
-    const failed = await Payment.countDocuments({ status: 'failed' });
+    const approved = await Payment.countDocuments({ status: 'approved' });
+    const pendingReview = await Payment.countDocuments({ status: 'pending_review' });
+    const rejected = await Payment.countDocuments({ status: 'rejected' });
 
     const revenueAgg = await Payment.aggregate([
-      { $match: { status: 'successful' } },
+      { $match: { status: 'approved' } },
       { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } },
     ]);
     const revenue = revenueAgg[0] || { total: 0, count: 0 };
-
-    const byMethod = await Payment.aggregate([
-      { $match: { status: 'successful' } },
-      { $group: { _id: '$method', count: { $sum: 1 }, total: { $sum: '$amount' } } },
-    ]);
 
     const recent = await Payment.find()
       .populate('userId', 'name email')
@@ -489,12 +483,10 @@ export async function getPaymentStats(_req, res) {
 
     res.json({
       total,
-      successful,
-      pending,
-      processing,
-      failed,
+      approved,
+      pendingReview,
+      rejected,
       revenue: revenue.total,
-      byMethod,
       recent,
     });
   } catch (err) {
@@ -505,6 +497,45 @@ export async function getPaymentStats(_req, res) {
 export async function updatePaymentAdmin(req, res) {
   try {
     const payment = await Payment.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    if (!payment) return res.status(404).json({ error: 'Payment not found.' });
+    res.json(payment);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function approvePaymentAdmin(req, res) {
+  try {
+    const { adminNote } = req.body || {};
+    const payment = await Payment.findByIdAndUpdate(req.params.id, {
+      status: 'approved',
+      adminNote: adminNote || '',
+      reviewedBy: req.user.id,
+      reviewedAt: new Date(),
+    }, { new: true }).populate('userId', 'name email').populate('courseId', 'title');
+    if (!payment) return res.status(404).json({ error: 'Payment not found.' });
+
+    if (payment.userId?.email && payment.courseId?.title) {
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      sendPaymentReceipt(payment.userId.email, payment.userId.name, payment.courseId.title, payment.amount, payment.currency, payment.method, payment.txRef, dateStr)
+        .catch((e) => console.error('Payment receipt email error:', e.message));
+    }
+
+    res.json(payment);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+}
+
+export async function rejectPaymentAdmin(req, res) {
+  try {
+    const { adminNote } = req.body || {};
+    const payment = await Payment.findByIdAndUpdate(req.params.id, {
+      status: 'rejected',
+      adminNote: adminNote || '',
+      reviewedBy: req.user.id,
+      reviewedAt: new Date(),
+    }, { new: true }).populate('userId', 'name email').populate('courseId', 'title');
     if (!payment) return res.status(404).json({ error: 'Payment not found.' });
     res.json(payment);
   } catch (err) {

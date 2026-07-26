@@ -4,7 +4,7 @@ import {
   Mail, UserCheck, Lightbulb, ShieldCheck,
   Star, Calendar, Newspaper, BookOpen,
   Video, Settings, ChevronLeft, ChevronRight,
-  LogOut,
+  LogOut, CreditCard,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ScrollArea } from './ui/scroll-area';
@@ -37,6 +37,7 @@ const NAV_SECTIONS = [
       { key: 'news', icon: Newspaper, label: 'News', color: 'text-rose-400' },
       { key: 'courses', icon: BookOpen, label: 'Courses', color: 'text-sky-400' },
       { key: 'live-sessions', icon: Video, label: 'Live Sessions', color: 'text-red-400' },
+      { key: 'payments', icon: CreditCard, label: 'Payments', color: 'text-emerald-400' },
     ],
   },
 ];
