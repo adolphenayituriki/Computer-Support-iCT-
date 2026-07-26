@@ -81,10 +81,18 @@ export async function verifyPayment(req, res) {
 export async function checkPaymentStatus(req, res) {
   try {
     const { courseId } = req.params;
-    const payment = await Payment.findOne({ userId: req.user.id, courseId, status: 'approved' });
-    res.json({ paid: !!payment });
+    const approved = await Payment.findOne({ userId: req.user.id, courseId, status: 'approved' });
+    if (approved) return res.json({ paid: true, status: 'approved' });
+
+    const pending = await Payment.findOne({ userId: req.user.id, courseId, status: 'pending_review' });
+    if (pending) return res.json({ paid: false, status: 'pending_review' });
+
+    const rejected = await Payment.findOne({ userId: req.user.id, courseId, status: 'rejected' }).sort({ reviewedAt: -1 });
+    if (rejected) return res.json({ paid: false, status: 'rejected', adminNote: rejected.adminNote || '' });
+
+    res.json({ paid: false, status: 'none' });
   } catch {
-    res.json({ paid: false });
+    res.json({ paid: false, status: 'none' });
   }
 }
 

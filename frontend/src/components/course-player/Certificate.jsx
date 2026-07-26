@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { FaPrint, FaDownload, FaTrophy, FaCheckCircle, FaLock } from 'react-icons/fa';
+import { FaPrint, FaDownload, FaTrophy, FaCheckCircle, FaLock, FaClock, FaExclamationCircle } from 'react-icons/fa';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -84,6 +84,8 @@ export default function Certificate({
   const [logoError, setLogoError] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [paid, setPaid] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState('none');
+  const [adminNote, setAdminNote] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(true);
 
@@ -93,7 +95,12 @@ export default function Certificate({
       headers: { Authorization: `Bearer ${token()}` },
     })
       .then(r => r.json())
-      .then(d => { setPaid(d.paid); setCheckingPayment(false); })
+      .then(d => {
+        setPaid(d.paid);
+        setPaymentStatus(d.status || 'none');
+        if (d.adminNote) setAdminNote(d.adminNote);
+        setCheckingPayment(false);
+      })
       .catch(() => setCheckingPayment(false));
   }, [course?._id]);
 
@@ -340,34 +347,56 @@ export default function Certificate({
       </div>
 
       {/* Print / Download buttons — hidden when printing */}
-      <div className="cert-no-print flex items-center gap-3 mt-5 mb-8">
-        {!paid ? (
+      <div className="cert-no-print flex flex-col items-center gap-3 mt-5 mb-8">
+        {checkingPayment ? (
+          <div className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 text-slate-500 text-sm font-medium">
+            <span className="animate-spin inline-block w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full" />
+            Checking payment status...
+          </div>
+        ) : paymentStatus === 'approved' ? (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDownloadPDF}
+              disabled={exporting}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+              style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: exporting ? 'none' : '0 4px 14px rgba(252,207,53,0.4)' }}
+            >
+              {exporting ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Generating...</> : <><FaDownload size={14} /> Download PDF</>}
+            </button>
+            <button onClick={handlePrint} className="inline-flex items-center gap-2 px-7 py-3 bg-slate-700 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg cursor-pointer">
+              <FaPrint size={14} /> Print
+            </button>
+          </div>
+        ) : paymentStatus === 'pending_review' ? (
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm font-semibold">
+              <FaClock size={14} /> Payment Under Review
+            </div>
+            <p className="text-xs text-slate-400">Certificate will be available once admin approves your payment.</p>
+          </div>
+        ) : paymentStatus === 'rejected' ? (
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold">
+              <FaExclamationCircle size={14} /> Payment Rejected
+            </div>
+            {adminNote && <p className="text-xs text-red-500 max-w-md text-center">Reason: {adminNote}</p>}
+            <button
+              onClick={() => setShowPayment(true)}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer mt-1"
+              style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: '0 4px 14px rgba(252,207,53,0.4)' }}
+            >
+              <FaLock size={14} /> Pay Again — {(course?.certificateFee || 1000).toLocaleString()} RWF
+            </button>
+          </div>
+        ) : (
           <button
             onClick={() => setShowPayment(true)}
-            disabled={checkingPayment}
             className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer"
             style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: '0 4px 14px rgba(252,207,53,0.4)' }}
           >
-            {checkingPayment ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Checking...</> : <><FaLock size={14} /> Pay {(course?.certificateFee || 1000).toLocaleString()} RWF to Download</>}
-          </button>
-        ) : (
-          <button
-            onClick={handleDownloadPDF}
-            disabled={exporting}
-            className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-            style={{ backgroundColor: '#FCCF35', color: '#1e293b', boxShadow: exporting ? 'none' : '0 4px 14px rgba(252,207,53,0.4)' }}
-            onMouseEnter={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#e6b800'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(252,207,53,0.5)'; }}}
-            onMouseLeave={e => { if (!exporting) { e.currentTarget.style.backgroundColor = '#FCCF35'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(252,207,53,0.4)'; }}}
-          >
-            {exporting ? <><span className="animate-spin inline-block w-4 h-4 border-2 border-slate-800 border-t-transparent rounded-full" /> Generating...</> : <><FaDownload size={14} /> Download PDF</>}
+            <FaLock size={14} /> Pay {(course?.certificateFee || 1000).toLocaleString()} RWF to Download
           </button>
         )}
-        <button
-          onClick={handlePrint}
-          className="inline-flex items-center gap-2 px-7 py-3 bg-slate-700 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg cursor-pointer"
-        >
-          <FaPrint size={14} /> Print / Save as PDF
-        </button>
       </div>
 
       {showPayment && (
