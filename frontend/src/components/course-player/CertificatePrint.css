@@ -14,29 +14,29 @@
 
 /* ===== BACKGROUND ===== */
 .cert-bg-gradient {
-  background-color: #fffcf5;
+  background-color: #f8faff;
   background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
-    repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(252,207,53,0.03) 60px, rgba(252,207,53,0.03) 61px),
-    repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(180,160,100,0.02) 60px, rgba(180,160,100,0.02) 61px);
+    radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(59,130,246,0.03) 0%, transparent 50%),
+    repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(59,130,246,0.02) 60px, rgba(59,130,246,0.02) 61px),
+    repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(255,206,8,0.015) 60px, rgba(255,206,8,0.015) 61px);
 }
 
-/* ===== OUTER FRAME — elegant double border ===== */
+/* ===== OUTER FRAME ===== */
 .cert-border-outer {
-  border: 3px solid #b8960c;
+  border: 3px solid #3B82F6;
   box-shadow:
-    inset 0 0 0 6px #fffcf5,
-    inset 0 0 0 8px #d4a843,
-    inset 0 0 0 14px #fffcf5,
-    inset 0 0 0 15px rgba(212,168,67,0.3),
-    0 8px 32px rgba(0,0,0,0.12),
-    0 2px 8px rgba(0,0,0,0.08);
+    inset 0 0 0 6px #f8faff,
+    inset 0 0 0 8px #FFCE08,
+    inset 0 0 0 14px #f8faff,
+    inset 0 0 0 15px rgba(59,130,246,0.2),
+    0 8px 32px rgba(0,0,0,0.10),
+    0 2px 8px rgba(0,0,0,0.06);
 }
 
 /* ===== INNER BORDER ===== */
 .cert-border-inner {
-  border: 1px solid rgba(212,168,67,0.25);
+  border: 1px solid rgba(59,130,246,0.15);
 }
 
 /* ===== CORNER ORNAMENTS ===== */
@@ -46,41 +46,41 @@
   z-index: 10;
 }
 
-/* Outer gold corners — larger L-brackets */
-.cert-corner-tl { top: 16px; left: 16px; width: 60px; height: 60px; border-top: 3px solid #b8960c; border-left: 3px solid #b8960c; }
-.cert-corner-tr { top: 16px; right: 16px; width: 60px; height: 60px; border-top: 3px solid #b8960c; border-right: 3px solid #b8960c; }
-.cert-corner-bl { bottom: 16px; left: 16px; width: 60px; height: 60px; border-bottom: 3px solid #b8960c; border-left: 3px solid #b8960c; }
-.cert-corner-br { bottom: 16px; right: 16px; width: 60px; height: 60px; border-bottom: 3px solid #b8960c; border-right: 3px solid #b8960c; }
+/* Outer blue corners */
+.cert-corner-tl { top: 16px; left: 16px; width: 60px; height: 60px; border-top: 3px solid #3B82F6; border-left: 3px solid #3B82F6; }
+.cert-corner-tr { top: 16px; right: 16px; width: 60px; height: 60px; border-top: 3px solid #3B82F6; border-right: 3px solid #3B82F6; }
+.cert-corner-bl { bottom: 16px; left: 16px; width: 60px; height: 60px; border-bottom: 3px solid #3B82F6; border-left: 3px solid #3B82F6; }
+.cert-corner-br { bottom: 16px; right: 16px; width: 60px; height: 60px; border-bottom: 3px solid #3B82F6; border-right: 3px solid #3B82F6; }
 
-/* Inner thin corners — second layer */
-.cert-corner-inner-tl { top: 28px; left: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(184,150,12,0.4); border-left: 1px solid rgba(184,150,12,0.4); }
-.cert-corner-inner-tr { top: 28px; right: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(184,150,12,0.4); border-right: 1px solid rgba(184,150,12,0.4); }
-.cert-corner-inner-bl { bottom: 28px; left: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(184,150,12,0.4); border-left: 1px solid rgba(184,150,12,0.4); }
-.cert-corner-inner-br { bottom: 28px; right: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(184,150,12,0.4); border-right: 1px solid rgba(184,150,12,0.4); }
+/* Inner thin corners — gold accent */
+.cert-corner-inner-tl { top: 28px; left: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(255,206,8,0.5); border-left: 1px solid rgba(255,206,8,0.5); }
+.cert-corner-inner-tr { top: 28px; right: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(255,206,8,0.5); border-right: 1px solid rgba(255,206,8,0.5); }
+.cert-corner-inner-bl { bottom: 28px; left: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(255,206,8,0.5); border-left: 1px solid rgba(255,206,8,0.5); }
+.cert-corner-inner-br { bottom: 28px; right: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(255,206,8,0.5); border-right: 1px solid rgba(255,206,8,0.5); }
 
 /* ===== DIVIDERS ===== */
 .cert-divider {
   width: 60px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #b8960c, transparent);
+  background: linear-gradient(90deg, transparent, #3B82F6, transparent);
   margin: 0 auto;
 }
 
 .cert-divider-long {
   width: 220px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #d4a843, #b8960c, #d4a843, transparent);
+  background: linear-gradient(90deg, transparent, #3B82F6, #FFCE08, #3B82F6, transparent);
   margin: 0 auto;
 }
 
 .cert-divider-full {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, #d4a843 20%, #b8960c 50%, #d4a843 80%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #3B82F6 20%, #FFCE08 50%, #3B82F6 80%, transparent 100%);
 }
 
 /* ===== QR ===== */
 .cert-qr-wrapper {
-  border: 1px solid rgba(212,168,67,0.3);
+  border: 1px solid rgba(59,130,246,0.2);
   padding: 4px;
   background: white;
 }
@@ -171,23 +171,23 @@
   }
 
   .cert-border-outer {
-    border: 3px solid #b8960c !important;
-    box-shadow: inset 0 0 0 6px #fffcf5, inset 0 0 0 8px #d4a843, inset 0 0 0 14px #fffcf5, inset 0 0 0 15px rgba(212,168,67,0.3) !important;
+    border: 3px solid #3B82F6 !important;
+    box-shadow: inset 0 0 0 6px #f8faff, inset 0 0 0 8px #FFCE08, inset 0 0 0 14px #f8faff, inset 0 0 0 15px rgba(59,130,246,0.2) !important;
   }
 
   .cert-bg-gradient {
-    background-color: #fffcf5 !important;
+    background-color: #f8faff !important;
     background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 50%, rgba(252,207,53,0.04) 0%, transparent 50%),
-      repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(252,207,53,0.03) 60px, rgba(252,207,53,0.03) 61px),
-      repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(180,160,100,0.02) 60px, rgba(180,160,100,0.02) 61px) !important;
+      radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 50%, rgba(59,130,246,0.03) 0%, transparent 50%),
+      repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(59,130,246,0.02) 60px, rgba(59,130,246,0.02) 61px),
+      repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(255,206,8,0.015) 60px, rgba(255,206,8,0.015) 61px) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  .cert-corner-tl, .cert-corner-tr, .cert-corner-bl, .cert-corner-br { border-color: #b8960c !important; }
-  .cert-corner-inner-tl, .cert-corner-inner-tr, .cert-corner-inner-bl, .cert-corner-inner-br { border-color: rgba(184,150,12,0.4) !important; }
+  .cert-corner-tl, .cert-corner-tr, .cert-corner-bl, .cert-corner-br { border-color: #3B82F6 !important; }
+  .cert-corner-inner-tl, .cert-corner-inner-tr, .cert-corner-inner-bl, .cert-corner-inner-br { border-color: rgba(255,206,8,0.5) !important; }
 
   .cert-name { font-family: 'Great Vibes', Georgia, cursive !important; }
   .cert-serif { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important; }

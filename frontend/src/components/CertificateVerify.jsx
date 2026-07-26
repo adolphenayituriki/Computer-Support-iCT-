@@ -66,19 +66,19 @@ export default function CertificateVerify() {
           <div style={{ background: 'linear-gradient(135deg, #1e293b, #334155)', padding: '2rem', textAlign: 'center' }}>
             <p style={{ color: '#94a3b8', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Certificate of Completion</p>
             <h1 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>CS Hub (iCT)</h1>
-            <p style={{ color: '#FCCF35', fontSize: '0.75rem', fontWeight: 600, margin: '0.25rem 0 0' }}>COMPUTER SUPPORT</p>
+            <p style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600, margin: '0.25rem 0 0' }}>COMPUTER SUPPORT</p>
           </div>
 
           <div style={{ padding: '2rem', textAlign: 'center' }}>
             <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>This certifies that</p>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FCCF35', margin: '0.25rem 0 0.75rem', fontFamily: "'Great Vibes', cursive" }}>{data.userName}</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3B82F6', margin: '0.25rem 0 0.75rem', fontFamily: "'Great Vibes', cursive" }}>{data.userName}</h2>
             <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>has successfully completed the course</p>
             <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', margin: '0.25rem 0 1rem' }}>{data.courseTitle}</h3>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.15rem' }}>Score</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FCCF35' }}>{data.assessmentScore}%</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFCE08' }}>{data.assessmentScore}%</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.15rem' }}>Category</div>

@@ -105,7 +105,7 @@ export default function PaymentModal({ courseId, courseTitle, courseFee, onClose
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs p-5 text-center" onClick={(e) => e.stopPropagation()}>
-          <FaClock className="text-amber-500 mx-auto mb-2" size={36} />
+          <FaClock className="text-blue-500 mx-auto mb-2" size={36} />
           <h3 className="text-sm font-bold text-slate-900">Payment Submitted!</h3>
           <p className="text-xs text-slate-500 mt-0.5 mb-1">Under review. Certificate unlocks after approval.</p>
           {txRef && <p className="text-[10px] text-slate-400 font-mono mb-2">{txRef}</p>}
@@ -123,7 +123,7 @@ export default function PaymentModal({ courseId, courseTitle, courseFee, onClose
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                <FaMobileAlt className="text-amber-600" size={14} />
+                <FaMobileAlt className="text-blue-600" size={14} />
               </div>
               <div>
                 <h3 className="text-[13px] font-bold text-slate-900 leading-tight">Certificate Payment</h3>
@@ -140,21 +140,21 @@ export default function PaymentModal({ courseId, courseTitle, courseFee, onClose
             <span className="text-xs font-bold text-slate-400 ml-1">RWF</span>
           </div>
 
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-2.5 border border-amber-200/60 mb-3">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-2.5 border border-blue-200/60 mb-3">
             <div className="flex items-center justify-between">
-              <a href={`tel:*182*1*1*${momoNumber}%23`} className="flex items-center gap-2 flex-1 min-w-0 bg-white rounded-lg px-2.5 py-2 border border-amber-200/80 hover:border-amber-300 transition-colors">
+              <a href={`tel:*182*1*1*${momoNumber}%23`} className="flex items-center gap-2 flex-1 min-w-0 bg-white rounded-lg px-2.5 py-2 border border-blue-200/80 hover:border-blue-300 transition-colors">
                 <div className="min-w-0">
                   <p className="text-sm font-black text-slate-900 font-mono leading-tight">{momoNumber}</p>
                   <p className="text-[9px] text-slate-400">{momoName}</p>
                 </div>
               </a>
-              <button onClick={copyNumber} className="ml-2 w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center shrink-0 hover:bg-amber-600 transition-colors" title="Copy number">
+              <button onClick={copyNumber} className="ml-2 w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center shrink-0 hover:bg-blue-600 transition-colors" title="Copy number">
                 {copied ? <FaCheckCircle className="text-white" size={12} /> : <FaCopy className="text-white" size={12} />}
               </button>
             </div>
             <div className="flex items-center justify-between mt-1.5">
-              <p className="text-[9px] text-amber-600/70">Tap number to dial *182*1*1#</p>
-              <p className="text-[9px] text-amber-600/70">Send exactly {formattedAmount} RWF</p>
+              <p className="text-[9px] text-blue-600/70">Tap number to dial *182*1*1#</p>
+              <p className="text-[9px] text-blue-600/70">Send exactly {formattedAmount} RWF</p>
             </div>
           </div>
 
@@ -166,7 +166,7 @@ export default function PaymentModal({ courseId, courseTitle, courseFee, onClose
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="07XXXXXXXX"
-                className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all"
+                className="w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all"
               />
             </div>
             <div className="flex-1">
@@ -180,7 +180,7 @@ export default function PaymentModal({ courseId, courseTitle, courseFee, onClose
                   </button>
                 </div>
               ) : (
-                <label className="flex items-center justify-center gap-1.5 w-full rounded-lg border border-dashed border-slate-200 bg-slate-50/50 h-[34px] cursor-pointer hover:border-amber-300 hover:bg-amber-50/50 transition-all">
+                <label className="flex items-center justify-center gap-1.5 w-full rounded-lg border border-dashed border-slate-200 bg-slate-50/50 h-[34px] cursor-pointer hover:border-blue-300 hover:bg-blue-50/50 transition-all">
                   <FaUpload size={10} className="text-slate-400" />
                   <span className="text-[10px] font-medium text-slate-400">Upload</span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
