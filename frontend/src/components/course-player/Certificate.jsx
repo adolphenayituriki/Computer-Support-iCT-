@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { FaPrint, FaDownload, FaTrophy, FaCheckCircle, FaLock, FaClock, FaExclamationCircle } from 'react-icons/fa';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import PaymentModal from '../PaymentModal';
 import API_BASE from '../../api';
@@ -139,32 +140,25 @@ export default function Certificate({
     setExporting(true);
 
     const el = certRef.current;
-
     await document.fonts.ready;
 
     const imgs = el.querySelectorAll('img');
     await Promise.all(Array.from(imgs).map(img => {
       if (img.complete) return Promise.resolve();
-      return new Promise((resolve) => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
+      return new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
     }));
 
     const origStyle = {
       overflow: el.style.overflow,
-      aspectRatio: el.style.aspectRatio,
       width: el.style.width,
       maxWidth: el.style.maxWidth,
       height: el.style.height,
       boxShadow: el.style.boxShadow,
       borderRadius: el.style.borderRadius,
       transform: el.style.transform,
-      position: el.style.position,
     };
 
     el.style.overflow = 'visible';
-    el.style.aspectRatio = 'auto';
     el.style.width = '1122px';
     el.style.maxWidth = '1122px';
     el.style.height = '794px';
@@ -173,58 +167,29 @@ export default function Certificate({
     el.style.transform = 'none';
 
     try {
-      const canvas = await html2canvas(el, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
+      const dataUrl = await toPng(el, {
         width: 1122,
         height: 794,
-        windowWidth: 1122,
-        windowHeight: 794,
-        onclone: (doc) => {
-          const clone = doc.querySelector('.cert-print-container');
-          if (clone) {
-            clone.style.overflow = 'visible';
-            clone.style.aspectRatio = 'auto';
-            clone.style.width = '1122px';
-            clone.style.maxWidth = '1122px';
-            clone.style.height = '794px';
-            clone.style.boxShadow = 'none';
-            clone.style.borderRadius = '0';
-            clone.style.transform = 'none';
-            clone.style.margin = '0';
-            clone.style.position = 'relative';
-          }
-          const scaleWrapper = doc.querySelector('.cert-scale-wrapper');
-          if (scaleWrapper) {
-            scaleWrapper.style.maxWidth = 'none';
-            scaleWrapper.style.overflow = 'visible';
-          }
-          const wrapper = doc.querySelector('.cert-page-wrapper');
-          if (wrapper) {
-            wrapper.style.background = 'white';
-            wrapper.style.padding = '0';
-            wrapper.style.margin = '0';
-            wrapper.style.minHeight = 'auto';
-          }
+        pixelRatio: 3,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+        skipAutoScale: true,
+        style: {
+          transform: 'none',
+          transformOrigin: 'top left',
         },
       });
 
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save(`Certificate-${(course?.title || 'Course').replace(/\s+/g, '_')}.pdf`);
     } catch (err) {
       console.error('PDF export failed:', err);
-      window.print();
+      alert('PDF download failed. Please try Print instead.');
     } finally {
-      Object.entries(origStyle).forEach(([key, val]) => {
-        el.style[key] = val || '';
-      });
+      Object.entries(origStyle).forEach(([key, val]) => { el.style[key] = val || ''; });
       setExporting(false);
     }
   }, [course?.title]);
