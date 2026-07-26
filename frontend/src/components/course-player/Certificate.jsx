@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { FaPrint, FaDownload, FaTrophy, FaCheckCircle, FaLock, FaClock, FaExclamationCircle } from 'react-icons/fa';
 import QRCode from 'qrcode';
-import html2canvas from 'html2canvas';
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import PaymentModal from '../PaymentModal';
@@ -9,6 +8,50 @@ import API_BASE from '../../api';
 import './CertificatePrint.css';
 
 function token() { return localStorage.getItem('cshub_token'); }
+
+const CERT_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
+
+.cert-name { font-family: 'Great Vibes', 'Georgia', cursive; }
+.cert-serif { font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif; }
+.cert-serif-body { font-family: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif; }
+
+.cert-bg-gradient {
+  background-color: #f8faff;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(59,130,246,0.03) 0%, transparent 50%),
+    repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(59,130,246,0.02) 60px, rgba(59,130,246,0.02) 61px),
+    repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(255,206,8,0.015) 60px, rgba(255,206,8,0.015) 61px);
+}
+
+.cert-border-outer {
+  border: 3px solid #3B82F6;
+  box-shadow:
+    inset 0 0 0 6px #f8faff,
+    inset 0 0 0 8px #FFCE08,
+    inset 0 0 0 14px #f8faff,
+    inset 0 0 0 15px rgba(59,130,246,0.2),
+    0 8px 32px rgba(0,0,0,0.10),
+    0 2px 8px rgba(0,0,0,0.06);
+}
+
+.cert-border-inner { border: 1px solid rgba(59,130,246,0.15); }
+
+.cert-corner { position: absolute; pointer-events: none; z-index: 10; }
+.cert-corner-tl { top: 16px; left: 16px; width: 60px; height: 60px; border-top: 3px solid #3B82F6; border-left: 3px solid #3B82F6; }
+.cert-corner-tr { top: 16px; right: 16px; width: 60px; height: 60px; border-top: 3px solid #3B82F6; border-right: 3px solid #3B82F6; }
+.cert-corner-bl { bottom: 16px; left: 16px; width: 60px; height: 60px; border-bottom: 3px solid #3B82F6; border-left: 3px solid #3B82F6; }
+.cert-corner-br { bottom: 16px; right: 16px; width: 60px; height: 60px; border-bottom: 3px solid #3B82F6; border-right: 3px solid #3B82F6; }
+.cert-corner-inner-tl { top: 28px; left: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(255,206,8,0.5); border-left: 1px solid rgba(255,206,8,0.5); }
+.cert-corner-inner-tr { top: 28px; right: 28px; width: 36px; height: 36px; border-top: 1px solid rgba(255,206,8,0.5); border-right: 1px solid rgba(255,206,8,0.5); }
+.cert-corner-inner-bl { bottom: 28px; left: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(255,206,8,0.5); border-left: 1px solid rgba(255,206,8,0.5); }
+.cert-corner-inner-br { bottom: 28px; right: 28px; width: 36px; height: 36px; border-bottom: 1px solid rgba(255,206,8,0.5); border-right: 1px solid rgba(255,206,8,0.5); }
+
+.cert-divider { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, #3B82F6, transparent); margin: 0 auto; }
+.cert-divider-long { width: 220px; height: 1px; background: linear-gradient(90deg, transparent, #3B82F6, #FFCE08, #3B82F6, transparent); margin: 0 auto; }
+.cert-qr-wrapper { border: 1px solid rgba(59,130,246,0.2); padding: 4px; background: white; }
+`;
 
 function generateCertNumber(courseCategory, userId, courseId) {
   const catAbbr = { general: 'GN', hardware: 'HW', software: 'SW', network: 'NW', virus: 'VS', training: 'TR' };
@@ -166,12 +209,18 @@ export default function Certificate({
     el.style.borderRadius = '0';
     el.style.transform = 'none';
 
+    // Inject CSS directly so html-to-image captures all styles
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-cert-export', 'true');
+    styleEl.textContent = CERT_CSS;
+    el.prepend(styleEl);
+
     try {
       const dataUrl = await toPng(el, {
         width: 1122,
         height: 794,
         pixelRatio: 3,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f8faff',
         cacheBust: true,
         skipAutoScale: true,
         style: {
@@ -189,6 +238,7 @@ export default function Certificate({
       console.error('PDF export failed:', err);
       alert('PDF download failed. Please try Print instead.');
     } finally {
+      if (styleEl.parentNode) styleEl.remove();
       Object.entries(origStyle).forEach(([key, val]) => { el.style[key] = val || ''; });
       setExporting(false);
     }
