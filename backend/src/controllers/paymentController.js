@@ -5,7 +5,7 @@ import User from '../models/User.js';
 import { sendPaymentReceipt, sendAdminNotification } from '../services/mailer.js';
 
 const FLW_API_BASE = 'https://api.flutterwave.com/v3';
-const FLW_OAUTH_URL = 'https://idp.flutterwave.com/oauth/token';
+const FLW_OAUTH_URL = 'https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token';
 
 let cachedToken = null;
 let tokenExpiry = 0;
@@ -13,19 +13,20 @@ let tokenExpiry = 0;
 async function getAccessToken() {
   if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
 
+  const params = new URLSearchParams();
+  params.append('client_id', process.env.FLW_CLIENT_ID);
+  params.append('client_secret', process.env.FLW_CLIENT_SECRET);
+  params.append('grant_type', 'client_credentials');
+
   const res = await fetch(FLW_OAUTH_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: process.env.FLW_CLIENT_ID,
-      client_secret: process.env.FLW_CLIENT_SECRET,
-      grant_type: 'client_credentials',
-    }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
   });
 
   const data = await res.json();
   if (!data.access_token) {
-    console.error('Flutterwave OAuth failed:', JSON.stringify(data));
+    console.error('Flutterwave OAuth failed:', res.status, JSON.stringify(data));
     throw new Error(`Failed to obtain Flutterwave access token: ${data.error || data.message || 'unknown'}`);
   }
 
