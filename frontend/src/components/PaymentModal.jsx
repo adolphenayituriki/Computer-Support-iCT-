@@ -142,17 +142,20 @@ export default function PaymentModal({ courseId, courseTitle, courseFee, onClose
 
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-2.5 border border-amber-200/60 mb-3">
             <div className="flex items-center justify-between">
-              <button onClick={copyNumber} className="flex items-center gap-2 flex-1 min-w-0 bg-white rounded-lg px-2.5 py-2 border border-amber-200/80 hover:border-amber-300 transition-colors">
+              <a href={`tel:*182*1*1*${momoNumber}%23`} className="flex items-center gap-2 flex-1 min-w-0 bg-white rounded-lg px-2.5 py-2 border border-amber-200/80 hover:border-amber-300 transition-colors">
                 <div className="min-w-0">
                   <p className="text-sm font-black text-slate-900 font-mono leading-tight">{momoNumber}</p>
                   <p className="text-[9px] text-slate-400">{momoName}</p>
                 </div>
-              </button>
+              </a>
               <button onClick={copyNumber} className="ml-2 w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center shrink-0 hover:bg-amber-600 transition-colors" title="Copy number">
                 {copied ? <FaCheckCircle className="text-white" size={12} /> : <FaCopy className="text-white" size={12} />}
               </button>
             </div>
-            <p className="text-[9px] text-amber-600/70 mt-1.5 text-center">Send exactly {formattedAmount} RWF via MTN MoMo</p>
+            <div className="flex items-center justify-between mt-1.5">
+              <p className="text-[9px] text-amber-600/70">Tap number to dial *182*1*1#</p>
+              <p className="text-[9px] text-amber-600/70">Send exactly {formattedAmount} RWF</p>
+            </div>
           </div>
 
           <div className="flex gap-2 mb-3">
