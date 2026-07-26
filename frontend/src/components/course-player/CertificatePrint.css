@@ -71,19 +71,17 @@
 
 .cert-print-container {
   width: 960px;
-  height: 676px;
+  height: 794px;
   transform-origin: top left;
 }
 
-/* On screens where the viewport is narrower than 960px + padding, scale down */
 @media (max-width: 1020px) {
   .cert-scale-wrapper {
-    /* Calculate scale: (viewport - 32px padding) / 960 */
     overflow: hidden;
   }
   .cert-print-container {
     transform: scale(calc((100vw - 32px) / 960));
-    margin-bottom: calc(-676px + (676px * (100vw - 32px) / 960));
+    margin-bottom: calc(-794px + (794px * (100vw - 32px) / 960));
   }
 }
 

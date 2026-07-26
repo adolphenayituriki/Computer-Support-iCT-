@@ -210,7 +210,6 @@ export default function Certificate({
 
   return (
     <div className="cert-page-wrapper bg-slate-100 min-h-screen flex flex-col items-center justify-start py-6 px-4 sm:px-6 lg:px-8">
-      {/* Scale wrapper — scales certificate to fit any screen width */}
       <div className="cert-scale-wrapper">
         <div ref={certRef} className="cert-print-container cert-border-outer bg-white relative shadow-2xl shadow-blue-900/10 rounded-sm overflow-hidden flex flex-col cert-bg-gradient">
           {/* Decorative corners */}
@@ -223,109 +222,113 @@ export default function Certificate({
           <div className="cert-corner cert-corner-inner-bl" />
           <div className="cert-corner cert-corner-inner-br" />
 
-          {/* Inner border */}
-          <div className="cert-border-inner m-3 flex-1 flex flex-col">
-            <div className="pt-4 px-5 pb-0 flex flex-col items-center h-full relative">
-              {/* Tick icon — top left */}
-              <div className="absolute top-4 left-4">
-                <FaCheckCircle size={22} style={{ color: '#FCCF35' }} />
-              </div>
+          <div className="cert-border-inner m-4 flex-1 flex flex-col">
+            <div className="pt-5 px-8 pb-4 flex flex-col items-center h-full relative">
 
-              {/* Header: Logo + Branding */}
-              <div className="flex items-center gap-3 mb-0.5">
+              {/* === TOP SECTION: Logo + Title === */}
+              <div className="flex items-center gap-3 mb-2">
                 {!logoError ? (
-                  <img src="/LOGO IMAGE.png" alt="CS Hub Logo" className="w-14 h-14 object-contain" onError={() => setLogoError(true)} />
+                  <img src="/LOGO IMAGE.png" alt="CS Hub Logo" className="w-16 h-16 object-contain" onError={() => setLogoError(true)} />
                 ) : (
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FCCF3520', border: '2px solid #FCCF3550' }}>
-                    <span className="cert-serif text-xl font-bold" style={{ color: '#FCCF35' }}>CS</span>
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FCCF3520', border: '2px solid #FCCF3550' }}>
+                    <span className="cert-serif text-2xl font-bold" style={{ color: '#FCCF35' }}>CS</span>
                   </div>
                 )}
                 <div className="flex flex-col">
-                  <h2 className="cert-serif text-base font-bold text-slate-800 tracking-wide leading-tight">CS Hub (iCT)</h2>
-                  <p className="text-[8px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#FCCF35' }}>Computer Support</p>
+                  <h2 className="cert-serif text-lg font-bold text-slate-800 tracking-wide leading-tight">CS Hub (iCT)</h2>
+                  <p className="text-[9px] font-semibold tracking-[0.3em] uppercase" style={{ color: '#FCCF35' }}>Computer Support</p>
                 </div>
               </div>
 
-              <div className="cert-divider mb-1.5" />
+              <div className="cert-divider mb-3" />
 
-              <h1 className="cert-serif text-xl font-bold text-slate-900 tracking-wide mb-0.5 text-center">
-                CERTIFICATE OF COMPLETION
+              <h1 className="cert-serif text-[26px] font-bold text-slate-900 tracking-[0.15em] mb-1 text-center uppercase">
+                Certificate of Completion
               </h1>
-              <div className="cert-divider-long mb-1.5" />
+              <div className="cert-divider-long mb-4" />
 
-              <p className="cert-serif-body text-xs text-slate-500 mb-0.5 text-center italic">
+              {/* === MIDDLE SECTION: Name + Course === */}
+              <p className="cert-serif-body text-sm text-slate-500 mb-1.5 text-center italic">
                 This certificate is proudly presented to
               </p>
-              <h2 className="cert-name text-5xl leading-none mb-0.5 text-center" style={{ color: '#FCCF35' }}>
+
+              <h2 className="cert-name text-[56px] leading-none mb-1 text-center" style={{ color: '#FCCF35' }}>
                 {userName || 'Student'}
               </h2>
-              <div className="w-[280px] h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, #FCCF35, transparent)' }} />
 
-              <p className="cert-serif-body text-xs text-slate-500 mb-0 text-center">
+              <div className="w-[320px] h-[1px] mb-3" style={{ background: 'linear-gradient(90deg, transparent, #FCCF35, transparent)' }} />
+
+              <p className="cert-serif-body text-sm text-slate-500 mb-1 text-center">
                 for successfully completing the course
               </p>
-              <h3 className="cert-serif text-base font-bold text-slate-800 text-center mb-0.5 max-w-[480px] leading-snug">
+              <h3 className="cert-serif text-lg font-bold text-slate-800 text-center mb-2 max-w-[500px] leading-snug">
                 {course?.title || 'Course Title'}
               </h3>
 
-              <p className="cert-serif-body text-[9px] text-slate-400 text-center mb-0 max-w-[400px] leading-relaxed">
+              <p className="cert-serif-body text-[11px] text-slate-400 text-center mb-2 max-w-[460px] leading-relaxed">
                 The recipient has completed all required modules and lessons, and has successfully passed the final assessment.
               </p>
-              <p className="cert-serif text-[9px] font-semibold text-slate-600 text-center mb-1">
-                Issued on {certData.issueDate}
-              </p>
 
-              <div className="flex items-center gap-2 mb-1 rounded-lg px-4 py-1" style={{ backgroundColor: '#FCCF3515', border: '1px solid #FCCF3530' }}>
-                <FaTrophy size={12} style={{ color: '#FCCF35' }} />
+              <div className="flex items-center gap-3 mb-2 rounded-lg px-5 py-1.5" style={{ backgroundColor: '#FCCF3515', border: '1px solid #FCCF3530' }}>
+                <FaTrophy size={14} style={{ color: '#FCCF35' }} />
                 <div className="text-center">
-                  <p className="text-[7px] uppercase tracking-wider font-semibold" style={{ color: '#d4a017' }}>Assessment Score</p>
-                  <p className="cert-serif text-base font-bold" style={{ color: '#d4a017' }}>{displayScore}%</p>
+                  <p className="text-[8px] uppercase tracking-wider font-semibold" style={{ color: '#d4a017' }}>Assessment Score</p>
+                  <p className="cert-serif text-lg font-bold" style={{ color: '#d4a017' }}>{displayScore}%</p>
                 </div>
               </div>
 
+              <p className="cert-serif text-[11px] font-semibold text-slate-600 text-center mb-2">
+                Issued on {certData.issueDate}
+              </p>
+
+              {/* === Spacer === */}
               <div className="flex-1" />
 
-              {/* Bottom row: Cert info | Seal | QR */}
-              <div className="w-full flex items-end justify-between gap-3 mb-2">
+              {/* === BOTTOM SECTION: Cert info + Seal + QR === */}
+              <div className="w-full flex items-end justify-between gap-4 mb-3 px-2">
+                {/* Left: Certificate details */}
                 <div className="text-left">
-                  <div className="mb-1.5">
-                    <p className="text-[7px] text-slate-400 uppercase tracking-wider font-medium mb-0">Certificate Number</p>
-                    <p className="text-[9px] font-bold text-slate-800 font-mono tracking-wider">{certData.certNumber}</p>
+                  <div className="mb-2">
+                    <p className="text-[8px] text-slate-400 uppercase tracking-wider font-medium mb-0.5">Certificate Number</p>
+                    <p className="text-[10px] font-bold text-slate-800 font-mono tracking-wider">{certData.certNumber}</p>
                   </div>
                   <div>
-                    <p className="text-[7px] text-slate-400 uppercase tracking-wider font-medium mb-0">Verification Code</p>
-                    <p className="text-[9px] font-bold text-slate-800 font-mono tracking-wider">{certData.verificationCode}</p>
+                    <p className="text-[8px] text-slate-400 uppercase tracking-wider font-medium mb-0.5">Verification Code</p>
+                    <p className="text-[10px] font-bold text-slate-800 font-mono tracking-wider">{certData.verificationCode}</p>
                   </div>
                 </div>
 
+                {/* Center: Seal */}
                 <div className="flex flex-col items-center shrink-0">
                   <SealStamp />
                 </div>
 
+                {/* Right: QR Code */}
                 <div className="flex flex-col items-center shrink-0">
                   <QRSection qrData={certData.qrPayload} />
                 </div>
               </div>
 
-              {/* Signatures */}
-              <div className="w-full flex items-end justify-between gap-3 mb-1 px-6">
-                <div className="flex flex-col items-center w-[160px]">
-                  <img src="/SIGNATURE.png" alt="Signature" className="h-8 object-contain mb-0" />
+              {/* === Signatures === */}
+              <div className="w-full flex items-end justify-between gap-4 mb-2 px-4">
+                <div className="flex flex-col items-center w-[180px]">
+                  <img src="/SIGNATURE.png" alt="Signature" className="h-10 object-contain mb-0.5" />
                   <div className="w-full h-[1px] bg-slate-300 mb-1" />
-                  <p className="cert-serif text-[10px] font-bold text-slate-800">NAYITURIKI Adolphe</p>
-                  <p className="text-[7px] text-slate-400">CEO of CS HUB (iCT)</p>
+                  <p className="cert-serif text-[11px] font-bold text-slate-800">NAYITURIKI Adolphe</p>
+                  <p className="text-[8px] text-slate-400">CEO of CS HUB (iCT)</p>
                 </div>
 
-                <div className="flex flex-col items-center w-[160px]">
-                  <img src="/MUYISINGIZEMWESE EVODE.jpg" alt="Signature" className="h-8 object-contain mb-0" />
+                <div className="flex flex-col items-center w-[180px]">
+                  <img src="/MUYISINGIZEMWESE EVODE.jpg" alt="Signature" className="h-10 object-contain mb-0.5" />
                   <div className="w-full h-[1px] bg-slate-300 mb-1" />
-                  <p className="cert-serif text-[10px] font-bold text-slate-800">Evode MUYISINGIZE</p>
-                  <p className="text-[7px] text-slate-400">Training Director of CS HUB (iCT)</p>
+                  <p className="cert-serif text-[11px] font-bold text-slate-800">Evode MUYISINGIZE</p>
+                  <p className="text-[8px] text-slate-400">Training Director of CS HUB (iCT)</p>
                 </div>
               </div>
 
-              <div className="w-full text-center mt-auto pb-0">
-                <p className="text-[8px] text-slate-400">
+              {/* === Footer === */}
+              <div className="w-full text-center mt-1 pt-2 border-t border-slate-100">
+                <p className="text-[9px] text-slate-400">
                   <span className="font-semibold" style={{ color: '#FCCF35' }}>cshub.rw@gmail.com</span>
                   <span className="mx-2 text-slate-200">|</span>
                   <span className="italic">Empowering Digital Skills Through Practical Learning</span>
