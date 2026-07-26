@@ -184,7 +184,7 @@ export default function Certificate({
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
       pdf.addImage(dataUrl, 'PNG', 0, 0, pdfW, pdfH);
-      pdf.save(`Certificate-${(course?.title || 'Course').replace(/\s+/g, '_')}.pdf`);
+      pdf.save(`Certificate - ${course?.title || 'Course'}.pdf`);
     } catch (err) {
       console.error('PDF export failed:', err);
       alert('PDF download failed. Please try Print instead.');
