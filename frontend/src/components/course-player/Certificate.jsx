@@ -115,6 +115,20 @@ export default function Certificate({
     return { certNumber, verificationCode, issueDate, qrPayload };
   }, [course, userName, userId, assessmentPassed, completedAt]);
 
+  const refreshStatus = useCallback(() => {
+    if (!course?._id || !token()) return;
+    fetch(`${API_BASE}/api/payments/status/${course._id}`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    })
+      .then(r => r.json())
+      .then(d => {
+        setPaid(d.paid);
+        setPaymentStatus(d.status || 'none');
+        if (d.adminNote) setAdminNote(d.adminNote);
+      })
+      .catch(() => {});
+  }, [course?._id]);
+
   const displayScore = assessmentScore || 0;
   const certRef = useRef(null);
 
@@ -404,8 +418,8 @@ export default function Certificate({
           courseId={course?._id}
           courseTitle={course?.title}
           courseFee={course?.certificateFee}
-          onClose={() => setShowPayment(false)}
-          onPaid={() => { setPaid(true); setShowPayment(false); }}
+          onClose={() => { setShowPayment(false); refreshStatus(); }}
+          onPaid={() => { setPaid(true); setShowPayment(false); refreshStatus(); }}
         />
       )}
     </div>
