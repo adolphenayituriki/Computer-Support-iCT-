@@ -218,7 +218,7 @@ export default function AdminPayments() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 h-8 flex-1 sm:w-56">
-            <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <FaSearch className="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <input type="text" placeholder="Search payments..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-transparent text-xs text-slate-700 outline-none placeholder:text-slate-400" />
           </div>
           <div className="flex gap-1">
