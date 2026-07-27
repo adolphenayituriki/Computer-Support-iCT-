@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://computer-support-ict.vercel.app/sitemap.xml

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../LanguageContext';
-import { FaUniversity, FaChalkboardTeacher, FaRocket, FaBolt } from 'react-icons/fa';
+import { FiCpu, FiImage, FiBookOpen, FiGlobe } from 'react-icons/fi';
 import BehindTheScenePopup from './BehindTheScenePopup';
 
 export default function WhyUs() {
@@ -28,10 +28,10 @@ export default function WhyUs() {
   }, []);
 
   const reasons = [
-    { icon: <FaUniversity />, title: t('whyUs.nationwide'), desc: t('whyUs.nationwideDesc') },
-    { icon: <FaChalkboardTeacher />, title: t('whyUs.forStudents'), desc: t('whyUs.forStudentsDesc') },
-    { icon: <FaRocket />, title: t('whyUs.digitalGap'), desc: t('whyUs.digitalGapDesc') },
-    { icon: <FaBolt />, title: t('whyUs.fastFree'), desc: t('whyUs.fastFreeDesc') },
+    { icon: <FiCpu />, title: t('whyUs.personalized'), desc: t('whyUs.personalizedDesc') },
+    { icon: <FiImage />, title: t('whyUs.multimedia'), desc: t('whyUs.multimediaDesc') },
+    { icon: <FiBookOpen />, title: t('whyUs.stem'), desc: t('whyUs.stemDesc') },
+    { icon: <FiGlobe />, title: t('whyUs.rwanda'), desc: t('whyUs.rwandaDesc') },
   ];
 
   return (

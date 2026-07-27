@@ -75,16 +75,16 @@ export default {
     }
   },
   "whyUs": {
-    "title": "Kubera iki CS hub (iCT)",
-    "subtitle": "Twatangriyeiye mu bibazo byanyabyo, tukubaha ibisubizo byo bya nyabyo",
-    "nationwide": "Ubufasha mu Gihugu",
-    "nationwideDesc": "Tugizemo ibibanza byose bya Rwanda — amashuri yose, amashuri y'ubumenyi, abacuruzi, abakozi, n'abo bakeneye ubufasha bw'ibikoresho n'uburambe bw'ikiyaboro.",
-    "forStudents": "Ku Banyeshuri n'Abarimu",
-    "forStudentsDesc": "Dufasha abantu bose — abanyeshuri, abarimu, n'abakozi — bakeneye guhindura uburambe bw'ikoranabuhanga no gukoresha igitangaro mu mirimo n'amasomo yabo.",
-    "digitalGap": "Kuzibura Ubufatanye bw'Ikoranabuhanga",
-    "digitalGapDesc": "Uburambe buke bw'ikoranabuhanga ntibugomba gutera umuntu inyuma. Duha amahugurwa n'ubufasha bwo gufasha abantu bacu guhangana mu isi.",
-    "fastFree": "Ubufasha Bwihuse & Bw'Ubuntu",
-    "fastFreeDesc": "Ibibazo bikenshi bikemurwa mu masaha 24-48. Duhitema igihe cyawe tukuremeze ur回到 ubuzima bwawe vuba."
+    "title": "Why Choose CS Hub AI",
+    "subtitle": "Real impact for students, teachers, and schools",
+    "personalized": "Personalized Education",
+    "personalizedDesc": "Every student learns at their own pace with AI adapting to their strengths and challenges.",
+    "multimedia": "Interactive Multimedia",
+    "multimediaDesc": "Images, videos, audio, simulations, and animations make learning engaging and memorable.",
+    "stem": "STEM Focus",
+    "stemDesc": "Strengthened Science, Technology, Engineering, and Mathematics education.",
+    "rwanda": "Rwanda Aligned",
+    "rwandaDesc": "Supports Rwanda's vision of digital transformation and competency-based learning."
   },
   "about": {
     "title": "Inkuru Yacu",
