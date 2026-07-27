@@ -157,6 +157,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <div className="nav-profile-name">{user?.name}</div>
+                    <button onClick={() => { setShowProfileMenu(false); navigate('/ai-dashboard?tab=profile'); }}>{t('nav.profile') || 'Profile'}</button>
                     <button onClick={() => { setShowProfileMenu(false); setShowSettings(true); }}>{t('nav.settings')}</button>
                     <button onClick={handleLogout}>{t('nav.logout')}</button>
                   </div>
@@ -195,11 +196,13 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                 {showProfileMenu && (
                   <div className="nav-profile-menu" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     <div className="nav-profile-name">{user?.name}</div>
+                    <button onClick={() => { setShowProfileMenu(false); navigate('/ai-dashboard?tab=profile'); }}>{t('nav.profile') || 'Profile'}</button>
                     <button onClick={() => { setShowProfileMenu(false); navigate('/dashboard'); }}>{t('nav.goToDashboard')}</button>
                     <button onClick={handleLogout}>{t('nav.logout')}</button>
                   </div>
                 )}
               </li>
+              <li className="nav-mobile-only"><button className="nav-mobile-settings" onClick={() => { setOpen(false); navigate('/ai-dashboard?tab=profile'); }}>{t('nav.profile') || 'Profile'}</button></li>
               <li className="nav-mobile-only"><button className="nav-mobile-dashboard" onClick={() => { setOpen(false); navigate('/dashboard'); }}>{t('nav.goToDashboard')}</button></li>
               <li className="nav-mobile-only"><button className="nav-mobile-logout" onClick={() => { setOpen(false); handleLogout(); }}>{t('nav.logout')}</button></li>
             </>

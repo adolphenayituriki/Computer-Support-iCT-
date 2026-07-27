@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../LanguageContext';
 import API_BASE, { AI_API_BASE } from '../api';
@@ -50,7 +50,8 @@ export default function AILearningDashboard() {
   const { user, logout, updateProfile, changePassword } = useAuth();
   const { lang } = useLang();
   const navigate = useNavigate();
-  const [tab, setTab] = useState('overview');
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(() => searchParams.get('tab') || 'overview');
   const [progressData, setProgressData] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -491,21 +492,49 @@ export default function AILearningDashboard() {
 
           {tab === 'profile' && (
             <div className="ai-dash-profile">
-              <div className="ai-dash-section">
-                <h2><FaUser style={{ marginRight: '0.5rem' }} /> My Profile</h2>
-                <div className="ai-dash-profile-header">
-                  <div className="ai-dash-profile-avatar">{initials}</div>
-                  <div>
-                    <h3>{user?.name || 'Student'}</h3>
-                    <p>{user?.email}</p>
-                    <div className="ai-dash-profile-stats">
-                      <span><FaStar style={{ color: '#6B7280' }} /> {progressData?.profile?.totalPoints || 0} points</span>
-                      <span><FaFire style={{ color: '#6B7280' }} /> {progressData?.profile?.streak || 0} day streak</span>
-                      <span><FaQuestionCircle style={{ color: '#6B7280' }} /> {progressData?.summary?.totalQuizzes || 0} quizzes</span>
-                    </div>
+              {/* Profile Card */}
+              <div className="ai-dash-profile-card">
+                <div className="ai-dash-profile-card-bg"></div>
+                <div className="ai-dash-profile-card-content">
+                  <div className="ai-dash-profile-avatar-wrap">
+                    <div className="ai-dash-profile-avatar-lg">{initials}</div>
+                    <span className="ai-dash-profile-badge">{user?.role === 'admin' ? 'Admin' : 'Learner'}</span>
+                  </div>
+                  <div className="ai-dash-profile-info">
+                    <h2>{user?.name || 'Student'}</h2>
+                    {user?.phone && <p className="ai-dash-profile-email">{user.phone}</p>}
+                    {user?.email && <p className="ai-dash-profile-email">{user.email}</p>}
+                    {!user?.phone && !user?.email && <p className="ai-dash-profile-email">No contact set</p>}
+                    <p className="ai-dash-profile-joined">
+                      Joined {new Date(user?.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+                <div className="ai-dash-profile-stats-grid">
+                  <div className="ai-dash-profile-stat-card">
+                    <FaStar className="stat-icon" style={{ color: '#FFCE08' }} />
+                    <div className="stat-value">{progressData?.profile?.totalPoints || 0}</div>
+                    <div className="stat-label">Points</div>
+                  </div>
+                  <div className="ai-dash-profile-stat-card">
+                    <FaFire className="stat-icon" style={{ color: '#ef4444' }} />
+                    <div className="stat-value">{progressData?.profile?.streak || 0}</div>
+                    <div className="stat-label">Day Streak</div>
+                  </div>
+                  <div className="ai-dash-profile-stat-card">
+                    <FaQuestionCircle className="stat-icon" style={{ color: '#3b82f6' }} />
+                    <div className="stat-value">{progressData?.summary?.totalQuizzes || 0}</div>
+                    <div className="stat-label">Quizzes</div>
+                  </div>
+                  <div className="ai-dash-profile-stat-card">
+                    <FaBookOpen className="stat-icon" style={{ color: '#10b981' }} />
+                    <div className="stat-value">{progressData?.summary?.totalStudyMinutes || 0}m</div>
+                    <div className="stat-label">Study Time</div>
                   </div>
                 </div>
               </div>
+
+              {/* Edit Profile */}
               <div className="ai-dash-section">
                 <h3><FaEdit style={{ marginRight: '0.5rem' }} /> Edit Profile</h3>
                 <form className="ai-dash-profile-form" onSubmit={handleProfileSave}>
@@ -523,6 +552,8 @@ export default function AILearningDashboard() {
                   </button>
                 </form>
               </div>
+
+              {/* Change Password */}
               <div className="ai-dash-section">
                 <h3><FaKey style={{ marginRight: '0.5rem' }} /> Change Password</h3>
                 <form className="ai-dash-profile-form" onSubmit={handlePasswordSave}>

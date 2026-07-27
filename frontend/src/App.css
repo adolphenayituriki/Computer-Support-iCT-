@@ -13892,6 +13892,134 @@ header.scrolled .nav-dropdown-item-btn:hover {
    PROFILE TAB
    ══════════════════════════════════════════════ */
 
+/* Profile Card */
+.ai-dash-profile-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.ai-dash-profile-card-bg {
+  height: 56px;
+  background: linear-gradient(135deg, #FFCE08 0%, #fbbf24 50%, #f59e0b 100%);
+}
+
+.ai-dash-profile-card-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.25rem;
+  margin-top: -28px;
+}
+
+.ai-dash-profile-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ai-dash-profile-avatar-lg {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #1e293b;
+  color: #FFCE08;
+  font-size: 1.2rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.ai-dash-profile-badge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ai-dash-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-dash-profile-info h2 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.ai-dash-profile-email {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.ai-dash-profile-joined {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  margin: 0.1rem 0 0;
+}
+
+.ai-dash-profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.75rem;
+}
+
+.ai-dash-profile-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.6rem 0.25rem;
+  border-right: 1px solid #f1f5f9;
+  transition: background 0.2s;
+}
+
+.ai-dash-profile-stat-card:hover {
+  background: #fafafa;
+}
+
+.ai-dash-profile-stat-card:last-child {
+  border-right: none;
+}
+
+.ai-dash-profile-stat-card .stat-icon {
+  font-size: 0.9rem;
+}
+
+.ai-dash-profile-stat-card .stat-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.ai-dash-profile-stat-card .stat-label {
+  font-size: 0.6rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Legacy profile header (kept for other pages) */
 .ai-dash-profile-header {
   display: flex;
   align-items: center;
@@ -16349,6 +16477,15 @@ header.scrolled .nav-dropdown-item-btn:hover {
   /* ─── Profile ─── */
   .ai-dash-profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .ai-dash-profile-avatar { width: 56px; height: 56px; font-size: 1.2rem; }
+
+  .ai-dash-profile-card-bg { height: 44px; }
+  .ai-dash-profile-card-content { flex-direction: column; align-items: center; text-align: center; padding: 0 1rem; margin-top: -24px; }
+  .ai-dash-profile-avatar-lg { width: 52px; height: 52px; font-size: 1rem; }
+  .ai-dash-profile-info { text-align: center; }
+  .ai-dash-profile-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .ai-dash-profile-stat-card { border-right: none; border-bottom: 1px solid #f1f5f9; padding: 0.5rem 0.25rem; }
+  .ai-dash-profile-stat-card:nth-child(odd) { border-right: 1px solid #f1f5f9; }
+  .ai-dash-profile-stat-card:nth-last-child(-n+2) { border-bottom: none; }
   .ai-dash-profile-header h3 { font-size: 1rem; }
   .ai-dash-profile-header p { font-size: 0.8rem; }
   .ai-dash-profile-stats { gap: 0.6rem; flex-wrap: wrap; }
