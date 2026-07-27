@@ -127,9 +127,6 @@ export default function AILearning() {
         <section id="ai-features" className="py-24 bg-gradient-to-b from-slate-50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-4">
-                <FaRobot size={14} /> POWERED BY AI
-              </span>
               <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('aiLearning.featuresTitle')}</h2>
               <p className="text-lg text-slate-500 max-w-2xl mx-auto">{t('aiLearning.featuresSub')}</p>
             </div>
