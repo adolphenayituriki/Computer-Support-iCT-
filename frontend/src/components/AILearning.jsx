@@ -8,44 +8,44 @@ import {
   FaPuzzlePiece, FaChartLine, FaRoute, FaLanguage, FaMicroscope,
   FaChalkboardTeacher, FaGraduationCap, FaLaptop, FaSchool, FaUsers,
   FaCheckCircle, FaArrowRight, FaStar, FaLightbulb, FaRocket, FaGlobe,
-  FaBrain, FaSearch, FaChartBar, FaBookOpen, FaCogs
+  FaBrain, FaSearch, FaChartBar, FaBookOpen, FaCogs, FaPlay, FaShieldAlt
 } from 'react-icons/fa';
 
 const FEATURES = [
-  { icon: <FaRobot />, key: 1 },
-  { icon: <FaImage />, key: 2 },
-  { icon: <FaVideo />, key: 3 },
-  { icon: <FaHeadphones />, key: 4 },
-  { icon: <FaFlask />, key: 5 },
-  { icon: <FaQuestionCircle />, key: 6 },
-  { icon: <FaPuzzlePiece />, key: 7 },
-  { icon: <FaBrain />, key: 8 },
-  { icon: <FaChartBar />, key: 9 },
-  { icon: <FaRoute />, key: 10 },
-  { icon: <FaLanguage />, key: 11 },
-  { icon: <FaMicroscope />, key: 12 },
-  { icon: <FaChalkboardTeacher />, key: 13 },
+  { icon: FaRobot, color: 'from-blue-500 to-blue-600', key: 1 },
+  { icon: FaImage, color: 'from-purple-500 to-pink-500', key: 2 },
+  { icon: FaVideo, color: 'from-red-500 to-orange-500', key: 3 },
+  { icon: FaHeadphones, color: 'from-emerald-500 to-teal-500', key: 4 },
+  { icon: FaFlask, color: 'from-cyan-500 to-blue-500', key: 5 },
+  { icon: FaQuestionCircle, color: 'from-amber-500 to-yellow-500', key: 6 },
+  { icon: FaPuzzlePiece, color: 'from-pink-500 to-rose-500', key: 7 },
+  { icon: FaBrain, color: 'from-violet-500 to-purple-600', key: 8 },
+  { icon: FaChartBar, color: 'from-teal-500 to-cyan-500', key: 9 },
+  { icon: FaRoute, color: 'from-indigo-500 to-blue-500', key: 10 },
+  { icon: FaLanguage, color: 'from-orange-500 to-red-500', key: 11 },
+  { icon: FaMicroscope, color: 'from-green-500 to-emerald-500', key: 12 },
+  { icon: FaChalkboardTeacher, color: 'from-blue-600 to-indigo-600', key: 13 },
 ];
 
 const USERS = [
-  { icon: <FaGraduationCap />, key: 1 },
-  { icon: <FaChalkboardTeacher />, key: 2 },
-  { icon: <FaSchool />, key: 3 },
-  { icon: <FaUsers />, key: 4 },
+  { icon: FaGraduationCap, color: 'text-blue-500', bg: 'bg-blue-50', key: 1 },
+  { icon: FaChalkboardTeacher, color: 'text-emerald-500', bg: 'bg-emerald-50', key: 2 },
+  { icon: FaSchool, color: 'text-purple-500', bg: 'bg-purple-50', key: 3 },
+  { icon: FaUsers, color: 'text-amber-500', bg: 'bg-amber-50', key: 4 },
 ];
 
 const BENEFITS = [
-  { icon: <FaLightbulb />, key: 1 },
-  { icon: <FaCogs />, key: 2 },
-  { icon: <FaRocket />, key: 3 },
-  { icon: <FaGlobe />, key: 4 },
+  { icon: FaLightbulb, color: 'from-yellow-400 to-amber-500', key: 1 },
+  { icon: FaCogs, color: 'from-blue-500 to-indigo-500', key: 2 },
+  { icon: FaRocket, color: 'from-red-500 to-pink-500', key: 3 },
+  { icon: FaGlobe, color: 'from-emerald-500 to-teal-500', key: 4 },
 ];
 
 const PHASES = [
-  { icon: <FaLaptop />, key: 1 },
-  { icon: <FaImage />, key: 2 },
-  { icon: <FaMicroscope />, key: 3 },
-  { icon: <FaGlobe />, key: 4 },
+  { icon: FaLaptop, color: 'from-blue-500 to-blue-600', key: 1 },
+  { icon: FaImage, color: 'from-purple-500 to-pink-500', key: 2 },
+  { icon: FaMicroscope, color: 'from-emerald-500 to-teal-500', key: 3 },
+  { icon: FaGlobe, color: 'from-amber-500 to-orange-500', key: 4 },
 ];
 
 export default function AILearning() {
@@ -60,160 +60,205 @@ export default function AILearning() {
     return () => clearInterval(timer);
   }, []);
 
+  const openAuth = () => user ? navigate('/ai-dashboard') : setShowAuth(true);
+
   return (
     <>
-    <div className="ai-page">
-      {/* Hero */}
-      <section className="ai-hero">
-        <div className={`ai-hero-slide${slide === 0 ? ' active' : ''}`} style={{ backgroundImage: "url('/Seconadry students.jpg')" }}></div>
-        <div className={`ai-hero-slide${slide === 1 ? ' active' : ''}`} style={{ backgroundImage: "url('/primary students.jpg')" }}></div>
-        <div className="container ai-hero-content">
-          <span className="ai-hero-badge">
-            <FaStar /> {t('aiLearning.heroBadge')}
-          </span>
-          <h1>{t('aiLearning.heroTitle')}</h1>
-          <p className="ai-hero-sub">{t('aiLearning.heroSub')}</p>
-          <p className="ai-hero-desc">{t('aiLearning.heroDesc')}</p>
-          <div className="ai-hero-btns">
-            <a href="#ai-features" className="btn">
-              <FaSearch style={{ marginRight: '0.5rem' }} /> {t('aiLearning.heroCta')}
-            </a>
-            <button className="btn btn-outline" onClick={() => user ? navigate('/ai-dashboard') : setShowAuth(true)}>
-              <FaArrowRight style={{ marginRight: '0.5rem' }} /> {t('aiLearning.heroSecondary')}
-            </button>
+      <div className="min-h-screen bg-white">
+        {/* Hero */}
+        <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+          <div className="absolute inset-0">
+            <div className={`absolute inset-0 transition-opacity duration-1000 ${slide === 0 ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: "url('/Seconadry students.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            <div className={`absolute inset-0 transition-opacity duration-1000 ${slide === 1 ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: "url('/primary students.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/50" />
           </div>
-          <div className="ai-hero-stats">
-            <div className="ai-stat">
-              <FaRobot size={28} />
-              <strong>13</strong>
-              <span>AI Features</span>
-            </div>
-            <div className="ai-stat">
-              <FaGraduationCap size={28} />
-              <strong>6+</strong>
-              <span>Subject Areas</span>
-            </div>
-            <div className="ai-stat">
-              <FaGlobe size={28} />
-              <strong>3</strong>
-              <span>Languages</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Features Grid */}
-      <section id="ai-features" className="ai-features section-alt">
-        <div className="container">
-          <h2 className="section-title">{t('aiLearning.featuresTitle')}</h2>
-          <p className="section-sub">{t('aiLearning.featuresSub')}</p>
-          <div className="ai-features-grid">
-            {FEATURES.map((f) => (
-              <div className="ai-feature-card" key={f.key}>
-                <div className="ai-feature-icon">{f.icon}</div>
-                <h3>{t(`aiLearning.feature${f.key}Title`)}</h3>
-                <p>{t(`aiLearning.feature${f.key}Desc`)}</p>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-semibold mb-6">
+                <FaStar size={14} /> {t('aiLearning.heroBadge')}
+              </span>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-4">
+                {t('aiLearning.heroTitle')}
+              </h1>
+
+              <p className="text-lg sm:text-xl text-blue-300 font-semibold mb-2">
+                {t('aiLearning.heroSub')}
+              </p>
+
+              <p className="text-base text-slate-300 mb-8 max-w-lg leading-relaxed">
+                {t('aiLearning.heroDesc')}
+              </p>
+
+              <div className="flex flex-wrap gap-3 mb-10">
+                <a href="#ai-features" className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/30">
+                  <FaSearch size={14} /> {t('aiLearning.heroCta')}
+                </a>
+                <button onClick={openAuth} className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-white/20 transition-all backdrop-blur-sm">
+                  <FaArrowRight size={14} /> {t('aiLearning.heroSecondary')}
+                </button>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* How It Works */}
-      <section className="ai-how">
-        <div className="container">
-          <h2 className="section-title">{t('aiLearning.howTitle')}</h2>
-          <p className="section-sub">{t('aiLearning.howSub')}</p>
-          <div className="ai-how-steps">
-            <div className="ai-how-step">
-              <div className="ai-how-num">1</div>
-              <h3>{t('aiLearning.howStep1Title')}</h3>
-              <p>{t('aiLearning.howStep1Desc')}</p>
-            </div>
-            <div className="ai-how-step">
-              <div className="ai-how-num">2</div>
-              <h3>{t('aiLearning.howStep2Title')}</h3>
-              <p>{t('aiLearning.howStep2Desc')}</p>
-            </div>
-            <div className="ai-how-step">
-              <div className="ai-how-num">3</div>
-              <h3>{t('aiLearning.howStep3Title')}</h3>
-              <p>{t('aiLearning.howStep3Desc')}</p>
+              <div className="flex gap-8">
+                {[
+                  { icon: FaRobot, value: '13', label: 'AI Features' },
+                  { icon: FaGraduationCap, value: '6+', label: 'Subject Areas' },
+                  { icon: FaGlobe, value: '3', label: 'Languages' },
+                ].map((s, i) => (
+                  <div key={i} className="text-center">
+                    <s.icon size={22} className="text-blue-400 mx-auto mb-1" />
+                    <div className="text-2xl font-extrabold text-white">{s.value}</div>
+                    <div className="text-[11px] text-slate-400 font-medium">{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Target Users */}
-      <section className="ai-users section-alt">
-        <div className="container">
-          <h2 className="section-title">{t('aiLearning.usersTitle')}</h2>
-          <p className="section-sub">{t('aiLearning.usersSub')}</p>
-          <div className="ai-users-grid">
-            {USERS.map((u) => (
-              <div className="ai-user-card" key={u.key}>
-                <div className="ai-user-icon">{u.icon}</div>
-                <h3>{t(`aiLearning.user${u.key}Title`)}</h3>
-                <p>{t(`aiLearning.user${u.key}Desc`)}</p>
-              </div>
-            ))}
+        {/* Features */}
+        <section id="ai-features" className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">{t('aiLearning.featuresTitle')}</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto">{t('aiLearning.featuresSub')}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {FEATURES.map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div key={f.key} className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform`}>
+                      <Icon size={18} />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 mb-1">{t(`aiLearning.feature${f.key}Title`)}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{t(`aiLearning.feature${f.key}Desc`)}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Benefits */}
-      <section className="ai-benefits">
-        <div className="container">
-          <h2 className="section-title">{t('aiLearning.benefitsTitle')}</h2>
-          <p className="section-sub">{t('aiLearning.benefitsSub')}</p>
-          <div className="ai-benefits-grid">
-            {BENEFITS.map((b) => (
-              <div className="ai-benefit-card" key={b.key}>
-                <div className="ai-benefit-icon">{b.icon}</div>
-                <h3>{t(`aiLearning.benefit${b.key}Title`)}</h3>
-                <p>{t(`aiLearning.benefit${b.key}Desc`)}</p>
-              </div>
-            ))}
+        {/* How It Works */}
+        <section className="py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">{t('aiLearning.howTitle')}</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto">{t('aiLearning.howSub')}</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { n: 1, color: 'from-blue-500 to-blue-600' },
+                { n: 2, color: 'from-amber-500 to-orange-500' },
+                { n: 3, color: 'from-emerald-500 to-teal-500' },
+              ].map((step) => (
+                <div key={step.n} className="relative bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-lg transition-all">
+                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${step.color} text-white font-bold text-lg flex items-center justify-center mx-auto mb-4`}>
+                    {step.n}
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">{t(`aiLearning.howStep${step.n}Title`)}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{t(`aiLearning.howStep${step.n}Desc`)}</p>
+                  {step.n < 3 && <div className="hidden md:block absolute top-1/2 -right-3 w-6 h-0.5 bg-slate-200" />}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Roadmap */}
-      <section className="ai-roadmap section-alt">
-        <div className="container">
-          <h2 className="section-title">{t('aiLearning.roadmapTitle')}</h2>
-          <p className="section-sub">{t('aiLearning.roadmapSub')}</p>
-          <div className="ai-roadmap-grid">
-            {PHASES.map((p, i) => (
-              <div className="ai-roadmap-card" key={p.key}>
-                <div className="ai-roadmap-phase">{t(`aiLearning.phase${p.key}`)}</div>
-                <div className="ai-roadmap-icon">{p.icon}</div>
-                <p>{t(`aiLearning.phase${p.key}Items`)}</p>
-                <div className="ai-roadmap-line"></div>
-              </div>
-            ))}
+        {/* Target Users */}
+        <section className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">{t('aiLearning.usersTitle')}</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto">{t('aiLearning.usersSub')}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {USERS.map((u) => {
+                const Icon = u.icon;
+                return (
+                  <div key={u.key} className="bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-lg transition-all">
+                    <div className={`w-14 h-14 rounded-2xl ${u.bg} flex items-center justify-center mx-auto mb-4`}>
+                      <Icon size={24} className={u.color} />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 mb-1">{t(`aiLearning.user${u.key}Title`)}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{t(`aiLearning.user${u.key}Desc`)}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section className="ai-cta">
-        <div className="container ai-cta-content">
-          <FaBookOpen size={40} className="ai-cta-icon" />
-          <h2>{t('aiLearning.ctaTitle')}</h2>
-          <p>{t('aiLearning.ctaDesc')}</p>
-          <div className="ai-cta-btns">
-            <button className="btn" onClick={() => user ? navigate('/ai-dashboard') : setShowAuth(true)}>
-              {t('aiLearning.ctaBtn')}
-            </button>
-            <a href="/#contact" className="btn btn-outline">
-              {t('aiLearning.ctaSecondary')}
-            </a>
+        {/* Benefits */}
+        <section className="py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">{t('aiLearning.benefitsTitle')}</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto">{t('aiLearning.benefitsSub')}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {BENEFITS.map((b) => {
+                const Icon = b.icon;
+                return (
+                  <div key={b.key} className="bg-white rounded-2xl p-6 border border-slate-100 hover:shadow-lg transition-all">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${b.color} flex items-center justify-center text-white mb-3`}>
+                      <Icon size={20} />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 mb-1">{t(`aiLearning.benefit${b.key}Title`)}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{t(`aiLearning.benefit${b.key}Desc`)}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
-    <AILearningAuthModal open={showAuth} onClose={() => setShowAuth(false)} />
+        </section>
+
+        {/* Roadmap */}
+        <section className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">{t('aiLearning.roadmapTitle')}</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto">{t('aiLearning.roadmapSub')}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {PHASES.map((p, i) => {
+                const Icon = p.icon;
+                return (
+                  <div key={p.key} className="bg-white rounded-2xl p-6 border border-slate-100 relative overflow-hidden hover:shadow-lg transition-all">
+                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${p.color}`} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-2 block">{t(`aiLearning.phase${p.key}`)}</span>
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${p.color} flex items-center justify-center text-white mb-3`}>
+                      <Icon size={18} />
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed">{t(`aiLearning.phase${p.key}Items`)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-700">
+          <div className="max-w-3xl mx-auto px-4 text-center">
+            <FaBookOpen size={40} className="text-blue-300 mx-auto mb-4" />
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">{t('aiLearning.ctaTitle')}</h2>
+            <p className="text-blue-200 mb-8 max-w-lg mx-auto">{t('aiLearning.ctaDesc')}</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button onClick={openAuth} className="inline-flex items-center gap-2 px-8 py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg">
+                <FaPlay size={14} /> {t('aiLearning.ctaBtn')}
+              </button>
+              <a href="/#contact" className="inline-flex items-center gap-2 px-8 py-3 bg-white/10 text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all">
+                <FaShieldAlt size={14} /> {t('aiLearning.ctaSecondary')}
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <AILearningAuthModal open={showAuth} onClose={() => setShowAuth(false)} />
     </>
   );
 }
