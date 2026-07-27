@@ -8,23 +8,24 @@ import {
   FaPuzzlePiece, FaChartLine, FaRoute, FaLanguage, FaMicroscope,
   FaChalkboardTeacher, FaGraduationCap, FaLaptop, FaSchool, FaUsers,
   FaCheckCircle, FaArrowRight, FaStar, FaLightbulb, FaRocket, FaGlobe,
-  FaBrain, FaSearch, FaChartBar, FaBookOpen, FaCogs, FaPlay, FaShieldAlt
+  FaBrain, FaSearch, FaChartBar, FaBookOpen, FaCogs, FaPlay, FaShieldAlt,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 
 const FEATURES = [
-  { icon: FaRobot, color: 'text-blue-600', accent: 'bg-blue-50', border: 'hover:border-blue-300', glow: 'group-hover:shadow-blue-100', key: 1 },
-  { icon: FaImage, color: 'text-purple-600', accent: 'bg-purple-50', border: 'hover:border-purple-300', glow: 'group-hover:shadow-purple-100', key: 2 },
-  { icon: FaVideo, color: 'text-red-500', accent: 'bg-red-50', border: 'hover:border-red-300', glow: 'group-hover:shadow-red-100', key: 3 },
-  { icon: FaHeadphones, color: 'text-emerald-600', accent: 'bg-emerald-50', border: 'hover:border-emerald-300', glow: 'group-hover:shadow-emerald-100', key: 4 },
-  { icon: FaFlask, color: 'text-cyan-600', accent: 'bg-cyan-50', border: 'hover:border-cyan-300', glow: 'group-hover:shadow-cyan-100', key: 5 },
-  { icon: FaQuestionCircle, color: 'text-amber-500', accent: 'bg-amber-50', border: 'hover:border-amber-300', glow: 'group-hover:shadow-amber-100', key: 6 },
-  { icon: FaPuzzlePiece, color: 'text-pink-500', accent: 'bg-pink-50', border: 'hover:border-pink-300', glow: 'group-hover:shadow-pink-100', key: 7 },
-  { icon: FaBrain, color: 'text-violet-600', accent: 'bg-violet-50', border: 'hover:border-violet-300', glow: 'group-hover:shadow-violet-100', key: 8 },
-  { icon: FaChartBar, color: 'text-teal-600', accent: 'bg-teal-50', border: 'hover:border-teal-300', glow: 'group-hover:shadow-teal-100', key: 9 },
-  { icon: FaRoute, color: 'text-indigo-600', accent: 'bg-indigo-50', border: 'hover:border-indigo-300', glow: 'group-hover:shadow-indigo-100', key: 10 },
-  { icon: FaLanguage, color: 'text-orange-500', accent: 'bg-orange-50', border: 'hover:border-orange-300', glow: 'group-hover:shadow-orange-100', key: 11 },
-  { icon: FaMicroscope, color: 'text-green-600', accent: 'bg-green-50', border: 'hover:border-green-300', glow: 'group-hover:shadow-green-100', key: 12 },
-  { icon: FaChalkboardTeacher, color: 'text-blue-700', accent: 'bg-blue-50', border: 'hover:border-blue-400', glow: 'group-hover:shadow-blue-100', key: 13 },
+  { icon: FaRobot, color: 'text-blue-600', accent: 'bg-blue-50', border: 'hover:border-blue-300', glow: 'group-hover:shadow-blue-100', key: 1, action: 'tutor', tag: 'Interactive' },
+  { icon: FaImage, color: 'text-purple-600', accent: 'bg-purple-50', border: 'hover:border-purple-300', glow: 'group-hover:shadow-purple-100', key: 2, action: 'topic', tag: 'Creative' },
+  { icon: FaVideo, color: 'text-red-500', accent: 'bg-red-50', border: 'hover:border-red-300', glow: 'group-hover:shadow-red-100', key: 3, action: 'topic', tag: 'Visual' },
+  { icon: FaHeadphones, color: 'text-emerald-600', accent: 'bg-emerald-50', border: 'hover:border-emerald-300', glow: 'group-hover:shadow-emerald-100', key: 4, action: 'topic', tag: 'Audio' },
+  { icon: FaFlask, color: 'text-cyan-600', accent: 'bg-cyan-50', border: 'hover:border-cyan-300', glow: 'group-hover:shadow-cyan-100', key: 5, action: 'topic', tag: 'Hands-on' },
+  { icon: FaQuestionCircle, color: 'text-amber-500', accent: 'bg-amber-50', border: 'hover:border-amber-300', glow: 'group-hover:shadow-amber-100', key: 6, action: 'quiz', tag: 'Practice' },
+  { icon: FaPuzzlePiece, color: 'text-pink-500', accent: 'bg-pink-50', border: 'hover:border-pink-300', glow: 'group-hover:shadow-pink-100', key: 7, action: 'topic', tag: 'Adaptive' },
+  { icon: FaBrain, color: 'text-violet-600', accent: 'bg-violet-50', border: 'hover:border-violet-300', glow: 'group-hover:shadow-violet-100', key: 8, action: 'topic', tag: 'Smart' },
+  { icon: FaChartBar, color: 'text-teal-600', accent: 'bg-teal-50', border: 'hover:border-teal-300', glow: 'group-hover:shadow-teal-100', key: 9, action: 'progress', tag: 'Insights' },
+  { icon: FaRoute, color: 'text-indigo-600', accent: 'bg-indigo-50', border: 'hover:border-indigo-300', glow: 'group-hover:shadow-indigo-100', key: 10, action: null, tag: 'Coming Soon' },
+  { icon: FaLanguage, color: 'text-orange-500', accent: 'bg-orange-50', border: 'hover:border-orange-300', glow: 'group-hover:shadow-orange-100', key: 11, action: null, tag: 'Coming Soon' },
+  { icon: FaMicroscope, color: 'text-green-600', accent: 'bg-green-50', border: 'hover:border-green-300', glow: 'group-hover:shadow-green-100', key: 12, action: null, tag: 'Coming Soon' },
+  { icon: FaChalkboardTeacher, color: 'text-blue-700', accent: 'bg-blue-50', border: 'hover:border-blue-400', glow: 'group-hover:shadow-blue-100', key: 13, action: null, tag: 'Coming Soon' },
 ];
 
 const USERS = [
@@ -61,6 +62,11 @@ export default function AILearning() {
   }, []);
 
   const openAuth = () => user ? navigate('/ai-dashboard') : setShowAuth(true);
+
+  const openFeature = (action) => {
+    if (!user) { setShowAuth(true); return; }
+    navigate('/ai-dashboard');
+  };
 
   return (
     <>
@@ -130,19 +136,34 @@ export default function AILearning() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {FEATURES.map((f) => {
                 const Icon = f.icon;
+                const isAvailable = !!f.action;
                 return (
-                  <div key={f.key} className={`group relative bg-white rounded-2xl p-7 border border-slate-200 ${f.border} hover:shadow-2xl ${f.glow} transition-all duration-300 cursor-default`}>
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${f.accent} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon size={22} className={f.color} />
+                  <div key={f.key} className={`group relative bg-white rounded-2xl p-6 border border-slate-200 ${f.border} hover:shadow-2xl ${f.glow} transition-all duration-300 flex flex-col`}>
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-11 h-11 rounded-xl ${f.accent} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon size={20} className={f.color} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-slate-900 mb-1">{t(`aiLearning.feature${f.key}Title`)}</h3>
-                        <span className={`inline-block text-[10px] font-bold uppercase tracking-wider ${f.color}`}>AI-Powered</span>
+                        <h3 className="text-sm font-bold text-slate-900 mb-0.5">{t(`aiLearning.feature${f.key}Title`)}</h3>
+                        <span className={`inline-block text-[10px] font-bold uppercase tracking-wider ${f.color}`}>{f.tag}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-slate-500 leading-relaxed pl-16">{t(`aiLearning.feature${f.key}Desc`)}</p>
-                    <div className="absolute bottom-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-slate-100 to-transparent group-hover:via-blue-200 transition-all duration-300" />
+                    <p className="text-xs text-slate-500 leading-relaxed pl-14 mb-4 flex-1">{t(`aiLearning.feature${f.key}Desc`)}</p>
+                    <div className="pl-14">
+                      {isAvailable ? (
+                        <button
+                          onClick={() => openFeature(f.action)}
+                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${user ? `bg-slate-900 hover:bg-slate-800 text-white shadow-md shadow-slate-900/10` : `bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200`}`}
+                        >
+                          {user ? 'Open' : 'Sign In to Access'}
+                          <FaArrowRight size={10} />
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-slate-50 text-slate-400 border border-slate-100 cursor-not-allowed">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
