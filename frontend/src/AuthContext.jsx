@@ -52,12 +52,15 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (name, email, password, phone) => {
+    const body = { name, password };
+    if (email) body.email = email;
+    if (phone) body.phone = phone;
     let res;
     try {
       res = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, phone }),
+        body: JSON.stringify(body),
       });
     } catch {
       throw new Error('No internet connection. Please check your network and try again.');

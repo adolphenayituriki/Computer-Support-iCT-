@@ -50,7 +50,7 @@ export default function AILearningAuthModal({ open, onClose }) {
     if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setLoading(true);
     try {
-      const data = await register(form.name, form.email || undefined, form.password, form.phone || undefined);
+      const data = await register(form.name, registerMethod === 'email' ? form.email : '', form.password, registerMethod === 'phone' ? form.phone : '');
       localStorage.setItem('cshub_ai_role', role);
       showToast(`Welcome, ${data.user.name}! Account created.`);
       onClose();
