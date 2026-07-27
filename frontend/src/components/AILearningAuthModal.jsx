@@ -29,7 +29,7 @@ export default function AILearningAuthModal({ open, onClose }) {
       if (loginMethod === 'email') {
         data = await login(form.email, form.password);
       } else {
-        data = await loginByPhone(form.phone);
+        data = await loginByPhone(form.phone, form.password);
       }
       localStorage.setItem('cshub_ai_role', role);
       showToast(`Welcome back, ${data.user.name}!`);
@@ -139,8 +139,8 @@ export default function AILearningAuthModal({ open, onClose }) {
                   <input type="tel" placeholder="Phone number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required className={inputClass} />
                 )}
                 <div className="relative">
-                  <input type={showPwd.password ? 'text' : 'password'} placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required={loginMethod === 'email'} disabled={loginMethod === 'phone'} className={`${inputClass} pr-8 ${loginMethod === 'phone' ? 'opacity-50' : ''}`} />
-                  {loginMethod === 'email' && <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" onClick={() => setShowPwd({ ...showPwd, password: !showPwd.password })}>{showPwd.password ? <FaEyeSlash size={12} /> : <FaEye size={12} />}</button>}
+                  <input type={showPwd.password ? 'text' : 'password'} placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required className={`${inputClass} pr-8`} />
+                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" onClick={() => setShowPwd({ ...showPwd, password: !showPwd.password })}>{showPwd.password ? <FaEyeSlash size={12} /> : <FaEye size={12} />}</button>
                 </div>
                 <button type="submit" disabled={loading || !role} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-40 flex items-center justify-center gap-1.5">
                   {loading ? <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" /> : <>Sign In <FaArrowRight size={10} /></>}

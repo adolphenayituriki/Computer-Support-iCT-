@@ -11,15 +11,30 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export async function register(req, res) {
   try {
     const { name, email, password, phone } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'All fields are required.' });
+    if (!name || !password) {
+      return res.status(400).json({ error: 'Name and password are required.' });
     }
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(409).json({ error: 'Email already registered.' });
+    if (!email && !phone) {
+      return res.status(400).json({ error: 'Please provide an email or phone number.' });
+    }
+    if (email) {
+      const existingEmail = await User.findOne({ email });
+      if (existingEmail) return res.status(409).json({ error: 'Email already registered.' });
+    }
+    if (phone) {
+      const existingPhone = await User.findOne({ phone });
+      if (existingPhone) return res.status(409).json({ error: 'Phone number already registered.' });
+    }
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed, phone: phone || '', phoneVerified: !!phone });
-    sendUserWelcome(email, name).catch((e) => console.log('Email error:', e.message));
-    sendAdminNotification('New User Registered', `Name: ${name}\nEmail: ${email}${phone ? '\nPhone: ' + phone : ''}`).catch(() => {});
+    const user = await User.create({
+      name,
+      email: email || '',
+      password: hashed,
+      phone: phone || '',
+      phoneVerified: !!phone,
+    });
+    if (email) sendUserWelcome(email, name).catch((e) => console.log('Email error:', e.message));
+    sendAdminNotification('New User Registered', `Name: ${name}\n${email ? 'Email: ' + email : ''}${phone ? '\nPhone: ' + phone : ''}`).catch(() => {});
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: false, isTeamMember: false }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, phoneVerified: user.phoneVerified, isAdmin: false, isTeamMember: false } });
   } catch (err) {
@@ -29,16 +44,20 @@ export async function register(req, res) {
 
 export async function login(req, res) {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required.' });
+    const { email, phone, password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required.' });
     }
-    const user = await User.findOne({ email });
+    if (!email && !phone) {
+      return res.status(400).json({ error: 'Email or phone number is required.' });
+    }
+    const user = email ? await User.findOne({ email }) : await User.findOne({ phone });
     if (!user) return res.status(401).json({ error: 'Invalid credentials.' });
+    if (!user.password) return res.status(401).json({ error: 'This account uses Google Sign-In. Please log in with Google.' });
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Invalid credentials.' });
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -46,10 +65,14 @@ export async function login(req, res) {
 
 export async function loginByPhone(req, res) {
   try {
-    const { phone } = req.body;
+    const { phone, password } = req.body;
     if (!phone) return res.status(400).json({ error: 'Phone number is required.' });
+    if (!password) return res.status(400).json({ error: 'Password is required.' });
     const user = await User.findOne({ phone });
     if (!user) return res.status(404).json({ error: 'No account found with this phone number. Please register first.' });
+    if (!user.password) return res.status(401).json({ error: 'This account uses Google Sign-In. Please log in with Google.' });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: 'Invalid password.' });
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, phoneVerified: user.phoneVerified, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {

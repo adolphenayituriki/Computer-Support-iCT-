@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, default: '' },
   phone: { type: String, default: '' },
   phoneVerified: { type: Boolean, default: false },
   password: { type: String, required: false },
@@ -14,5 +14,8 @@ const userSchema = new mongoose.Schema({
   setupToken: { type: String },
   setupTokenExpires: { type: Number },
 }, { timestamps: true });
+
+userSchema.index({ email: 1 }, { unique: true, sparse: true });
+userSchema.index({ phone: 1 }, { unique: true, sparse: true });
 
 export default mongoose.model('User', userSchema);

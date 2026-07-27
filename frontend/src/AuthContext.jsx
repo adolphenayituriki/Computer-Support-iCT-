@@ -106,13 +106,13 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const loginByPhone = async (phone) => {
+  const loginByPhone = async (phone, password) => {
     let res;
     try {
       res = await fetch(`${API_BASE}/api/auth/login-phone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, password }),
       });
     } catch {
       throw new Error('No internet connection. Please check your network and try again.');
