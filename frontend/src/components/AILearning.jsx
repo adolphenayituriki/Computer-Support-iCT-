@@ -151,38 +151,31 @@ export default function AILearning() {
         </section>
 
         {/* How It Works */}
-        <section className="py-24 bg-white">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <div className="text-center mb-10">
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-700 text-sm font-bold mb-4">
                 <FaRocket size={14} /> SIMPLE PROCESS
               </span>
-              <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('aiLearning.howTitle')}</h2>
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-3 tracking-tight">{t('aiLearning.howTitle')}</h2>
               <p className="text-lg text-slate-500 max-w-2xl mx-auto">{t('aiLearning.howSub')}</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { n: 1, color: 'from-blue-500 to-blue-600', text: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-                { n: 2, color: 'from-amber-500 to-orange-500', text: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200' },
-                { n: 3, color: 'from-emerald-500 to-teal-500', text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-              ].map((step, i) => (
-                <div key={step.n} className="relative group">
-                  <div className="bg-white rounded-2xl p-8 border border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-100 transition-all duration-300 text-center h-full">
-                    <div className="relative inline-block mb-6">
-                      <span style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }} className={`text-8xl font-black ${step.text} opacity-15 absolute -top-3 left-1/2 -translate-x-1/2 select-none`}>
-                        {step.n}
-                      </span>
-                      <div className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <span className="text-white text-xl font-black">{step.n}</span>
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-3">{t(`aiLearning.howStep${step.n}Title`)}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">{t(`aiLearning.howStep${step.n}Desc`)}</p>
-                  </div>
+                { n: 1, text: 'text-blue-600' },
+                { n: 2, text: 'text-amber-600' },
+                { n: 3, text: 'text-emerald-600' },
+              ].map((step) => (
+                <div key={step.n} className="relative group text-center px-4">
+                  <span style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }} className={`text-7xl font-black ${step.text} opacity-20 block mb-2 select-none`}>
+                    {step.n}
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">{t(`aiLearning.howStep${step.n}Title`)}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{t(`aiLearning.howStep${step.n}Desc`)}</p>
                   {step.n < 3 && (
-                    <div className="hidden md:flex absolute top-1/2 -right-4 w-8 items-center justify-center">
-                      <div className="w-full h-0.5 bg-gradient-to-r from-slate-200 to-slate-300" />
-                      <div className="absolute right-0 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[6px] border-l-slate-300" />
+                    <div className="hidden md:flex absolute top-6 -right-3 w-6 items-center justify-center">
+                      <div className="w-full h-0.5 bg-slate-200" />
+                      <div className="absolute right-0 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[5px] border-l-slate-300" />
                     </div>
                   )}
                 </div>
