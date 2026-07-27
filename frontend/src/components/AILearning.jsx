@@ -12,19 +12,19 @@ import {
 } from 'react-icons/fa';
 
 const FEATURES = [
-  { icon: FaRobot, color: 'from-blue-500 to-blue-600', key: 1 },
-  { icon: FaImage, color: 'from-purple-500 to-pink-500', key: 2 },
-  { icon: FaVideo, color: 'from-red-500 to-orange-500', key: 3 },
-  { icon: FaHeadphones, color: 'from-emerald-500 to-teal-500', key: 4 },
-  { icon: FaFlask, color: 'from-cyan-500 to-blue-500', key: 5 },
-  { icon: FaQuestionCircle, color: 'from-amber-500 to-yellow-500', key: 6 },
-  { icon: FaPuzzlePiece, color: 'from-pink-500 to-rose-500', key: 7 },
-  { icon: FaBrain, color: 'from-violet-500 to-purple-600', key: 8 },
-  { icon: FaChartBar, color: 'from-teal-500 to-cyan-500', key: 9 },
-  { icon: FaRoute, color: 'from-indigo-500 to-blue-500', key: 10 },
-  { icon: FaLanguage, color: 'from-orange-500 to-red-500', key: 11 },
-  { icon: FaMicroscope, color: 'from-green-500 to-emerald-500', key: 12 },
-  { icon: FaChalkboardTeacher, color: 'from-blue-600 to-indigo-600', key: 13 },
+  { icon: FaRobot, color: 'text-blue-600', accent: 'bg-blue-50', border: 'hover:border-blue-300', glow: 'group-hover:shadow-blue-100', key: 1 },
+  { icon: FaImage, color: 'text-purple-600', accent: 'bg-purple-50', border: 'hover:border-purple-300', glow: 'group-hover:shadow-purple-100', key: 2 },
+  { icon: FaVideo, color: 'text-red-500', accent: 'bg-red-50', border: 'hover:border-red-300', glow: 'group-hover:shadow-red-100', key: 3 },
+  { icon: FaHeadphones, color: 'text-emerald-600', accent: 'bg-emerald-50', border: 'hover:border-emerald-300', glow: 'group-hover:shadow-emerald-100', key: 4 },
+  { icon: FaFlask, color: 'text-cyan-600', accent: 'bg-cyan-50', border: 'hover:border-cyan-300', glow: 'group-hover:shadow-cyan-100', key: 5 },
+  { icon: FaQuestionCircle, color: 'text-amber-500', accent: 'bg-amber-50', border: 'hover:border-amber-300', glow: 'group-hover:shadow-amber-100', key: 6 },
+  { icon: FaPuzzlePiece, color: 'text-pink-500', accent: 'bg-pink-50', border: 'hover:border-pink-300', glow: 'group-hover:shadow-pink-100', key: 7 },
+  { icon: FaBrain, color: 'text-violet-600', accent: 'bg-violet-50', border: 'hover:border-violet-300', glow: 'group-hover:shadow-violet-100', key: 8 },
+  { icon: FaChartBar, color: 'text-teal-600', accent: 'bg-teal-50', border: 'hover:border-teal-300', glow: 'group-hover:shadow-teal-100', key: 9 },
+  { icon: FaRoute, color: 'text-indigo-600', accent: 'bg-indigo-50', border: 'hover:border-indigo-300', glow: 'group-hover:shadow-indigo-100', key: 10 },
+  { icon: FaLanguage, color: 'text-orange-500', accent: 'bg-orange-50', border: 'hover:border-orange-300', glow: 'group-hover:shadow-orange-100', key: 11 },
+  { icon: FaMicroscope, color: 'text-green-600', accent: 'bg-green-50', border: 'hover:border-green-300', glow: 'group-hover:shadow-green-100', key: 12 },
+  { icon: FaChalkboardTeacher, color: 'text-blue-700', accent: 'bg-blue-50', border: 'hover:border-blue-400', glow: 'group-hover:shadow-blue-100', key: 13 },
 ];
 
 const USERS = [
@@ -118,22 +118,31 @@ export default function AILearning() {
         </section>
 
         {/* Features */}
-        <section id="ai-features" className="py-20 bg-slate-50">
+        <section id="ai-features" className="py-24 bg-gradient-to-b from-slate-50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">{t('aiLearning.featuresTitle')}</h2>
-              <p className="text-slate-500 max-w-2xl mx-auto">{t('aiLearning.featuresSub')}</p>
+            <div className="text-center mb-16">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-4">
+                <FaRobot size={14} /> POWERED BY AI
+              </span>
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('aiLearning.featuresTitle')}</h2>
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">{t('aiLearning.featuresSub')}</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {FEATURES.map((f) => {
                 const Icon = f.icon;
                 return (
-                  <div key={f.key} className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform`}>
-                      <Icon size={18} />
+                  <div key={f.key} className={`group relative bg-white rounded-2xl p-7 border border-slate-200 ${f.border} hover:shadow-2xl ${f.glow} transition-all duration-300 cursor-default`}>
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${f.accent} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon size={22} className={f.color} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-slate-900 mb-1">{t(`aiLearning.feature${f.key}Title`)}</h3>
+                        <span className={`inline-block text-[10px] font-bold uppercase tracking-wider ${f.color}`}>AI-Powered</span>
+                      </div>
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 mb-1">{t(`aiLearning.feature${f.key}Title`)}</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">{t(`aiLearning.feature${f.key}Desc`)}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed pl-16">{t(`aiLearning.feature${f.key}Desc`)}</p>
+                    <div className="absolute bottom-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-slate-100 to-transparent group-hover:via-blue-200 transition-all duration-300" />
                   </div>
                 );
               })}
