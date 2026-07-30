@@ -5,6 +5,7 @@ import LearningProgress from '../models/LearningProgress.js';
 import TopicSession from '../models/TopicSession.js';
 import Notification from '../models/Notification.js';
 import Resource from '../models/Resource.js';
+import * as gemini from '../services/gemini.js';
 
 const SUBJECTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'English', 'Kinyarwanda', 'French', 'Geography', 'History'];
 
@@ -272,22 +273,39 @@ export async function tutorChat(req, res) {
     if (!message) return res.status(400).json({ error: 'Message is required.' });
 
     const subject = reqSubject || detectSubject(message) || 'general';
-    let reply = getAIResponse(message);
-
-    const relevantResources = await findRelevantResources(message, subject, 2);
-    if (relevantResources.length > 0) {
-      const resourceRefs = relevantResources.map((r) => `"${r.title}" (${r.subject})`).join(', ');
-      const contentSnippets = relevantResources.map((r) => {
-        const snippet = r.content.substring(0, 600);
-        return `\n\n📖 From "${r.title}":\n${snippet}...`;
-      }).join('');
-      reply += `\n\n📚 Related resources available: ${resourceRefs}${contentSnippets}\n\n💡 Check the Resource Library for these materials to study further!`;
-    }
 
     let session;
     if (sessionId) {
       session = await LearningSession.findById(sessionId);
     }
+
+    const historyMessages = session ? session.messages.slice(-10) : [];
+    const geminiReply = await gemini.tutorChat(
+      [...historyMessages, { role: 'user', content: message }],
+      subject
+    );
+
+    let reply;
+    if (geminiReply) {
+      reply = geminiReply;
+    } else {
+      reply = getAIResponse(message);
+    }
+
+    const relevantResources = await findRelevantResources(message, subject, 2);
+    if (relevantResources.length > 0) {
+      const resourceRefs = relevantResources.map((r) => `"${r.title}" (${r.subject})`).join(', ');
+      if (!geminiReply) {
+        const contentSnippets = relevantResources.map((r) => {
+          const snippet = r.content.substring(0, 600);
+          return `\n\n📖 From "${r.title}":\n${snippet}...`;
+        }).join('');
+        reply += `\n\n📚 Related resources available: ${resourceRefs}${contentSnippets}\n\n💡 Check the Resource Library for these materials to study further!`;
+      } else {
+        reply += `\n\n📚 Related resources you can study: ${resourceRefs}`;
+      }
+    }
+
     if (!session) {
       session = await LearningSession.create({
         userId: req.user.id,
@@ -311,7 +329,7 @@ export async function tutorChat(req, res) {
       { new: true, upsert: true }
     );
 
-    res.json({ reply, sessionId: session._id, subject, progress, resourcesReferenced: relevantResources.length });
+    res.json({ reply, sessionId: session._id, subject, progress, resourcesReferenced: relevantResources.length, aiProvider: geminiReply ? 'gemini' : 'rules' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -319,14 +337,20 @@ export async function tutorChat(req, res) {
 
 export async function generateQuiz(req, res) {
   try {
-    const { subject, level, count = 5 } = req.body;
+    const { subject, topic, level, count = 5 } = req.body;
     if (!subject) return res.status(400).json({ error: 'Subject is required.' });
 
-    const bank = QUESTION_BANK[subject] || [];
-    if (bank.length === 0) return res.status(400).json({ error: 'No questions available for this subject.' });
+    let questions;
 
-    const shuffled = [...bank].sort(() => Math.random() - 0.5);
-    const questions = shuffled.slice(0, Math.min(count, shuffled.length));
+    const geminiQuestions = await gemini.generateQuizQuestions(subject, topic || '', count, level || 'secondary');
+    if (geminiQuestions) {
+      questions = geminiQuestions;
+    } else {
+      const bank = QUESTION_BANK[subject] || [];
+      if (bank.length === 0) return res.status(400).json({ error: 'No questions available for this subject.' });
+      const shuffled = [...bank].sort(() => Math.random() - 0.5);
+      questions = shuffled.slice(0, Math.min(count, shuffled.length));
+    }
 
     const quiz = await Quiz.create({
       userId: req.user.id,
@@ -341,7 +365,7 @@ export async function generateQuiz(req, res) {
       options: q.options,
     }));
 
-    res.json({ quizId: quiz._id, questions: safeQuestions, subject, totalQuestions: quiz.totalQuestions });
+    res.json({ quizId: quiz._id, questions: safeQuestions, subject, totalQuestions: quiz.totalQuestions, aiGenerated: !!geminiQuestions });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -676,8 +700,32 @@ export async function processTopic(req, res) {
     const subject = detectTopicSubject(title);
     const content = TOPIC_CONTENT[subject] || TOPIC_CONTENT.computer_science;
 
+    const geminiContent = await gemini.generateTopicContent(title, level || 'beginner');
+
     const imageUrl = generatePlaceholderImage(subject, title);
-    const transcript = `Welcome to this AI audio lesson on "${title}". ${content.summary} ${content.sections.map((s) => s.heading + ': ' + s.content).join(' ')}`;
+    let lesson, quizData, flashcardData, imagePrompt;
+
+    if (geminiContent) {
+      lesson = { summary: geminiContent.summary, sections: geminiContent.sections };
+      quizData = geminiContent.quiz.map((q) => ({
+        question: q.question,
+        options: q.options,
+        correctIndex: q.correctIndex,
+        explanation: q.explanation,
+      }));
+      flashcardData = geminiContent.flashcards.map((f) => ({
+        front: f.front,
+        back: f.back,
+      }));
+      imagePrompt = geminiContent.imagePrompt;
+    } else {
+      lesson = { summary: content.summary, sections: content.sections };
+      quizData = generateTopicQuiz(subject, title);
+      flashcardData = generateTopicFlashcards(subject);
+      imagePrompt = content.image.prompt;
+    }
+
+    const transcript = `Welcome to this AI audio lesson on "${title}". ${lesson.summary} ${lesson.sections.map((s) => s.heading + ': ' + s.content).join(' ')}`;
 
     const topic = await TopicSession.create({
       userId: req.user.id,
@@ -685,12 +733,12 @@ export async function processTopic(req, res) {
       subject,
       level: level || 'beginner',
       status: 'completed',
-      lesson: { summary: content.summary, sections: content.sections },
-      image: { url: imageUrl, prompt: content.image.prompt, alt: content.image.alt },
+      lesson,
+      image: { url: imageUrl, prompt: imagePrompt, alt: content.image.alt },
       video: { url: '', title: content.video.title, duration: content.video.duration },
       audio: { url: '', transcript, duration: content.video.duration },
-      quiz: generateTopicQuiz(subject, title),
-      flashcards: generateTopicFlashcards(subject),
+      quiz: quizData,
+      flashcards: flashcardData,
       tags: [subject, level || 'beginner'],
     });
 
@@ -702,7 +750,7 @@ export async function processTopic(req, res) {
       link: '',
     });
 
-    res.json(topic);
+    res.json({ ...topic.toObject(), aiGenerated: !!geminiContent });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -985,14 +1033,22 @@ export async function generateQuizFromResource(req, res) {
     const { count = 5 } = req.body;
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    const questions = generateQuestionsFromContent(resource.content, resource.subject, count);
+
+    let questions;
+    const geminiQuestions = await gemini.generateResourceQuiz(resource.content, resource.title, resource.subject, count);
+    if (geminiQuestions) {
+      questions = geminiQuestions;
+    } else {
+      questions = generateQuestionsFromContent(resource.content, resource.subject, count);
+    }
+
     const quiz = await Quiz.create({
       userId: req.user.id, subject: resource.subject, level: 'secondary',
       questions, totalQuestions: questions.length, resourceId: resource._id,
     });
     resource.quizzesGenerated += 1;
     await resource.save();
-    res.json({ quizId: quiz._id, questions: quiz.questions.map((q) => ({ text: q.text, options: q.options })), subject: resource.subject, totalQuestions: quiz.totalQuestions, resourceTitle: resource.title });
+    res.json({ quizId: quiz._id, questions: quiz.questions.map((q) => ({ text: q.text, options: q.options })), subject: resource.subject, totalQuestions: quiz.totalQuestions, resourceTitle: resource.title, aiGenerated: !!geminiQuestions });
   } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
@@ -1001,10 +1057,18 @@ export async function generateFlashcardsFromResource(req, res) {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    const flashcards = generateFlashcardsFromContent(resource.content, resource.subject);
+
+    let flashcards;
+    const geminiFlashcards = await gemini.generateResourceFlashcards(resource.content, resource.title, resource.subject);
+    if (geminiFlashcards) {
+      flashcards = geminiFlashcards;
+    } else {
+      flashcards = generateFlashcardsFromContent(resource.content, resource.subject);
+    }
+
     resource.flashcardsGenerated += 1;
     await resource.save();
-    res.json({ flashcards, resourceTitle: resource.title, subject: resource.subject });
+    res.json({ flashcards, resourceTitle: resource.title, subject: resource.subject, aiGenerated: !!geminiFlashcards });
   } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
@@ -1013,8 +1077,16 @@ export async function generateSummaryFromResource(req, res) {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found.' });
-    const summary = generateSummaryFromContent(resource.content, resource.title);
-    res.json({ ...summary, resourceTitle: resource.title, subject: resource.subject });
+
+    let summary;
+    const geminiSummary = await gemini.generateResourceSummary(resource.content, resource.title);
+    if (geminiSummary) {
+      summary = geminiSummary;
+    } else {
+      summary = generateSummaryFromContent(resource.content, resource.title);
+    }
+
+    res.json({ ...summary, resourceTitle: resource.title, subject: resource.subject, aiGenerated: !!geminiSummary });
   } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
@@ -1028,8 +1100,12 @@ export async function chatAboutResource(req, res) {
 
     const contentSnippet = resource.content.substring(0, 2000);
     const lower = message.toLowerCase();
+
     let reply;
-    if (lower.match(/\b(summary|summarize|overview|main point|key point)\b/)) {
+    const geminiReply = await gemini.chatAboutResourceContent(message, resource.content, resource.title, resource.subject);
+    if (geminiReply) {
+      reply = geminiReply;
+    } else if (lower.match(/\b(summary|summarize|overview|main point|key point)\b/)) {
       const summary = generateSummaryFromContent(resource.content, resource.title);
       reply = `Here's a summary of "${resource.title}":\n\n${summary.overview}\n\nKey Points:\n${summary.keyPoints.map((p, i) => `${i + 1}. ${p}`).join('\n')}`;
     } else if (lower.match(/\b(explain|tell me about|what is|what are|describe)\b/)) {
@@ -1044,7 +1120,7 @@ export async function chatAboutResource(req, res) {
     } else {
       reply = `I can help you with "${resource.title}" (${resource.subject}). Here's what I know:\n\n${contentSnippet.substring(0, 400)}...\n\nAsk me to explain concepts, summarize, or create quiz questions!`;
     }
-    res.json({ reply, resourceTitle: resource.title, subject: resource.subject });
+    res.json({ reply, resourceTitle: resource.title, subject: resource.subject, aiGenerated: !!geminiReply });
   } catch (err) { res.status(500).json({ error: err.message }); }
 }
 
