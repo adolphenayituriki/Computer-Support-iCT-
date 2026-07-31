@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
 import { AI_API_BASE } from '../api';
 import {
-  FaBook, FaLink, FaUpload, FaPlus, FaTrash, FaFilePdf, FaGlobe,
+  FaBook, FaUpload, FaPlus, FaTrash, FaFilePdf, FaGlobe,
   FaRobot, FaQuestionCircle, FaBrain, FaFileAlt, FaComments,
   FaSpinner, FaTimes, FaArrowLeft, FaSearch, FaExclamationTriangle,
-  FaCheckCircle, FaStar, FaLightbulb, FaCopy, FaChevronLeft, FaChevronRight, FaUser, FaShieldAlt
+  FaCheckCircle, FaStar, FaLightbulb, FaChevronLeft, FaChevronRight, FaUser
 } from 'react-icons/fa';
 
 const SUBJECTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'English', 'Geography', 'History', 'General'];
@@ -55,8 +55,17 @@ export default function AIResources({ onBack }) {
   const [chatMessages, setChatMessages] = useState([]);
 
   const [resourceTool, setResourceTool] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterSubject, setFilterSubject] = useState('All');
 
   const token = () => localStorage.getItem('cshub_token');
+
+  const filteredResources = resources.filter((r) => {
+    const q = search.trim().toLowerCase();
+    const matchQuery = !q || `${r.title} ${r.subject} ${r.description || ''}`.toLowerCase().includes(q);
+    const matchSubject = filterSubject === 'All' || r.subject === filterSubject;
+    return matchQuery && matchSubject;
+  });
 
   useEffect(() => { fetchResources(); }, []);
 
@@ -190,15 +199,17 @@ export default function AIResources({ onBack }) {
     } catch {}
   };
 
-  const generateResourceQuiz = async () => {
-    if (!selectedResource) return;
+  const generateResourceQuiz = async (resource) => {
+    const target = resource || selectedResource;
+    if (!target) return;
+    if (!resource) setSelectedResource(target);
     setQuizLoading(true);
     setResourceQuiz(null);
     setQuizAnswers({});
     setQuizSubmitted(false);
     setQuizResults(null);
     try {
-      const res = await fetch(`${AI_API_BASE}/api/ai/resources/${selectedResource._id}/quiz`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/resources/${target._id}/quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({ count: 5 }),
@@ -227,14 +238,16 @@ export default function AIResources({ onBack }) {
     setQuizSubmitted(true);
   };
 
-  const generateResourceFlashcards = async () => {
-    if (!selectedResource) return;
+  const generateResourceFlashcards = async (resource) => {
+    const target = resource || selectedResource;
+    if (!target) return;
+    if (!resource) setSelectedResource(target);
     setFlashcardLoading(true);
     setResourceFlashcards(null);
     setFlashcardIndex(0);
     setFlashcardFlipped(false);
     try {
-      const res = await fetch(`${AI_API_BASE}/api/ai/resources/${selectedResource._id}/flashcards`, {
+      const res = await fetch(`${AI_API_BASE}/api/ai/resources/${target._id}/flashcards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({}),
@@ -310,7 +323,7 @@ export default function AIResources({ onBack }) {
           <button className="ai-resource-back-btn" onClick={() => { setView('library'); setSelectedResource(null); setResourceTool(null); }}>
             <FaArrowLeft /> Back to Library
           </button>
-          <div className="ai-resource-detail-title">
+          <div className={`ai-resource-detail-title ${selectedResource.type}`}>
             {selectedResource.type === 'book' ? <FaFilePdf /> : <FaGlobe />}
             <div>
               <h2>{selectedResource.title}</h2>
@@ -626,32 +639,62 @@ export default function AIResources({ onBack }) {
           )}
         </div>
       ) : (
-        <div className="ai-resource-grid">
-          {resources.map((r) => (
-            <div className="ai-resource-card" key={r._id}>
-              <div className="ai-resource-card-header">
-                <div className={`ai-resource-card-icon ${r.type}`}>
-                  {r.type === 'book' ? <FaFilePdf /> : <FaGlobe />}
-                </div>
-                <div className="ai-resource-card-info">
-                  <h4>{r.title}</h4>
-                  <span className="ai-resource-card-meta">{r.subject} · {r.type === 'book' ? 'Book' : 'Link'}</span>
-                </div>
-              </div>
-              {r.description && <p className="ai-resource-card-desc">{r.description}</p>}
-              <div className="ai-resource-card-content">
-                <p>{renderContentPreview(r.content)}</p>
-              </div>
-              <div className="ai-resource-card-footer">
-                <button onClick={() => openResource(r)}><FaRobot /> Open</button>
-                <button onClick={() => { setSelectedResource(r); generateResourceQuiz(); }}><FaQuestionCircle /></button>
-                <button onClick={() => { setSelectedResource(r); generateResourceFlashcards(); }}><FaBrain /></button>
-                {isAdmin && <button onClick={() => handleDelete(r._id)}><FaTrash /></button>}
-              </div>
-              <small className="ai-resource-card-date">{new Date(r.createdAt).toLocaleDateString()}</small>
+        <>
+          <div className="ai-resource-toolbar">
+            <div className="ai-resource-search">
+              <FaSearch />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={`Search ${resources.length} resource${resources.length === 1 ? '' : 's'}...`}
+              />
             </div>
-          ))}
-        </div>
+            <div className="ai-resource-filters">
+              {['All', ...SUBJECTS].map((s) => (
+                <button
+                  key={s}
+                  className={`ai-resource-filter-chip${filterSubject === s ? ' active' : ''}`}
+                  onClick={() => setFilterSubject(s)}
+                >{s}</button>
+              ))}
+            </div>
+          </div>
+          {filteredResources.length === 0 ? (
+            <div className="ai-resource-empty">
+              <FaSearch size={40} />
+              <h3>No matching resources</h3>
+              <p>No resources match your search or subject filter. Try a different keyword or clear the filters.</p>
+            </div>
+          ) : (
+            <div className="ai-resource-grid">
+              {filteredResources.map((r) => (
+                <div className="ai-resource-card" key={r._id}>
+                  <div className="ai-resource-card-header">
+                    <div className={`ai-resource-card-icon ${r.type}`}>
+                      {r.type === 'book' ? <FaFilePdf /> : <FaGlobe />}
+                    </div>
+                    <div className="ai-resource-card-info">
+                      <h4>{r.title}</h4>
+                      <span className="ai-resource-card-meta">{r.subject} · {r.type === 'book' ? 'Book' : 'Link'}</span>
+                    </div>
+                  </div>
+                  {r.description && <p className="ai-resource-card-desc">{r.description}</p>}
+                  <div className="ai-resource-card-content">
+                    <p>{renderContentPreview(r.content)}</p>
+                  </div>
+                  <div className="ai-resource-card-footer">
+                    <button onClick={() => openResource(r)}><FaRobot /> Open</button>
+                    <button title="Generate quiz" onClick={() => generateResourceQuiz(r)}><FaQuestionCircle /></button>
+                    <button title="Generate flashcards" onClick={() => generateResourceFlashcards(r)}><FaBrain /></button>
+                    {isAdmin && <button title="Delete resource" onClick={() => handleDelete(r._id)}><FaTrash /></button>}
+                  </div>
+                  <small className="ai-resource-card-date">{new Date(r.createdAt).toLocaleDateString()}</small>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

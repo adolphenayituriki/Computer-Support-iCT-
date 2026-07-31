@@ -28,6 +28,11 @@ const topicSessionSchema = new mongoose.Schema({
     transcript: String,
     duration: String,
   },
+  simulation: {
+    title: String,
+    description: String,
+    html: String,
+  },
   quiz: [{
     question: String,
     options: [String],

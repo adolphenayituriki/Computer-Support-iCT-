@@ -4,7 +4,8 @@ import { authenticate, adminOnly } from '../middleware/auth.js';
 import {
   getProfile, updateProfile, tutorChat, generateQuiz, submitQuiz,
   getQuizHistory, getQuizById, getProgress, getSessions, getSession,
-  processTopic, getTopicHistory, getTopicById,
+  processTopic, getTopicHistory, getTopicById, deleteTopic, dedupeTopics,
+  proxyImage, generateSimulation, generateCareerGuidance, generateTeacherDoc,
   getNotifications, markNotificationsRead, deleteNotification,
   uploadResource, addLinkResource, getResources, getResourceById, deleteResource,
   adminGetResources,
@@ -32,9 +33,18 @@ router.get('/quizzes/:id', authenticate, getQuizById);
 
 router.get('/progress', authenticate, getProgress);
 
+router.get('/topics/process', (req, res) => res.status(405).json({ error: 'Use POST.' }));
 router.post('/topics/process', authenticate, processTopic);
 router.get('/topics', authenticate, getTopicHistory);
 router.get('/topics/:id', authenticate, getTopicById);
+router.delete('/topics/duplicates', authenticate, dedupeTopics);
+router.delete('/topics/:id', authenticate, deleteTopic);
+
+router.get('/proxy-image', authenticate, proxyImage);
+router.post('/simulations/generate', authenticate, generateSimulation);
+
+router.post('/careers/generate', authenticate, generateCareerGuidance);
+router.post('/teacher/generate', authenticate, adminOnly, generateTeacherDoc);
 
 router.get('/notifications', authenticate, getNotifications);
 router.post('/notifications/read', authenticate, markNotificationsRead);

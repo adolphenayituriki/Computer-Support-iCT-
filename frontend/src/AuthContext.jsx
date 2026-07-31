@@ -84,11 +84,11 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const updateProfile = async (name, email) => {
+  const updateProfile = async (name, email, phone) => {
     const res = await fetch(`${API_BASE}/api/auth/profile`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('cshub_token')}` },
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify({ name, email, phone }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);

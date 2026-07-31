@@ -7,43 +7,63 @@ import AITutor from './AITutor';
 import AIQuiz from './AIQuiz';
 import AITopicWorkspace from './AITopicWorkspace';
 import AIResources from './AIResources';
+import AICareer from './AICareer';
+import AITeacherAssistant from './AITeacherAssistant';
 import {
-  FaRobot, FaImage, FaVideo, FaHeadphones, FaFlask, FaQuestionCircle,
-  FaPuzzlePiece, FaChartLine, FaRoute, FaLanguage, FaMicroscope,
-  FaChalkboardTeacher, FaBrain, FaTachometerAlt, FaCog, FaSignOutAlt,
-  FaHome, FaBookOpen, FaGraduationCap, FaStar, FaCalendarAlt,
-  FaClock, FaCheckCircle, FaArrowRight, FaUser, FaBell,
-  FaLaptop, FaGlobe, FaLightbulb, FaRocket, FaComments, FaFire,
-  FaBars, FaTimes, FaSearch, FaTools, FaEnvelope, FaEnvelopeOpen,
-  FaCheck, FaTrash, FaEdit, FaKey
+  FaRobot, FaChartLine, FaTachometerAlt, FaCog, FaSignOutAlt,
+  FaHome, FaBookOpen, FaStar, FaCalendarAlt,
+  FaClock, FaUser, FaBell,
+  FaLightbulb, FaComments, FaFire,
+  FaBars, FaTimes, FaSearch, FaTools, FaEnvelope,
+  FaCheck, FaTrash, FaEdit, FaKey, FaQuestionCircle, FaGlobe, FaLaptop, FaPhone, FaRoute, FaChalkboardTeacher
 } from 'react-icons/fa';
 
-const FEATURES = [
-  { icon: <FaRobot />, key: 1, color: '#6B7280', action: 'tutor' },
-  { icon: <FaImage />, key: 2, color: '#6B7280', action: 'topic' },
-  { icon: <FaVideo />, key: 3, color: '#6B7280', action: 'topic' },
-  { icon: <FaHeadphones />, key: 4, color: '#6B7280', action: 'topic' },
-  { icon: <FaFlask />, key: 5, color: '#6B7280', action: 'topic' },
-  { icon: <FaQuestionCircle />, key: 6, color: '#6B7280', action: 'quiz' },
-  { icon: <FaPuzzlePiece />, key: 7, color: '#6B7280', action: 'topic' },
-  { icon: <FaBrain />, key: 8, color: '#6B7280', action: 'topic' },
-  { icon: <FaChartLine />, key: 9, color: '#6B7280', action: 'progress' },
-  { icon: <FaRoute />, key: 10, color: '#6B7280', action: null },
-  { icon: <FaLanguage />, key: 11, color: '#6B7280', action: null },
-  { icon: <FaMicroscope />, key: 12, color: '#6B7280', action: null },
-  { icon: <FaChalkboardTeacher />, key: 13, color: '#6B7280', action: null },
+const SIDEBAR_GROUPS = [
+  {
+    label: 'Dashboard',
+    labelRw: 'Ikigega',
+    items: [
+      { key: 'overview', icon: <FaTachometerAlt />, labelEn: 'Overview', labelRw: 'Igice', roles: ['learner', 'admin'] },
+      { key: 'progress', icon: <FaChartLine />, labelEn: 'My Progress', labelRw: 'Ibikorwa byanje', roles: ['learner'] },
+      { key: 'profile', icon: <FaUser />, labelEn: 'Profile', labelRw: 'Umwirondoro', roles: ['learner', 'admin'] },
+      { key: 'settings', icon: <FaCog />, labelEn: 'Settings', labelRw: 'Amategeko', roles: ['learner', 'admin'] },
+    ],
+  },
+  {
+    label: 'AI Tools',
+    labelRw: 'Ibikoresho bya AI',
+    items: [
+      { key: 'topic', icon: <FaTools />, labelEn: 'AI Tools', labelRw: 'Ibikoresho bya AI', roles: ['learner'] },
+      { key: 'tutor', icon: <FaComments />, labelEn: 'AI Tutor', labelRw: 'Uwigisha wa AI', roles: ['learner'] },
+      { key: 'quiz', icon: <FaQuestionCircle />, labelEn: 'Quizzes', labelRw: 'Ibibazo', roles: ['learner'] },
+      { key: 'resources', icon: <FaBookOpen />, labelEn: 'Resources', labelRw: 'Inkwando', roles: ['learner', 'admin'] },
+      { key: 'career', icon: <FaRoute />, labelEn: 'Career Guidance', labelRw: "Umutwe w'akazi", roles: ['learner'] },
+      { key: 'teacher', icon: <FaChalkboardTeacher />, labelEn: 'Teacher Assistant', labelRw: "Umufasha w'umwarimu", roles: ['admin'] },
+    ],
+  },
 ];
 
-const SIDEBAR = [
-  { key: 'overview', icon: <FaTachometerAlt />, labelEn: 'Overview', labelRw: 'Igice' },
-  { key: 'topic', icon: <FaTools />, labelEn: 'AI Tools', labelRw: 'Ibikoresho bya AI' },
-  { key: 'tutor', icon: <FaComments />, labelEn: 'AI Tutor', labelRw: 'Uwigisha wa AI' },
-  { key: 'quiz', icon: <FaQuestionCircle />, labelEn: 'Quizzes', labelRw: 'Ibibazo' },
-  { key: 'resources', icon: <FaBookOpen />, labelEn: 'Resources', labelRw: 'Inkwando' },
-  { key: 'progress', icon: <FaChartLine />, labelEn: 'My Progress', labelRw: 'Ibikorwa byanje' },
-  { key: 'profile', icon: <FaUser />, labelEn: 'Profile', labelRw: 'Umwirondoro' },
-  { key: 'settings', icon: <FaCog />, labelEn: 'Settings', labelRw: 'Amategeko' },
-];
+const SUBJECT_INFO = {
+  mathematics: { label: 'Mathematics', color: '#FFCE08', icon: '📐' },
+  math: { label: 'Mathematics', color: '#FFCE08', icon: '📐' },
+  physics: { label: 'Physics', color: '#5694F7', icon: '⚡' },
+  chemistry: { label: 'Chemistry', color: '#10b981', icon: '⚗️' },
+  biology: { label: 'Biology', color: '#8b5cf6', icon: '🧬' },
+  computer_science: { label: 'Computer Science', color: '#06b6d4', icon: '💻' },
+  english: { label: 'English', color: '#f59e0b', icon: '📚' },
+  geography: { label: 'Geography', color: '#ef4444', icon: '🗺️' },
+  history: { label: 'History', color: '#d946ef', icon: '🏛️' },
+  general: { label: 'General', color: '#64748b', icon: '🌍' },
+};
+
+const subjectInfo = (s) => SUBJECT_INFO[(s || '').toLowerCase()] || { label: s || 'General', color: '#64748b', icon: '📖' };
+
+const subjectStatus = (quizzes, pct) => {
+  if (pct >= 80) return { label: 'Mastered', color: '#10b981' };
+  if (pct >= 50) return { label: 'In progress', color: '#f59e0b' };
+  if (quizzes > 0) return { label: 'Needs practice', color: '#ef4444' };
+  return { label: 'Not started', color: '#9ca3af' };
+};
 
 export default function AILearningDashboard() {
   const { t } = useLang();
@@ -51,7 +71,13 @@ export default function AILearningDashboard() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState(() => searchParams.get('tab') || 'overview');
+  const role = user?.isAdmin ? 'admin' : 'learner';
+  const roleTabs = SIDEBAR_GROUPS
+    .flatMap((group) => group.items)
+    .filter((item) => item.roles.includes(role))
+    .map((item) => item.key);
+  const defaultTab = user?.isAdmin ? 'teacher' : 'overview';
+  const [tab, setTab] = useState(() => searchParams.get('tab') || defaultTab);
   const [progressData, setProgressData] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -59,22 +85,34 @@ export default function AILearningDashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchActive, setSearchActive] = useState(false);
-  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [lastSearch, setLastSearch] = useState('');
+  const [searchTrigger, setSearchTrigger] = useState(0);
+  const [profileForm, setProfileForm] = useState({ name: '', email: '', phone: '' });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [profileMsg, setProfileMsg] = useState('');
   const [passwordMsg, setPasswordMsg] = useState('');
   const [profileSaving, setProfileSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [profileMsgType, setProfileMsgType] = useState('');
+  const [passwordMsgType, setPasswordMsgType] = useState('');
   const searchRef = useRef(null);
   const notifRef = useRef(null);
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
   const token = () => localStorage.getItem('cshub_token');
+  const navGroups = SIDEBAR_GROUPS
+    .map((group) => ({ ...group, items: group.items.filter((item) => item.roles.includes(role)) }))
+    .filter((group) => group.items.length > 0);
+
+  useEffect(() => {
+    if (!roleTabs.includes(tab)) setTab(defaultTab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     fetchProgress();
     fetchNotifications();
     if (user) {
-      setProfileForm({ name: user.name || '', email: user.email || '' });
+      setProfileForm({ name: user.name || '', email: user.email || '', phone: user.phone || '' });
     }
   }, [user]);
 
@@ -130,13 +168,12 @@ export default function AILearningDashboard() {
     } catch {}
   };
 
-  const openFeature = (action) => {
-    if (action === 'tutor') setTab('tutor');
-    else if (action === 'quiz') setTab('quiz');
-    else if (action === 'progress') setTab('progress');
-    else if (action === 'topic') setTab('topic');
-    setSidebarOpen(false);
-  };
+  const notifWasOpen = useRef(false);
+  useEffect(() => {
+    if (notifWasOpen.current && !showNotifications && unreadCount > 0) markAllRead();
+    notifWasOpen.current = showNotifications;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showNotifications]);
 
   const handleNav = (key) => {
     setTab(key);
@@ -147,6 +184,8 @@ export default function AILearningDashboard() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setLastSearch(searchQuery.trim());
+      setSearchTrigger((t) => t + 1);
       setTab('topic');
       setSearchActive(false);
       setSearchQuery('');
@@ -158,10 +197,12 @@ export default function AILearningDashboard() {
     setProfileSaving(true);
     setProfileMsg('');
     try {
-      await updateProfile(profileForm);
+      await updateProfile(profileForm.name, profileForm.email, profileForm.phone);
       setProfileMsg('Profile updated successfully!');
+      setProfileMsgType('success');
     } catch (err) {
       setProfileMsg(err.message || 'Failed to update profile.');
+      setProfileMsgType('error');
     }
     setProfileSaving(false);
   };
@@ -172,29 +213,33 @@ export default function AILearningDashboard() {
     setPasswordMsg('');
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setPasswordMsg('New passwords do not match.');
+      setPasswordMsgType('error');
       setPasswordSaving(false);
       return;
     }
     try {
       await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
       setPasswordMsg('Password changed successfully!');
+      setPasswordMsgType('success');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
       setPasswordMsg(err.message || 'Failed to change password.');
+      setPasswordMsgType('error');
     }
     setPasswordSaving(false);
   };
 
   const stats = [
-    { icon: <FaComments />, value: progressData?.recentSessions?.length || 0, label: 'AI Sessions', color: '#6B7280' },
-    { icon: <FaQuestionCircle />, value: progressData?.summary?.totalQuizzes || 0, label: 'Quizzes Done', color: '#6B7280' },
-    { icon: <FaChartLine />, value: `${progressData?.summary?.avgScore || 0}%`, label: 'Avg Score', color: '#6B7280' },
-    { icon: <FaStar />, value: progressData?.profile?.totalPoints || 0, label: 'Points', color: '#6B7280' },
+    { icon: <FaComments />, value: progressData ? progressData.recentSessions?.length || 0 : '—', label: 'AI Sessions', color: '#6B7280' },
+    { icon: <FaQuestionCircle />, value: progressData ? progressData.summary?.totalQuizzes || 0 : '—', label: 'Quizzes Done', color: '#6B7280' },
+    { icon: <FaChartLine />, value: progressData ? `${progressData.summary?.avgScore || 0}%` : '—', label: 'Avg Score', color: '#6B7280' },
+    { icon: <FaStar />, value: progressData ? progressData.profile?.totalPoints || 0 : '—', label: 'Points', color: '#6B7280' },
   ];
 
   const tabTitles = {
     overview: 'Overview', topic: 'AI Tools', tutor: 'AI Tutor', quiz: 'Quizzes',
     resources: 'Resources', progress: 'My Progress', profile: 'Profile', settings: 'Settings',
+    career: 'AI Career Guidance', teacher: 'AI Teacher Assistant',
   };
 
   return (
@@ -212,15 +257,20 @@ export default function AILearningDashboard() {
           </button>
         </div>
         <nav className="ai-dash-nav">
-          {SIDEBAR.map((item) => (
-            <button
-              key={item.key}
-              className={`ai-dash-nav-item${tab === item.key ? ' active' : ''}`}
-              onClick={() => handleNav(item.key)}
-            >
-              {item.icon}
-              <span>{lang === 'rw' ? item.labelRw : item.labelEn}</span>
-            </button>
+          {navGroups.map((group) => (
+            <div key={group.label} className="ai-dash-nav-group">
+              <div className="ai-dash-nav-group-label">{lang === 'rw' ? group.labelRw : group.label}</div>
+              {group.items.map((item) => (
+                <button
+                  key={item.key}
+                  className={`ai-dash-nav-item${tab === item.key ? ' active' : ''}`}
+                  onClick={() => handleNav(item.key)}
+                >
+                  {item.icon}
+                  <span>{lang === 'rw' ? item.labelRw : item.labelEn}</span>
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="ai-dash-sidebar-footer">
@@ -261,7 +311,7 @@ export default function AILearningDashboard() {
             <button
               className="ai-dash-topbar-btn ai-dash-notif-btn"
               title="Notifications"
-              onClick={() => { setShowNotifications(!showNotifications); if (unreadCount > 0) markAllRead(); }}
+              onClick={() => setShowNotifications(!showNotifications)}
             >
               <FaBell />
               {unreadCount > 0 && <span className="ai-dash-notif-badge">{unreadCount}</span>}
@@ -306,7 +356,37 @@ export default function AILearningDashboard() {
         </header>
 
         <div className="ai-dash-content">
-          {tab === 'overview' && (
+          {tab === 'overview' && (user?.isAdmin ? (
+            <>
+              <div className="ai-dash-welcome">
+                <div className="ai-dash-welcome-text">
+                  <h2>Welcome back, {user?.name?.split(' ')[0] || 'Admin'}!</h2>
+                  <p>Your AI-powered teaching toolkit is ready. Generate lesson plans, exams, worksheets and more.</p>
+                </div>
+                <button className="btn" onClick={() => handleNav('teacher')}>
+                  <FaChalkboardTeacher style={{ marginRight: '0.5rem' }} /> Open Teacher Assistant
+                </button>
+              </div>
+
+              <div className="ai-dash-section">
+                <h3><FaClock style={{ marginRight: '0.5rem' }} /> Quick Access</h3>
+                <div className="ai-dash-quick-grid">
+                  <button className="ai-dash-quick-card" onClick={() => handleNav('teacher')}>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaChalkboardTeacher /></div>
+                    <span>Teacher Assistant</span>
+                  </button>
+                  <button className="ai-dash-quick-card" onClick={() => handleNav('profile')}>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaUser /></div>
+                    <span>My Profile</span>
+                  </button>
+                  <button className="ai-dash-quick-card" onClick={() => handleNav('settings')}>
+                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaCog /></div>
+                    <span>Settings</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
             <>
               <div className="ai-dash-welcome">
                 <div className="ai-dash-welcome-text">
@@ -357,10 +437,6 @@ export default function AILearningDashboard() {
                     <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaBookOpen /></div>
                     <span>Resources</span>
                   </button>
-                  <button className="ai-dash-quick-card" onClick={() => handleNav('topic')}>
-                    <div className="ai-dash-quick-icon" style={{ color: '#6B7280' }}><FaImage /></div>
-                    <span>AI Image Gen</span>
-                  </button>
                 </div>
               </div>
 
@@ -372,7 +448,7 @@ export default function AILearningDashboard() {
                       <div className="ai-dash-activity-item" key={i}>
                         <div className="ai-dash-activity-icon" style={{ color: '#6B7280' }}><FaComments /></div>
                         <div className="ai-dash-activity-info">
-                          <span>{s.subject} — {s.messages} messages</span>
+                          <span>{s.subject ? s.subject.charAt(0).toUpperCase() + s.subject.slice(1) : 'General'} — {s.messages} messages</span>
                           <small>{new Date(s.date).toLocaleDateString()}</small>
                         </div>
                       </div>
@@ -381,9 +457,16 @@ export default function AILearningDashboard() {
                 </div>
               )}
             </>
+          ))}
           )}
 
-          {tab === 'topic' && <AITopicWorkspace onBack={() => setTab('overview')} />}
+          {tab === 'topic' && (
+            <AITopicWorkspace
+              onBack={() => setTab('overview')}
+              initialQuery={lastSearch}
+              autoSearchTrigger={searchTrigger}
+            />
+          )}
 
           {tab === 'tutor' && <AITutor />}
 
@@ -391,100 +474,136 @@ export default function AILearningDashboard() {
 
           {tab === 'resources' && <AIResources onBack={() => setTab('overview')} />}
 
-          {tab === 'features' && (
-            <div className="ai-dash-features">
-              <div className="ai-dash-section">
-                <h2>All AI Tools</h2>
-                <p className="ai-dash-features-sub">13 powerful AI-driven tools to transform how students learn</p>
-                <div className="ai-dash-features-grid">
-                  {FEATURES.map((f) => (
-                    <div className="ai-dash-feature-card" key={f.key}>
-                      <div className="ai-dash-feature-icon" style={{ color: f.color }}>{f.icon}</div>
-                      <h3>{t(`aiLearning.feature${f.key}Title`)}</h3>
-                      <p>{t(`aiLearning.feature${f.key}Desc`)}</p>
-                      {f.action ? (
-                        <button className="ai-dash-feature-btn" onClick={() => openFeature(f.action)}>
-                          Open <FaArrowRight />
-                        </button>
-                      ) : (
-                        <span className="ai-dash-feature-coming">Coming Soon</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {tab === 'career' && <AICareer />}
+
+          {tab === 'teacher' && (user?.isAdmin ? <AITeacherAssistant /> : (
+            <div className="ai-teacher-denied">
+              <FaChalkboardTeacher />
+              <h3>Teachers only</h3>
+              <p>The AI Teacher Assistant is available for teachers and administrators.</p>
             </div>
-          )}
+          ))}
 
           {tab === 'progress' && (
             <div className="ai-dash-progress">
               <div className="ai-dash-section">
-                <h2>My Learning Progress</h2>
-                <p>Track your learning journey across all AI tools and subjects.</p>
-                {progressData && (
+                <div className="ai-dash-page-header">
+                  <span className="ai-dash-page-header-icon" style={{ backgroundColor: '#8b5cf61f', color: '#8b5cf6' }}><FaChartLine /></span>
+                  <div>
+                    <h2>My Learning Progress</h2>
+                    <p>Track your learning journey across all AI tools and subjects.</p>
+                  </div>
+                </div>
+                {progressData ? (
                   <>
                     <div className="ai-dash-stats" style={{ marginBottom: '1.5rem' }}>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaStar /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#FFCE08' }}><FaStar /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.profile.totalPoints}</strong>
                           <span>Total Points</span>
                         </div>
                       </div>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaFire /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#ef4444' }}><FaFire /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.profile.streak}</strong>
                           <span>Day Streak</span>
                         </div>
                       </div>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaQuestionCircle /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#8b5cf6' }}><FaQuestionCircle /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.summary.totalQuizzes}</strong>
                           <span>Quizzes</span>
                         </div>
                       </div>
                       <div className="ai-dash-stat-card">
-                        <div className="ai-dash-stat-icon" style={{ color: '#6B7280' }}><FaClock /></div>
+                        <div className="ai-dash-stat-icon" style={{ color: '#10b981' }}><FaClock /></div>
                         <div className="ai-dash-stat-info">
                           <strong>{progressData.summary.totalStudyMinutes}m</strong>
                           <span>Study Time</span>
                         </div>
                       </div>
                     </div>
+
+                    <div className="ai-dash-section-head">
+                      <h3>Subject Progress</h3>
+                      <span className="ai-dash-subject-count">{progressData.subjects.length} subject{progressData.subjects.length === 1 ? '' : 's'}</span>
+                    </div>
                     {progressData.subjects.length > 0 ? (
                       <div className="ai-dash-progress-grid">
-                        {progressData.subjects.map((s) => (
-                          <div className="ai-dash-progress-card" key={s.subject}>
-                            <div className="ai-dash-progress-header">
-                              <FaBookOpen size={24} style={{ color: '#6B7280' }} />
-                              <span>{s.subject}</span>
+                        {progressData.subjects.map((s) => {
+                          const info = subjectInfo(s.subject);
+                          const pct = s.averageScore || 0;
+                          const status = subjectStatus(s.totalQuizzes, pct);
+                          return (
+                            <div className="ai-dash-progress-card" key={s.subject}>
+                              <div className="ai-dash-progress-card-head">
+                                <span className="ai-dash-progress-subject-icon" style={{ backgroundColor: info.color + '1f', color: info.color }}>{info.icon}</span>
+                                <div className="ai-dash-progress-subject-info">
+                                  <strong>{info.label}</strong>
+                                  <span style={{ color: status.color }}>{status.label}</span>
+                                </div>
+                                <span className="ai-dash-progress-avg" style={{ backgroundColor: pct >= 80 ? '#10b9811a' : pct >= 50 ? '#f59e0b1a' : pct > 0 ? '#ef44441a' : '#f3f4f6', color: pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : pct > 0 ? '#ef4444' : '#9ca3af' }}>{pct}%</span>
+                              </div>
+                              <div className="ai-dash-progress-bar">
+                                <div className="ai-dash-progress-fill" style={{ width: `${pct}%`, backgroundColor: pct > 0 ? info.color : '#e5e7eb' }} />
+                              </div>
+                              <div className="ai-dash-progress-meta">
+                                <span className="ai-dash-progress-quiz-count" style={{ color: info.color }}>{s.totalQuizzes} quiz{s.totalQuizzes === 1 ? '' : 'zes'}</span>
+                                <span className="ai-dash-progress-sep">•</span>
+                                <span>{s.totalStudyMinutes}m studied</span>
+                              </div>
                             </div>
-                            <div className="ai-dash-progress-bar">
-                              <div className="ai-dash-progress-fill" style={{ width: `${s.averageScore}%` }}></div>
-                            </div>
-                            <small>{s.totalQuizzes} quizzes — Avg: {s.averageScore}% — {s.totalStudyMinutes}m studied</small>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="ai-dash-progress-grid">
-                        {['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'English'].map((subject) => (
-                          <div className="ai-dash-progress-card" key={subject}>
-                            <div className="ai-dash-progress-header">
-                              <FaBookOpen size={24} style={{ color: '#6B7280' }} />
-                              <span>{subject}</span>
+                        {['mathematics', 'physics', 'chemistry', 'biology', 'computer_science', 'english'].map((slug) => {
+                          const info = subjectInfo(slug);
+                          return (
+                            <div className="ai-dash-progress-card" key={slug}>
+                              <div className="ai-dash-progress-card-head">
+                                <span className="ai-dash-progress-subject-icon" style={{ backgroundColor: '#f3f4f6', color: '#9ca3af' }}>{info.icon}</span>
+                                <div className="ai-dash-progress-subject-info">
+                                  <strong>{info.label}</strong>
+                                  <span style={{ color: '#9ca3af' }}>Not started</span>
+                                </div>
+                                <span className="ai-dash-progress-avg" style={{ backgroundColor: '#f3f4f6', color: '#9ca3af' }}>0%</span>
+                              </div>
+                              <div className="ai-dash-progress-bar">
+                                <div className="ai-dash-progress-fill" style={{ width: '0%' }} />
+                              </div>
+                              <div className="ai-dash-progress-meta">
+                                <span>Start a quiz to begin tracking</span>
+                              </div>
                             </div>
-                            <div className="ai-dash-progress-bar">
-                              <div className="ai-dash-progress-fill" style={{ width: '0%' }}></div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {progressData.recentSessions?.length > 0 && (
+                      <div className="ai-dash-section" style={{ marginTop: '1.5rem' }}>
+                        <h3><FaLightbulb style={{ marginRight: '0.5rem' }} /> Recent Activity</h3>
+                        <div className="ai-dash-activity-list">
+                          {progressData.recentSessions.map((s, i) => (
+                            <div className="ai-dash-activity-item" key={i}>
+                              <div className="ai-dash-activity-icon" style={{ color: '#6B7280' }}><FaComments /></div>
+                              <div className="ai-dash-activity-info">
+                                <span>{s.subject ? subjectInfo(s.subject).label : 'General'} — {s.messages} messages</span>
+                                <small>{new Date(s.date).toLocaleDateString()}</small>
+                              </div>
                             </div>
-                            <small>Start learning to track progress</small>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </>
+                ) : (
+                  <p className="ai-dash-progress-loading">Loading your progress...</p>
                 )}
               </div>
             </div>
@@ -492,19 +611,27 @@ export default function AILearningDashboard() {
 
           {tab === 'profile' && (
             <div className="ai-dash-profile">
+              <div className="ai-dash-page-header">
+                <span className="ai-dash-page-header-icon" style={{ backgroundColor: '#8b5cf61f', color: '#8b5cf6' }}><FaUser /></span>
+                <div>
+                  <h2>My Profile</h2>
+                  <p>Manage your personal details and account security</p>
+                </div>
+              </div>
+
               {/* Profile Card */}
               <div className="ai-dash-profile-card">
                 <div className="ai-dash-profile-card-bg"></div>
                 <div className="ai-dash-profile-card-content">
                   <div className="ai-dash-profile-avatar-wrap">
                     <div className="ai-dash-profile-avatar-lg">{initials}</div>
-                    <span className="ai-dash-profile-badge">{user?.role === 'admin' ? 'Admin' : 'Learner'}</span>
+                    <span className="ai-dash-profile-badge">{user?.isAdmin ? 'Admin' : 'Learner'}</span>
                   </div>
                   <div className="ai-dash-profile-info">
                     <h2>{user?.name || 'Student'}</h2>
-                    {user?.phone && <p className="ai-dash-profile-email">{user.phone}</p>}
-                    {user?.email && <p className="ai-dash-profile-email">{user.email}</p>}
-                    {!user?.phone && !user?.email && <p className="ai-dash-profile-email">No contact set</p>}
+                    {user?.email && <p className="ai-dash-profile-email"><FaEnvelope style={{ marginRight: '0.35rem' }} />{user.email}</p>}
+                    {user?.phone && <p className="ai-dash-profile-email"><FaPhone style={{ marginRight: '0.35rem' }} />{user.phone}</p>}
+                    {!user?.phone && !user?.email && <p className="ai-dash-profile-email">No contact set — add your email or phone below</p>}
                     <p className="ai-dash-profile-joined">
                       Joined {new Date(user?.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                     </p>
@@ -536,17 +663,26 @@ export default function AILearningDashboard() {
 
               {/* Edit Profile */}
               <div className="ai-dash-section">
-                <h3><FaEdit style={{ marginRight: '0.5rem' }} /> Edit Profile</h3>
+                <div className="ai-dash-section-head">
+                  <h3><FaEdit style={{ marginRight: '0.45rem' }} /> Edit Profile</h3>
+                  <span className="ai-dash-subject-count">Personal details</span>
+                </div>
                 <form className="ai-dash-profile-form" onSubmit={handleProfileSave}>
-                  <div className="ai-dash-form-group">
-                    <label>Full Name</label>
-                    <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                  <div className="ai-dash-form-row">
+                    <div className="ai-dash-form-group">
+                      <label>Full Name</label>
+                      <input type="text" value={profileForm.name} placeholder="Your full name" onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                    </div>
+                    <div className="ai-dash-form-group">
+                      <label>Email Address</label>
+                      <input type="email" value={profileForm.email} placeholder="you@example.com" onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                    </div>
                   </div>
                   <div className="ai-dash-form-group">
-                    <label>Email</label>
-                    <input type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                    <label>Phone Number</label>
+                    <input type="tel" value={profileForm.phone} placeholder="+250 7XX XXX XXX" onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} />
                   </div>
-                  {profileMsg && <p className={`ai-dash-form-msg ${profileMsg.includes('success') ? 'success' : 'error'}`}>{profileMsg}</p>}
+                  {profileMsg && <p className={`ai-dash-form-msg ${profileMsgType}`}>{profileMsg}</p>}
                   <button type="submit" className="ai-dash-form-btn" disabled={profileSaving}>
                     {profileSaving ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -555,21 +691,24 @@ export default function AILearningDashboard() {
 
               {/* Change Password */}
               <div className="ai-dash-section">
-                <h3><FaKey style={{ marginRight: '0.5rem' }} /> Change Password</h3>
+                <div className="ai-dash-section-head">
+                  <h3><FaKey style={{ marginRight: '0.45rem' }} /> Change Password</h3>
+                  <span className="ai-dash-subject-count">Security</span>
+                </div>
                 <form className="ai-dash-profile-form" onSubmit={handlePasswordSave}>
                   <div className="ai-dash-form-group">
                     <label>Current Password</label>
-                    <input type="password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })} />
+                    <input type="password" value={passwordForm.currentPassword} placeholder="Enter current password" onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })} />
                   </div>
                   <div className="ai-dash-form-group">
                     <label>New Password</label>
-                    <input type="password" value={passwordForm.newPassword} onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })} />
+                    <input type="password" value={passwordForm.newPassword} placeholder="At least 6 characters" onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })} />
                   </div>
                   <div className="ai-dash-form-group">
                     <label>Confirm New Password</label>
-                    <input type="password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} />
+                    <input type="password" value={passwordForm.confirmPassword} placeholder="Repeat the new password" onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} />
                   </div>
-                  {passwordMsg && <p className={`ai-dash-form-msg ${passwordMsg.includes('success') ? 'success' : 'error'}`}>{passwordMsg}</p>}
+                  {passwordMsg && <p className={`ai-dash-form-msg ${passwordMsgType}`}>{passwordMsg}</p>}
                   <button type="submit" className="ai-dash-form-btn" disabled={passwordSaving}>
                     {passwordSaving ? 'Changing...' : 'Change Password'}
                   </button>

@@ -73,6 +73,13 @@ function generatePlaceholderImage(title) {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+function generateImageUrl(prompt, title) {
+  const text = (prompt || `Educational visualization of ${title}`).replace(/["\\]/g, ' ').trim().substring(0, 300);
+  if (!text) return generatePlaceholderImage(title);
+  const seed = Math.floor(Math.random() * 100000);
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=500&nologo=true&seed=${seed}`;
+}
+
 export async function getProfile(req, res) {
   try {
     let profile = await AIProfile.findOne({ userId: req.user.id });
@@ -328,7 +335,7 @@ export async function processTopic(req, res) {
       return res.status(503).json({ error: 'AI content generation is currently unavailable. Please try again later.' });
     }
 
-    const imageUrl = generatePlaceholderImage(title);
+    const imageUrl = generateImageUrl(geminiContent.imagePrompt, title);
     const lesson = { summary: geminiContent.summary, sections: geminiContent.sections };
     const quizData = geminiContent.quiz.map((q) => ({
       question: q.question,
@@ -373,6 +380,107 @@ export async function processTopic(req, res) {
   }
 }
 
+export async function proxyImage(req, res) {
+  try {
+    const { url } = req.query;
+    if (!url || !/^https:\/\/image\.pollinations\.ai\/prompt\//.test(url)) {
+      return res.status(400).json({ error: 'Invalid image URL.' });
+    }
+    const upstream = await fetch(url, { signal: AbortSignal.timeout(90000) });
+    if (!upstream.ok) {
+      return res.status(502).json({ error: 'Image provider returned an error.' });
+    }
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    res.setHeader('Content-Type', upstream.headers.get('content-type') || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Content-Length', buffer.length);
+    res.end(buffer);
+  } catch (err) {
+    res.status(502).json({ error: 'Failed to fetch image.' });
+  }
+}
+
+export async function generateSimulation(req, res) {
+  try {
+    const { title } = req.body;
+    if (!title || title.trim().length < 2) {
+      return res.status(400).json({ error: 'Please provide a topic title.' });
+    }
+    const escaped = title.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let simulation;
+    try {
+      simulation = await gemini.generateSimulation(title.trim(), 'beginner');
+    } catch (err) {
+      return res.status(503).json({ error: err.message });
+    }
+    if (!simulation) {
+      return res.status(503).json({ error: 'Simulation generation is currently unavailable. Please try again later.' });
+    }
+    const topic = await TopicSession.findOneAndUpdate(
+      { userId: req.user.id, title: { $regex: new RegExp(`^${escaped}$`, 'i') } },
+      { $set: { simulation } },
+      { new: true, sort: { createdAt: -1 } }
+    );
+    res.json({ ...simulation, topicId: topic?._id || null });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function generateCareerGuidance(req, res) {
+  try {
+    const { interests, subjects, level, goals } = req.body || {};
+    const list = Array.isArray(subjects) ? subjects.filter((s) => typeof s === 'string' && s.trim()) : [];
+    if (!interests?.trim() && list.length === 0) {
+      return res.status(400).json({ error: 'Please tell us about your interests or favourite subjects.' });
+    }
+    let result;
+    try {
+      result = await gemini.generateCareerGuidance({
+        interests: (interests || '').trim(),
+        subjects: list.slice(0, 6),
+        level: (level || 'Secondary').trim(),
+        goals: (goals || '').trim(),
+      });
+    } catch (err) {
+      return res.status(503).json({ error: err.message });
+    }
+    if (!result || !result.careers || result.careers.length === 0) {
+      return res.status(503).json({ error: 'Career guidance is currently unavailable. Please try again later.' });
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function generateTeacherDoc(req, res) {
+  try {
+    const { type, subject, topic, level, count } = req.body || {};
+    if (!topic?.trim()) {
+      return res.status(400).json({ error: 'Please provide a topic.' });
+    }
+    let result;
+    try {
+      result = await gemini.generateTeacherDoc({
+        type: type || 'lessonPlan',
+        subject: (subject || '').trim(),
+        topic: topic.trim(),
+        level: (level || 'Secondary').trim(),
+        count: Number(count) || 0,
+      });
+    } catch (err) {
+      return res.status(503).json({ error: err.message });
+    }
+    if (!result) {
+      return res.status(503).json({ error: 'Document generation is currently unavailable. Please try again later.' });
+    }
+    res.json({ title: `${topic.trim()} — ${type || 'lessonPlan'}`, content: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 export async function getTopicHistory(req, res) {
   try {
     const topics = await TopicSession.find({ userId: req.user.id }).sort({ createdAt: -1 }).limit(20);
@@ -388,6 +496,36 @@ export async function getTopicById(req, res) {
     if (!topic) return res.status(404).json({ error: 'Topic not found.' });
     if (topic.userId.toString() !== req.user.id) return res.status(403).json({ error: 'Not authorized.' });
     res.json(topic);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function deleteTopic(req, res) {
+  try {
+    const topic = await TopicSession.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    if (!topic) return res.status(404).json({ error: 'Topic not found.' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function dedupeTopics(req, res) {
+  try {
+    const topics = await TopicSession.find({ userId: req.user.id }).sort({ createdAt: 1 });
+    const seen = new Map();
+    const toDelete = [];
+    for (const t of topics) {
+      const key = (t.title || '').trim().toLowerCase();
+      if (!key) continue;
+      if (seen.has(key)) toDelete.push(t._id);
+      else seen.set(key, t._id);
+    }
+    if (toDelete.length > 0) {
+      await TopicSession.deleteMany({ _id: { $in: toDelete } });
+    }
+    res.json({ deleted: toDelete.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

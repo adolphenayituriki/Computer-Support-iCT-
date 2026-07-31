@@ -4,18 +4,35 @@ import { useLang } from '../LanguageContext';
 import API_BASE, { AI_API_BASE } from '../api';
 import {
   FaQuestionCircle, FaCheckCircle, FaTimesCircle, FaSpinner, FaRedo,
-  FaTrophy, FaClock, FaArrowRight, FaListOl, FaEye, FaHome, FaExclamationTriangle
+  FaTrophy, FaClock, FaArrowRight, FaEye, FaHome, FaExclamationTriangle, FaSearch
 } from 'react-icons/fa';
 
 const SUBJECTS = [
-  { key: 'Mathematics', color: '#FFCE08' },
-  { key: 'Physics', color: '#5694F7' },
-  { key: 'Chemistry', color: '#10b981' },
-  { key: 'Biology', color: '#8b5cf6' },
-  { key: 'Computer Science', color: '#06b6d4' },
-  { key: 'English', color: '#f59e0b' },
-  { key: 'Geography', color: '#ef4444' },
+  { key: 'Mathematics', color: '#FFCE08', icon: '📐', desc: 'Numbers, algebra & geometry' },
+  { key: 'Physics', color: '#5694F7', icon: '⚡', desc: 'Forces, energy & motion' },
+  { key: 'Chemistry', color: '#10b981', icon: '⚗️', desc: 'Matter, reactions & bonds' },
+  { key: 'Biology', color: '#8b5cf6', icon: '🧬', desc: 'Life, cells & ecosystems' },
+  { key: 'Computer Science', color: '#06b6d4', icon: '💻', desc: 'Code, logic & computing' },
+  { key: 'English', color: '#f59e0b', icon: '📚', desc: 'Language, reading & writing' },
+  { key: 'Geography', color: '#ef4444', icon: '🗺️', desc: 'Earth, maps & people' },
 ];
+
+const subjectInfo = (name) => SUBJECTS.find((s) => s.key === name) || { key: name, color: '#8b5cf6', icon: '📝', desc: 'Quiz' };
+const subjectColor = (name) => subjectInfo(name).color;
+
+const scoreColor = (pct) => (pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444');
+
+const timeAgo = (date) => {
+  const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+  return new Date(date).toLocaleDateString();
+};
 
 export default function AIQuiz() {
   const { user } = useAuth();
@@ -33,6 +50,8 @@ export default function AIQuiz() {
   const [startTime, setStartTime] = useState(0);
   const [reviewData, setReviewData] = useState(null);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [histSearch, setHistSearch] = useState('');
+  const [histSubject, setHistSubject] = useState('');
   const token = () => localStorage.getItem('cshub_token');
 
   useEffect(() => {
@@ -227,46 +246,137 @@ export default function AIQuiz() {
   // ─── SUBJECTS VIEW ──────────────────────────────
 
   if (view === 'subjects') {
+    const subjectCounts = {};
+    history.forEach((h) => { subjectCounts[h.subject] = (subjectCounts[h.subject] || 0) + 1; });
+    const scores = history.map((h) => (h.totalQuestions > 0 ? Math.round((h.score / h.totalQuestions) * 100) : 0));
+    const avgPct = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+    const bestPct = scores.length ? Math.max(...scores) : null;
+    const subjectsInHistory = [...new Set(history.map((h) => h.subject))];
+    const shownHistory = history.filter((h) =>
+      (!histSubject || h.subject === histSubject) &&
+      (!histSearch || (h.subject || '').toLowerCase().includes(histSearch.toLowerCase()))
+    );
+
     return (
       <div className="ai-quiz">
         <div className="ai-quiz-header">
-          <FaQuestionCircle size={20} />
-          <h3>Quiz Generator</h3>
+          <span className="ai-quiz-header-icon" style={{ backgroundColor: '#8b5cf61f', color: '#8b5cf6' }}><FaQuestionCircle /></span>
+          <div>
+            <h3>Quiz Generator</h3>
+            <p className="ai-quiz-sub">Pick a subject and test yourself with 5 AI-generated questions</p>
+          </div>
         </div>
-        <p className="ai-quiz-sub">Choose a subject to start a quiz</p>
         {error && (
           <div className="ai-quiz-error">
             <FaExclamationTriangle /> {error}
           </div>
         )}
+        {history.length > 0 && (
+          <div className="ai-quiz-stats">
+            <div className="ai-quiz-stat-card">
+              <span className="ai-quiz-stat-icon">📝</span>
+              <strong>{history.length}</strong>
+              <span>Quizzes taken</span>
+            </div>
+            <div className="ai-quiz-stat-card">
+              <span className="ai-quiz-stat-icon">🎯</span>
+              <strong>{avgPct}%</strong>
+              <span>Average score</span>
+            </div>
+            <div className="ai-quiz-stat-card">
+              <span className="ai-quiz-stat-icon">🏆</span>
+              <strong>{bestPct}%</strong>
+              <span>Best score</span>
+            </div>
+            <div className="ai-quiz-stat-card">
+              <span className="ai-quiz-stat-icon">🔥</span>
+              <strong>{subjectsInHistory.length}</strong>
+              <span>Subjects tried</span>
+            </div>
+          </div>
+        )}
         <div className="ai-quiz-subjects">
           {SUBJECTS.map((s) => (
-            <button key={s.key} className="ai-quiz-subject-btn" onClick={() => startQuiz(s.key)} disabled={loading}>
-              <div className="ai-quiz-subject-icon" style={{ color: s.color }}>{loading && subject === s.key ? <FaSpinner className="fa-spin" /> : <FaListOl />}</div>
-              <span>{s.key}</span>
+            <button key={s.key} className="ai-quiz-subject-btn" onClick={() => startQuiz(s.key)} disabled={loading} style={{ '--qcolor': s.color }}>
+              <span className="ai-quiz-subject-icon" style={{ backgroundColor: s.color + '1f', color: s.color }}>
+                {loading && subject === s.key ? <FaSpinner className="fa-spin" /> : s.icon}
+              </span>
+              <span className="ai-quiz-subject-text">
+                <strong>{s.key}</strong>
+                <small>{subjectCounts[s.key] ? `${subjectCounts[s.key]} quiz${subjectCounts[s.key] === 1 ? '' : 'zes'} taken` : s.desc}</small>
+              </span>
+              <FaArrowRight className="ai-quiz-subject-arrow" style={{ color: s.color }} />
             </button>
           ))}
         </div>
         {history.length > 0 && (
           <div className="ai-quiz-history">
-            <h4>Recent Quizzes</h4>
-            <div className="ai-quiz-history-list">
-              {history.slice(0, 10).map((h) => {
-                const pct = h.totalQuestions > 0 ? Math.round((h.score / h.totalQuestions) * 100) : 0;
-                return (
-                  <div key={h._id} className="ai-quiz-history-item">
-                    <div className="ai-quiz-history-left">
-                      <span className="ai-quiz-history-subject">{h.subject}</span>
-                      <span className="ai-quiz-history-score">{h.score}/{h.totalQuestions} ({pct}%)</span>
-                      <span className="ai-quiz-history-date">{new Date(h.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <button className="ai-quiz-history-review-btn" onClick={() => startReview(h)} disabled={reviewLoading}>
-                      <FaEye /> Review
-                    </button>
-                  </div>
-                );
-              })}
+            <div className="ai-quiz-history-head">
+              <h4>Recent Quizzes <span className="ai-quiz-history-count">{history.length} total</span></h4>
+              <div className="ai-quiz-history-search">
+                <FaSearch />
+                <input
+                  type="text"
+                  placeholder="Search subject..."
+                  value={histSearch}
+                  onChange={(e) => setHistSearch(e.target.value)}
+                />
+              </div>
             </div>
+            {subjectsInHistory.length > 1 && (
+              <div className="ai-quiz-history-chips">
+                <button className={`ai-quiz-chip${!histSubject ? ' active' : ''}`} onClick={() => setHistSubject('')}>All</button>
+                {subjectsInHistory.map((s) => (
+                  <button
+                    key={s}
+                    className={`ai-quiz-chip${histSubject === s ? ' active' : ''}`}
+                    style={histSubject === s
+                      ? { backgroundColor: subjectColor(s), borderColor: subjectColor(s), color: '#fff' }
+                      : { color: subjectColor(s), borderColor: subjectColor(s) + '55' }}
+                    onClick={() => setHistSubject(s)}
+                  >
+                    {subjectInfo(s).icon} {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            {shownHistory.length === 0 ? (
+              <div className="ai-quiz-history-empty">
+                <p>No quizzes match your filter.</p>
+                <button onClick={() => { setHistSearch(''); setHistSubject(''); }}>Clear filters</button>
+              </div>
+            ) : (
+              <div className="ai-quiz-history-list">
+                {shownHistory.slice(0, 10).map((h) => {
+                  const pct = h.totalQuestions > 0 ? Math.round((h.score / h.totalQuestions) * 100) : 0;
+                  return (
+                    <div key={h._id} className="ai-quiz-history-item">
+                      <div className="ai-quiz-history-left">
+                        <span className="ai-quiz-history-icon" style={{ backgroundColor: subjectColor(h.subject) + '1f', color: subjectColor(h.subject) }}>
+                          {subjectInfo(h.subject).icon}
+                        </span>
+                        <div className="ai-quiz-history-mid">
+                          <span className="ai-quiz-history-subject">{h.subject}</span>
+                          <span className="ai-quiz-history-time">{timeAgo(h.createdAt)}</span>
+                        </div>
+                        <span className="ai-quiz-history-score" style={{ backgroundColor: scoreColor(pct) + '1a', color: scoreColor(pct) }}>{h.score}/{h.totalQuestions} · {pct}%</span>
+                        <div className="ai-quiz-history-bar">
+                          <div className="ai-quiz-history-bar-fill" style={{ width: `${pct}%`, backgroundColor: scoreColor(pct) }} />
+                        </div>
+                      </div>
+                      <div className="ai-quiz-history-actions">
+                        <button className="ai-quiz-history-review-btn" onClick={() => startReview(h)} disabled={reviewLoading}>
+                          <FaEye /> Review
+                        </button>
+                        <button className="ai-quiz-history-retake-btn" onClick={() => startQuiz(h.subject)} disabled={loading}>
+                          <FaRedo /> Retake
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -319,7 +429,7 @@ export default function AIQuiz() {
       <div className="ai-quiz-play-header">
         <button className="ai-quiz-back-btn" onClick={goHome}>← Back</button>
         <span className="ai-quiz-progress-text">Question {currentQ + 1} of {questions.length}</span>
-        <span className="ai-quiz-subject-badge">{subject}</span>
+        <span className="ai-quiz-subject-badge" style={{ backgroundColor: subjectColor(subject) }}>{subject}</span>
       </div>
       <div className="ai-quiz-progress-bar">
         <div className="ai-quiz-progress-fill" style={{ width: `${progress}%` }}></div>

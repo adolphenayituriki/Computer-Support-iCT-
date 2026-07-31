@@ -4,13 +4,19 @@ import {
   Mail, UserCheck, Lightbulb, ShieldCheck,
   Star, Calendar, Newspaper, BookOpen,
   Video, Settings, ChevronLeft, ChevronRight,
-  LogOut, CreditCard,
+  LogOut, CreditCard, Bot,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 const NAV_SECTIONS = [
+  {
+    label: 'AI Learning',
+    items: [
+      { key: 'ai-learning', href: '/ai-dashboard', icon: Bot, label: 'AI Learning', color: 'text-fuchsia-400' },
+    ],
+  },
   {
     label: 'Overview',
     items: [
@@ -109,23 +115,33 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen, onClose }
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.key;
-                  const btn = (
-                    <button
-                      key={item.key}
-                      onClick={() => { onTabChange(item.key); onClose(); }}
-                      className={cn(
-                        'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
-                        collapsed && 'justify-center px-0 py-2.5',
-                        isActive
-                          ? 'bg-white/[0.08] text-white'
-                          : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
-                      )}
-                    >
+                  const inner = (
+                    <>
                       {isActive && (
                         <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-cshub-yellow shadow-sm shadow-cshub-yellow/30" />
                       )}
                       <Icon className={cn('h-[18px] w-[18px] shrink-0 transition-colors', isActive ? item.color : 'text-slate-500 group-hover:text-slate-300')} />
                       {!collapsed && <span className="truncate">{item.label}</span>}
+                    </>
+                  );
+                  const cls = cn(
+                    'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
+                    collapsed && 'justify-center px-0 py-2.5',
+                    isActive
+                      ? 'bg-white/[0.08] text-white'
+                      : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                  );
+                  const btn = item.href ? (
+                    <a key={item.key} href={item.href} className={cls}>
+                      {inner}
+                    </a>
+                  ) : (
+                    <button
+                      key={item.key}
+                      onClick={() => { onTabChange(item.key); onClose(); }}
+                      className={cls}
+                    >
+                      {inner}
                     </button>
                   );
 

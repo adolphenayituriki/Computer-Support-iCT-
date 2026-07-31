@@ -18,15 +18,26 @@ const FEATURES = [
   { icon: FaVideo, key: 3, action: 'topic', tag: 'Visual', category: 'content' },
   { icon: FaHeadphones, key: 4, action: 'topic', tag: 'Audio', category: 'content' },
   { icon: FaFlask, key: 5, action: 'topic', tag: 'Hands-on', category: 'content' },
-  { icon: FaQuestionCircle, key: 6, action: 'quiz', tag: 'Practice', category: 'practice' },
-  { icon: FaPuzzlePiece, key: 7, action: 'topic', tag: 'Adaptive', category: 'tutoring' },
-  { icon: FaBrain, key: 8, action: 'topic', tag: 'Smart', category: 'practice' },
+  { icon: FaQuestionCircle, key: 6, action: 'topic', tag: 'Practice', category: 'practice' },
+  { icon: FaPuzzlePiece, key: 7, action: 'quiz', tag: 'Adaptive', category: 'practice' },
+  { icon: FaBrain, key: 8, action: 'dashboard', tag: 'Smart', category: 'practice' },
   { icon: FaChartBar, key: 9, action: 'progress', tag: 'Insights', category: 'tracking' },
-  { icon: FaRoute, key: 10, action: 'dashboard', tag: 'Planning', category: 'tracking' },
+  { icon: FaRoute, key: 10, action: 'career', tag: 'Planning', category: 'tracking' },
   { icon: FaLanguage, key: 11, action: 'topic', tag: 'Languages', category: 'content' },
   { icon: FaMicroscope, key: 12, action: 'topic', tag: 'Science', category: 'content' },
-  { icon: FaChalkboardTeacher, key: 13, action: 'dashboard', tag: 'Teaching', category: 'tracking' },
+  { icon: FaChalkboardTeacher, key: 13, action: 'teacher', tag: 'Teaching', category: 'tracking' },
 ];
+
+// Feature action -> AI dashboard tab (matches AILearningDashboard SIDEBAR keys)
+const TAB_MAP = {
+  tutor: 'tutor',
+  topic: 'topic',
+  quiz: 'quiz',
+  progress: 'progress',
+  career: 'career',
+  teacher: 'teacher',
+  dashboard: 'overview',
+};
 
 const CATEGORIES = [
   { value: 'all', label: 'All Tools' },
@@ -61,7 +72,7 @@ export default function AILearning() {
 
   const openFeature = (action) => {
     if (!user) { setShowAuth(true); return; }
-    navigate('/ai-dashboard');
+    navigate(`/ai-dashboard?tab=${TAB_MAP[action] || 'overview'}`);
   };
 
   return (

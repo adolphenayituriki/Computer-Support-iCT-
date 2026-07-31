@@ -120,7 +120,7 @@ export async function getMe(req, res) {
   try {
     const user = await User.findById(req.user.id).select('-password -resetToken -resetTokenExpires');
     if (!user) return res.status(404).json({ error: 'User not found.' });
-    res.json({ user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+    res.json({ user: { id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -128,14 +128,23 @@ export async function getMe(req, res) {
 
 export async function updateProfile(req, res) {
   try {
-    const { name, email } = req.body;
-    if (!name || !email) return res.status(400).json({ error: 'Name and email are required.' });
-    const emailTaken = await User.findOne({ email, _id: { $ne: req.user.id } });
-    if (emailTaken) return res.status(409).json({ error: 'Email already in use.' });
-    const user = await User.findByIdAndUpdate(req.user.id, { name, email }, { new: true });
+    const { name, email, phone } = req.body;
+    if (!name || (!email && !phone)) return res.status(400).json({ error: 'Name and at least one contact (email or phone) are required.' });
+    if (email) {
+      const emailTaken = await User.findOne({ email, _id: { $ne: req.user.id } });
+      if (emailTaken) return res.status(409).json({ error: 'Email already in use.' });
+    }
+    if (phone) {
+      const phoneTaken = await User.findOne({ phone, _id: { $ne: req.user.id } });
+      if (phoneTaken) return res.status(409).json({ error: 'Phone number already in use.' });
+    }
+    const updates = { name };
+    if (email) updates.email = email;
+    if (phone) updates.phone = phone;
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true });
     if (!user) return res.status(404).json({ error: 'User not found.' });
-    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
+    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, isAdmin: user.isAdmin, isTeamMember: user.isTeamMember } });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
