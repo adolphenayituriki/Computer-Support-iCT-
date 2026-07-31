@@ -182,11 +182,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                     <a href="/courses" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
                       <FaBookOpen /> {t('navDropdown.knowledgeBase')}
                     </a>
-                    {user && (
-                      <button className="nav-dropdown-item-btn" onClick={() => { setOpen(false); setCoursesOpen(false); setShowAILearning(true); }}>
-                        <FaRobot /> {t('navDropdown.aiLearning')}
-                      </button>
-                    )}
+                    <button className="nav-dropdown-item-btn" onClick={() => { setOpen(false); setCoursesOpen(false); setShowAILearning(true); }}>
+                      <FaRobot /> {t('navDropdown.aiLearning')}
+                    </button>
                   </div>
                 )}
               </li>
@@ -222,11 +220,9 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
                     <a href="/courses" onClick={() => { setOpen(false); setCoursesOpen(false); }}>
                       <FaBookOpen /> {t('navDropdown.knowledgeBase')}
                     </a>
-                    {user && (
-                      <button className="nav-dropdown-item-btn" onClick={() => { setOpen(false); setCoursesOpen(false); setShowAILearning(true); }}>
-                        <FaRobot /> {t('navDropdown.aiLearning')}
-                      </button>
-                    )}
+                    <button className="nav-dropdown-item-btn" onClick={() => { setOpen(false); setCoursesOpen(false); setShowAILearning(true); }}>
+                      <FaRobot /> {t('navDropdown.aiLearning')}
+                    </button>
                   </div>
                 )}
               </li>

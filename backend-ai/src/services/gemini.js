@@ -184,12 +184,15 @@ Return ONLY a valid JSON array of objects with this structure:
   }
 }
 
-export async function generateTopicContent(topic, level = 'beginner') {
+export async function generateTopicContent(topic, level = 'secondary', resourceContext = '') {
   if (!isAvailable()) return null;
 
   try {
     const model = getModel();
-    const prompt = `Create comprehensive learning content for the topic "${topic}" at ${level} level.
+    let prompt = `Create comprehensive learning content for the topic "${topic}" tailored to ${level} students.
+- Use vocabulary, depth and examples appropriate for ${level} students.
+- Keep explanations clear and well-structured for that education level.
+- Questions and flashcards must match the expected difficulty of ${level}.
 
 Return ONLY a valid JSON object with this exact structure (no markdown, no code fences):
 {
@@ -205,6 +208,13 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no code 
   ],
   "imagePrompt": "A text description for generating an AI image about this topic"
 }`;
+
+    if (resourceContext) {
+      prompt += `
+
+The school has uploaded the following curriculum resources for this subject. Use them to align the content with the curriculum, reference their topics, and avoid contradicting them:
+${resourceContext}`;
+    }
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

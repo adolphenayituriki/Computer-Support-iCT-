@@ -327,10 +327,27 @@ export async function getSession(req, res) {
 
 export async function processTopic(req, res) {
   try {
-    const { title, level } = req.body;
+    const { title, level, useResources } = req.body;
     if (!title || title.trim().length < 2) return res.status(400).json({ error: 'Please enter a topic (at least 2 characters).' });
 
-    const geminiContent = await gemini.generateTopicContent(title, level || 'beginner');
+    let resourceContext = '';
+    if (useResources) {
+      try {
+        const resources = await Resource.find({ status: 'ready' })
+          .select('title subject type description')
+          .sort({ createdAt: -1 })
+          .limit(20);
+        if (resources.length > 0) {
+          resourceContext = resources
+            .map((r) => `- ${r.title} (${r.subject || 'General'}, ${r.type})${r.description ? `: ${r.description}` : ''}`)
+            .join('\n');
+        }
+      } catch (err) {
+        console.error('[processTopic] resource context error:', err.message);
+      }
+    }
+
+    const geminiContent = await gemini.generateTopicContent(title, level || 'secondary', resourceContext);
     if (!geminiContent) {
       return res.status(503).json({ error: 'AI content generation is currently unavailable. Please try again later.' });
     }
@@ -355,7 +372,7 @@ export async function processTopic(req, res) {
       userId: req.user.id,
       title: title.trim(),
       subject: 'General',
-      level: level || 'beginner',
+      level: level || 'secondary',
       status: 'completed',
       lesson,
       image: { url: imageUrl, prompt: imagePrompt, alt: `AI illustration for ${title}` },
@@ -363,7 +380,7 @@ export async function processTopic(req, res) {
       audio: { url: '', transcript, duration: '10:00' },
       quiz: quizData,
       flashcards: flashcardData,
-      tags: [level || 'beginner'],
+      tags: [level || 'secondary'],
     });
 
     await Notification.create({
@@ -402,14 +419,14 @@ export async function proxyImage(req, res) {
 
 export async function generateSimulation(req, res) {
   try {
-    const { title } = req.body;
+    const { title, level } = req.body;
     if (!title || title.trim().length < 2) {
       return res.status(400).json({ error: 'Please provide a topic title.' });
     }
     const escaped = title.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     let simulation;
     try {
-      simulation = await gemini.generateSimulation(title.trim(), 'beginner');
+      simulation = await gemini.generateSimulation(title.trim(), level || 'secondary');
     } catch (err) {
       return res.status(503).json({ error: err.message });
     }

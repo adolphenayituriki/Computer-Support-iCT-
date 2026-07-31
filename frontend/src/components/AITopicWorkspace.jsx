@@ -12,6 +12,14 @@ const LOAD_STEPS = [
   { icon: '🃏', label: 'Making flashcards' },
 ];
 
+const EDUCATION_LEVELS = [
+  { value: 'Primary', label: 'Primary (P1–P6)' },
+  { value: 'O-Level', label: 'Ordinary Level (S1–S3)' },
+  { value: 'A-Level', label: 'Advanced Level (S4–S6)' },
+  { value: 'TVET', label: 'TVET' },
+  { value: 'University', label: 'University' },
+];
+
 const SUBJECT_INFO = {
   general: { label: 'General', color: '#64748b', icon: '🌍' },
   math: { label: 'Mathematics', color: '#FFCE08', icon: '📐' },
@@ -55,6 +63,8 @@ const toolsGenerated = (t) => {
 export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearchTrigger = 0 }) {
   const { user } = useAuth();
   const [query, setQuery] = useState('');
+  const [level, setLevel] = useState('O-Level');
+  const [useResources, setUseResources] = useState(true);
   const [loading, setLoading] = useState(false);
   const [topic, setTopic] = useState(null);
   const [history, setHistory] = useState([]);
@@ -163,7 +173,7 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('cshub_token')}`,
         },
-        body: JSON.stringify({ title: title.trim(), level: 'beginner' }),
+        body: JSON.stringify({ title: title.trim(), level, useResources }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -287,7 +297,7 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('cshub_token')}`,
         },
-        body: JSON.stringify({ title: topic.title }),
+        body: JSON.stringify({ title: topic.title, level }),
       });
       const data = await res.json();
       if (res.ok && data.html) {
@@ -559,6 +569,30 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
             {loading ? '⏳' : '→'}
           </button>
         </div>
+        <div className="topic-search-options">
+          <label className="topic-level-field">
+            <span className="topic-level-label">Education level</span>
+            <select
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+              className="topic-level-select"
+              disabled={loading}
+            >
+              {EDUCATION_LEVELS.map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="topic-resource-toggle">
+            <input
+              type="checkbox"
+              checked={useResources}
+              onChange={(e) => setUseResources(e.target.checked)}
+              disabled={loading}
+            />
+            <span>Align with uploaded curriculum resources</span>
+          </label>
+        </div>
         <p className="topic-search-hint">AI will generate: lesson, image, video, audio, quiz, flashcards & simulations for any topic</p>
       </form>
 
@@ -568,7 +602,7 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
             <div className="topic-loading-spinner" />
             <div className="topic-loading-core">🤖</div>
           </div>
-          <p className="topic-loading-title">Generating AI content for "<strong>{query}</strong>"...</p>
+          <p className="topic-loading-title">Generating AI content for "<strong>{query}</strong>" ({level})...</p>
           <div className="topic-loading-steps">
             {LOAD_STEPS.map((step, i) => (
               <span
