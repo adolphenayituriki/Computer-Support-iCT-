@@ -28,9 +28,9 @@ export async function register(req, res) {
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({
       name,
-      email: email || '',
+      email: email || null,
       password: hashed,
-      phone: phone || '',
+      phone: phone || null,
       phoneVerified: !!phone,
     });
     if (email) sendUserWelcome(email, name).catch((e) => console.log('Email error:', e.message));

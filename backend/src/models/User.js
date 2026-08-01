@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
   setupTokenExpires: { type: Number },
 }, { timestamps: true });
 
-userSchema.index({ email: 1 }, { unique: true, sparse: true });
-userSchema.index({ phone: 1 }, { unique: true, sparse: true });
+userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: 'string', $gt: '' } } });
+userSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $type: 'string', $gt: '' } } });
 
 export default mongoose.model('User', userSchema);
