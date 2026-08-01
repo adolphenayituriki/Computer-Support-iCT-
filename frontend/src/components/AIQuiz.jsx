@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useLang } from '../LanguageContext';
 import API_BASE, { AI_API_BASE } from '../api';
+import { sanitizeAI } from './AIMarkdown';
 import {
   FaQuestionCircle, FaCheckCircle, FaTimesCircle, FaSpinner, FaRedo,
   FaTrophy, FaClock, FaArrowRight, FaEye, FaHome, FaExclamationTriangle, FaSearch
@@ -211,7 +212,7 @@ export default function AIQuiz() {
                     <span className="ai-quiz-review-q-num">Q{i + 1}</span>
                     <span className="ai-quiz-review-q-points">{isCorrect ? '+10 pts' : '0 pts'}</span>
                   </div>
-                  <p className="ai-quiz-review-q-text">{q.text}</p>
+                  <p className="ai-quiz-review-q-text">{sanitizeAI(q.text)}</p>
                   <div className="ai-quiz-review-q-options">
                     {q.options.map((opt, oi) => {
                       const isUA = oi === userAns;
@@ -222,14 +223,14 @@ export default function AIQuiz() {
                       return (
                         <div key={oi} className={cls}>
                           <span className="ai-quiz-review-opt-letter">{String.fromCharCode(65 + oi)}</span>
-                          <span>{opt}</span>
+                          <span>{sanitizeAI(opt)}</span>
                           {isC && <span className="ai-quiz-review-opt-check"><FaCheckCircle /></span>}
                           {isUA && !isC && <span className="ai-quiz-review-opt-x"><FaTimesCircle /></span>}
                         </div>
                       );
                     })}
                   </div>
-                  {q.explanation && <div className="ai-quiz-review-explanation"><strong>Explanation:</strong> {q.explanation}</div>}
+                  {q.explanation && <div className="ai-quiz-review-explanation"><strong>Explanation:</strong> {sanitizeAI(q.explanation)}</div>}
                 </div>
               );
             })}
@@ -435,12 +436,12 @@ export default function AIQuiz() {
         <div className="ai-quiz-progress-fill" style={{ width: `${progress}%` }}></div>
       </div>
       <div className="ai-quiz-question-card">
-        <h3>Q{currentQ + 1}. {q.text}</h3>
+        <h3>Q{currentQ + 1}. {sanitizeAI(q.text)}</h3>
         <div className="ai-quiz-options">
           {q.options.map((opt, i) => (
             <button key={i} className={`ai-quiz-option${answers[currentQ] === i ? ' selected' : ''}`} onClick={() => selectAnswer(i)}>
               <span className="ai-quiz-option-letter">{String.fromCharCode(65 + i)}</span>
-              <span>{opt}</span>
+              <span>{sanitizeAI(opt)}</span>
             </button>
           ))}
         </div>

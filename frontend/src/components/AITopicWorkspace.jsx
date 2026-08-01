@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import API_BASE, { AI_API_BASE } from '../api';
 import { useAuth } from '../AuthContext';
-import AIMarkdown from './AIMarkdown';
+import AIMarkdown, { sanitizeAI } from './AIMarkdown';
 
 const LOAD_STEPS = [
   { icon: '📖', label: 'Creating lesson' },
@@ -60,12 +60,24 @@ const toolsGenerated = (t) => {
   return n;
 };
 
+const toolReady = (t, id) => {
+  if (id === 'lesson') return !!(t.lesson?.summary || t.lesson?.sections?.length);
+  if (id === 'image') return !!t.image?.url;
+  if (id === 'video') return !!(t.video?.url || t.video?.title);
+  if (id === 'audio') return !!t.audio?.transcript;
+  if (id === 'quiz') return !!(t.quiz && t.quiz.length);
+  if (id === 'flashcards') return !!(t.flashcards && t.flashcards.length);
+  if (id === 'simulation') return !!t.simulation?.html;
+  return false;
+};
+
 export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearchTrigger = 0 }) {
   const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [level, setLevel] = useState('O-Level');
   const [useResources, setUseResources] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const [topic, setTopic] = useState(null);
   const [history, setHistory] = useState([]);
   const [activeTool, setActiveTool] = useState('lesson');
@@ -81,6 +93,9 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
   const [simLoading, setSimLoading] = useState(false);
   const [simError, setSimError] = useState('');
   const [simFullscreen, setSimFullscreen] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState([]);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [cardOrder, setCardOrder] = useState(null);
   const inputRef = useRef(null);
   const audioCleanupRef = useRef(null);
 
@@ -104,6 +119,11 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
     setImgSeed(0);
     setSimError('');
     setSimFullscreen(false);
+    setQuizAnswers([]);
+    setQuizSubmitted(false);
+    setCardOrder(null);
+    setFlashcardIdx(0);
+    setFlashcardFlipped(false);
   }, [topic]);
 
   useEffect(() => {
@@ -161,6 +181,7 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
   async function runSearch(title) {
     if (!title || !title.trim() || loading) return;
     setLoading(true);
+    setSearchError('');
     setTopic(null);
     setActiveTool('lesson');
     setShowFlashcards(false);
@@ -179,8 +200,12 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
       if (res.ok) {
         setTopic(data);
         loadHistory();
+      } else {
+        setSearchError(data.error || 'Could not generate this topic. Please try again.');
       }
-    } catch {}
+    } catch {
+      setSearchError('Connection error. Please try again.');
+    }
     setLoading(false);
   }
 
@@ -345,7 +370,7 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
         return (
           <div className="topic-image">
             <h3>🖼️ AI Generated Image</h3>
-            <p className="topic-image-prompt">{topic.image?.prompt}</p>
+            <p className="topic-image-prompt">{sanitizeAI(topic.image?.prompt)}</p>
             <div className="topic-image-frame">
               {imgSrc && imgLoading && (
                 <div className="topic-image-loader">
@@ -445,31 +470,95 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
             </div>
           </div>
         );
-      case 'quiz':
+      case 'quiz': {
+        const total = topic.quiz?.length || 0;
+        const answered = quizAnswers.filter((a) => a !== undefined && a !== null).length;
+        const score = quizSubmitted
+          ? topic.quiz.reduce((acc, q, qi) => acc + (quizAnswers[qi] === q.correctIndex ? 1 : 0), 0)
+          : 0;
         return (
           <div className="topic-quiz">
-            <h3>📝 Topic Quiz</h3>
-            <p className="topic-quiz-count">{topic.quiz?.length || 0} questions</p>
-            {topic.quiz?.map((q, qi) => (
-              <div key={qi} className="topic-quiz-question">
-                <p><strong>Q{qi + 1}.</strong> {q.question}</p>
-                <div className="topic-quiz-options">
-                  {q.options.map((opt, oi) => (
-                    <div key={oi} className={`topic-quiz-opt ${oi === q.correctIndex ? 'correct' : ''}`}>
-                      <span className="topic-quiz-letter">{String.fromCharCode(65 + oi)}</span> {opt}
-                    </div>
-                  ))}
-                </div>
-                <p className="topic-quiz-explanation">💡 {q.explanation}</p>
+            <div className="topic-quiz-head">
+              <div>
+                <h3>📝 Topic Quiz</h3>
+                <p className="topic-quiz-count">{total} questions — tap an answer for each, then check your score</p>
               </div>
-            ))}
+              {quizSubmitted && (
+                <div className={`topic-quiz-score ${score === total ? 'perfect' : ''}`}>
+                  {score === total && '🎉 Perfect! '}{score}/{total} correct
+                </div>
+              )}
+            </div>
+            {topic.quiz?.map((q, qi) => {
+              const selected = quizAnswers[qi];
+              return (
+                <div key={qi} className="topic-quiz-question">
+                  <p><strong>Q{qi + 1}.</strong> {sanitizeAI(q.question)}</p>
+                  <div className="topic-quiz-options">
+                    {q.options.map((opt, oi) => {
+                      const chosen = selected === oi;
+                      const showCorrect = quizSubmitted && oi === q.correctIndex;
+                      const showWrong = quizSubmitted && chosen && oi !== q.correctIndex;
+                      return (
+                        <button
+                          key={oi}
+                          type="button"
+                          className={`topic-quiz-opt ${chosen ? 'chosen' : ''} ${showCorrect ? 'correct' : ''} ${showWrong ? 'wrong' : ''}`}
+                          onClick={() => {
+                            if (quizSubmitted) return;
+                            setQuizAnswers((prev) => { const n = [...prev]; n[qi] = oi; return n; });
+                          }}
+                          disabled={quizSubmitted}
+                        >
+                          <span className="topic-quiz-letter">{String.fromCharCode(65 + oi)}</span> {sanitizeAI(opt)}
+                          {showCorrect && <span className="topic-quiz-mark">✓</span>}
+                          {showWrong && <span className="topic-quiz-mark">✗</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {quizSubmitted && <p className="topic-quiz-explanation">💡 {sanitizeAI(q.explanation)}</p>}
+                </div>
+              );
+            })}
+            {total > 0 && (
+              <div className="topic-quiz-actions">
+                {!quizSubmitted ? (
+                  <button className="topic-action-btn primary" onClick={() => setQuizSubmitted(true)} disabled={answered !== total}>
+                    Check Answers ({answered}/{total})
+                  </button>
+                ) : (
+                  <button className="topic-action-btn" onClick={() => { setQuizAnswers([]); setQuizSubmitted(false); }}>
+                    ↺ Try Again
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         );
-      case 'flashcards':
+      }
+      case 'flashcards': {
+        const deck = cardOrder ? cardOrder.map((i) => topic.flashcards[i]) : topic.flashcards;
+        const shuffleCards = () => {
+          if (!topic.flashcards?.length) return;
+          const idx = topic.flashcards.map((_, i) => i);
+          for (let i = idx.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [idx[i], idx[j]] = [idx[j], idx[i]];
+          }
+          setCardOrder(idx);
+          setFlashcardIdx(0);
+          setFlashcardFlipped(false);
+        };
         return (
           <div className="topic-flashcards">
-            <h3>🃏 Flashcards</h3>
-            {topic.flashcards && topic.flashcards.length > 0 && (
+            <div className="topic-quiz-head">
+              <h3>🃏 Flashcards</h3>
+              {deck && deck.length > 0 && (
+                <button className="topic-action-btn" onClick={shuffleCards} title="Shuffle the deck">🔀 Shuffle</button>
+              )}
+            </div>
+            {deck && deck.length > 0 && (
               <>
                 <div
                   className={`topic-flashcard ${flashcardFlipped ? 'flipped' : ''}`}
@@ -478,30 +567,31 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
                   <div className="topic-flashcard-inner">
                     <div className="topic-flashcard-front">
                       <span className="topic-flashcard-label">Question</span>
-                      <p>{topic.flashcards[flashcardIdx]?.front}</p>
+                      <p>{sanitizeAI(deck[flashcardIdx]?.front)}</p>
                       <span className="topic-flashcard-hint">Tap to flip</span>
                     </div>
                     <div className="topic-flashcard-back">
                       <span className="topic-flashcard-label">Answer</span>
-                      <p>{topic.flashcards[flashcardIdx]?.back}</p>
+                      <p>{sanitizeAI(deck[flashcardIdx]?.back)}</p>
                       <span className="topic-flashcard-hint">Tap to flip</span>
                     </div>
                   </div>
                 </div>
                 <div className="topic-flashcard-nav">
                   <button onClick={() => { setFlashcardIdx(Math.max(0, flashcardIdx - 1)); setFlashcardFlipped(false); }} disabled={flashcardIdx === 0} className="topic-flashcard-btn">← Prev</button>
-                  <span>{flashcardIdx + 1} / {topic.flashcards.length}</span>
-                  <button onClick={() => { setFlashcardIdx(Math.min(topic.flashcards.length - 1, flashcardIdx + 1)); setFlashcardFlipped(false); }} disabled={flashcardIdx === topic.flashcards.length - 1} className="topic-flashcard-btn">Next →</button>
+                  <span>{flashcardIdx + 1} / {deck.length}</span>
+                  <button onClick={() => { setFlashcardIdx(Math.min(deck.length - 1, flashcardIdx + 1)); setFlashcardFlipped(false); }} disabled={flashcardIdx === deck.length - 1} className="topic-flashcard-btn">Next →</button>
                 </div>
               </>
             )}
           </div>
         );
+      }
       case 'simulation':
         return (
           <div className="topic-simulation">
             <h3>🧪 Interactive Simulation</h3>
-            {topic.simulation?.description && <p className="topic-image-prompt">{topic.simulation.description}</p>}
+            {topic.simulation?.description && <p className="topic-image-prompt">{sanitizeAI(topic.simulation.description)}</p>}
             {!topic.simulation?.html && (
               <div className="topic-simulation-empty">
                 <div className="topic-simulation-icon">🧪</div>
@@ -548,9 +638,13 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
     <div className="topic-workspace">
       <div className="topic-workspace-header">
         <button onClick={onBack} className="topic-back-btn">← Back</button>
-        <div className="topic-workspace-heading">
-          <h2>AI Tools</h2>
-          <span>Generate a complete learning package for any topic</span>
+        <div className="topic-workspace-hero">
+          <div className="topic-workspace-hero-icon">🧠</div>
+          <div className="topic-workspace-heading">
+            <h2>AI Tools</h2>
+            <span>Generate a complete learning package for any topic</span>
+          </div>
+          <span className="topic-workspace-hero-chip">✦ AI-Powered</span>
         </div>
       </div>
 
@@ -596,6 +690,13 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
         <p className="topic-search-hint">AI will generate: lesson, image, video, audio, quiz, flashcards & simulations for any topic</p>
       </form>
 
+      {searchError && (
+        <div className="topic-search-error">
+          <span>⚠️</span>
+          <p>{searchError}</p>
+        </div>
+      )}
+
       {loading && (
         <div className="topic-loading">
           <div className="topic-loading-orbit">
@@ -622,10 +723,19 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
       {!loading && topic && (
         <div className="topic-result">
           <div className="topic-result-header">
-            <h2>{topic.title}</h2>
-            <div className="topic-result-meta">
-              <span className="topic-subject-badge">{topic.subject}</span>
-              <span className="topic-level-badge">{topic.level}</span>
+            <div className="topic-result-hero">
+              <span className="topic-result-hero-icon">📘</span>
+              <div className="topic-result-hero-main">
+                <h2>{topic.title}</h2>
+                <div className="topic-result-meta">
+                  <span className="topic-subject-badge">{topic.subject}</span>
+                  <span className="topic-level-badge">{topic.level}</span>
+                </div>
+              </div>
+              <div className="topic-result-count">
+                <strong>{toolsGenerated(topic)}</strong>
+                <span>/ 7 tools</span>
+              </div>
             </div>
           </div>
 
@@ -639,7 +749,7 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
                   if (tool.id === 'flashcards') { setShowFlashcards(true); setFlashcardIdx(0); setFlashcardFlipped(false); }
                 }}
               >
-                <span>{tool.icon}</span> {tool.label}
+                <span className={`topic-tool-tab-icon ${toolReady(topic, tool.id) ? 'ready' : ''}`}>{tool.icon}</span> {tool.label}
               </button>
             ))}
           </div>
@@ -696,6 +806,17 @@ export default function AITopicWorkspace({ onBack, initialQuery = '', autoSearch
                     </span>
                   </span>
                   <strong className="topic-history-card-title">{t.title}</strong>
+                  <span className="topic-history-card-dots">
+                    {TOOLS.map((tool) => (
+                      <span
+                        key={tool.id}
+                        className={`topic-history-card-dot ${toolReady(t, tool.id) ? 'on' : ''}`}
+                        title={tool.label}
+                      >
+                        {tool.icon}
+                      </span>
+                    ))}
+                  </span>
                   <span className="topic-history-card-meta">
                     <span className="topic-history-card-tools" style={{ color: info.color }}>{tools} tool{tools === 1 ? '' : 's'}</span>
                     <span className="topic-history-card-sep">•</span>

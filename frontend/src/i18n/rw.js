@@ -199,7 +199,7 @@ export default {
   },
   "aiLearning": {
     "heroBadge": "Amasomo avuka ku Bwenge Bwamenyekanijwe",
-    "heroTitle": "Urubuga rw'Amasomo n'Ikoranabuhanga rwa CS Hub",
+    "heroTitle": "MenyAi TweseDinG",
     "heroSub": "Amasomo Avuka ku Bwenge Bwamenyekanijwe kwa Abanyeshuri y'Ikibuga",
     "heroDesc": "Ahantu h'ubumenyi bw'ikoranabuhanga aho AI itanga uburambe bw'amasomo bwihariye binyuze mu magambo, ibishushanyo, videwo, amajwi, imiterere n'ibikorwa bihuza.",
     "heroCta": "Raba Ibikorwa",
@@ -271,7 +271,7 @@ export default {
     "phase4": "Igice cya 4",
     "phase4Items": "Amasomo y'Akure, Porogaramu y'Agaciro, Amahamya y'Urumimi, Kwiyungira mu Bwambere",
     "ctaTitle": "Witegura Guhindura Amasomo?",
-    "ctaDesc": "Iyungishe Urubuga rw'Amasomo n'Ikoranabuhanga rwa CS Hub kandi urabe amaherezo y'amasomo.",
+    "ctaDesc": "Iyungishe MenyAi TweseDinG kandi urabe amaherezo y'amasomo.",
     "ctaBtn": "Tangura",
     "ctaSecondary": "Tuvugishe"
   },

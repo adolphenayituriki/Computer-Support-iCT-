@@ -199,7 +199,7 @@ export default {
   },
   "aiLearning": {
     "heroBadge": "AI-Powered Education",
-    "heroTitle": "CS Hub AI Learning Platform",
+    "heroTitle": "MenyAi TweseDinG",
     "heroSub": "Interactive AI-Powered Learning for Secondary Schools",
     "heroDesc": "An intelligent platform where AI creates personalized lessons with text, images, videos, voice, simulations, and interactive activities — all aligned to Rwanda's curriculum.",
     "heroCta": "Explore Features",
@@ -271,7 +271,7 @@ export default {
     "phase4": "Phase 4",
     "phase4Items": "Offline Learning, Mobile App, Multi-language Support, Regional Expansion",
     "ctaTitle": "Ready to Transform Education?",
-    "ctaDesc": "Join CS Hub AI Learning Platform and experience the future of education today.",
+    "ctaDesc": "Join MenyAi TweseDinG and experience the future of education today.",
     "ctaBtn": "Get Started",
     "ctaSecondary": "Contact Us"
   },

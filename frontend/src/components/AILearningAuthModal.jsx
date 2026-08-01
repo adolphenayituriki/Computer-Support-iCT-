@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaEye, FaEyeSlash, FaUserGraduate, FaChalkboardTeacher, FaTimes, FaRobot, FaArrowRight, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaTimes, FaRobot, FaArrowRight, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 export default function AILearningAuthModal({ open, onClose }) {
   const { login, loginByPhone, register } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [tab, setTab] = useState('login');
-  const [role, setRole] = useState('');
   const [loginMethod, setLoginMethod] = useState('email');
   const [registerMethod, setRegisterMethod] = useState('email');
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
@@ -22,7 +21,6 @@ export default function AILearningAuthModal({ open, onClose }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    if (!role) { setError('Please select your role.'); return; }
     setLoading(true);
     try {
       let data;
@@ -31,7 +29,6 @@ export default function AILearningAuthModal({ open, onClose }) {
       } else {
         data = await loginByPhone(form.phone, form.password);
       }
-      localStorage.setItem('cshub_ai_role', role);
       showToast(`Welcome back, ${data.user.name}!`);
       onClose();
       navigate('/ai-dashboard');
@@ -45,13 +42,11 @@ export default function AILearningAuthModal({ open, onClose }) {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-    if (!role) { setError('Please select your role.'); return; }
     if (form.password !== form.confirm) { setError('Passwords do not match.'); return; }
     if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setLoading(true);
     try {
       const data = await register(form.name, registerMethod === 'email' ? form.email : '', form.password, registerMethod === 'phone' ? form.phone : '');
-      localStorage.setItem('cshub_ai_role', role);
       showToast(`Welcome, ${data.user.name}! Account created.`);
       onClose();
       navigate('/ai-dashboard');
@@ -76,38 +71,10 @@ export default function AILearningAuthModal({ open, onClose }) {
             <FaRobot size={20} className="text-white" />
           </div>
           <h2 className="text-base font-extrabold text-white">AI Learning Platform</h2>
-          <p className="text-[11px] text-blue-200 mt-0.5">Join as a Student or Teacher</p>
+          <p className="text-[11px] text-blue-200 mt-0.5">Sign in to start learning with AI</p>
         </div>
 
         <div className="px-4 py-3">
-          {/* Role Selection */}
-          <div className="flex gap-2 mb-3">
-            <button
-              className={`flex-1 flex items-center gap-2 p-2.5 rounded-lg border transition-all ${role === 'student' ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'}`}
-              onClick={() => setRole('student')}
-            >
-              <div className={`w-7 h-7 rounded-md flex items-center justify-center ${role === 'student' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                <FaUserGraduate size={12} />
-              </div>
-              <div className="text-left">
-                <span className={`text-xs font-bold block leading-tight ${role === 'student' ? 'text-blue-600' : 'text-slate-600'}`}>Student</span>
-                <span className="text-[9px] text-slate-400 leading-tight">Learn with AI tools</span>
-              </div>
-            </button>
-            <button
-              className={`flex-1 flex items-center gap-2 p-2.5 rounded-lg border transition-all ${role === 'teacher' ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'}`}
-              onClick={() => setRole('teacher')}
-            >
-              <div className={`w-7 h-7 rounded-md flex items-center justify-center ${role === 'teacher' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                <FaChalkboardTeacher size={12} />
-              </div>
-              <div className="text-left">
-                <span className={`text-xs font-bold block leading-tight ${role === 'teacher' ? 'text-blue-600' : 'text-slate-600'}`}>Teacher</span>
-                <span className="text-[9px] text-slate-400 leading-tight">Create & manage classes</span>
-              </div>
-            </button>
-          </div>
-
           {/* Tabs */}
           <div className="flex bg-slate-100 rounded-lg p-0.5 mb-3">
             <button className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-all ${tab === 'login' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`} onClick={() => { setTab('login'); setError(''); }}>
@@ -142,7 +109,7 @@ export default function AILearningAuthModal({ open, onClose }) {
                   <input type={showPwd.password ? 'text' : 'password'} placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required className={`${inputClass} pr-8`} />
                   <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" onClick={() => setShowPwd({ ...showPwd, password: !showPwd.password })}>{showPwd.password ? <FaEyeSlash size={12} /> : <FaEye size={12} />}</button>
                 </div>
-                <button type="submit" disabled={loading || !role} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-40 flex items-center justify-center gap-1.5">
+                <button type="submit" disabled={loading} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-40 flex items-center justify-center gap-1.5">
                   {loading ? <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" /> : <>Sign In <FaArrowRight size={10} /></>}
                 </button>
               </form>
@@ -172,7 +139,7 @@ export default function AILearningAuthModal({ open, onClose }) {
                   <input type={showPwd.confirm ? 'text' : 'password'} placeholder="Confirm Password" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} required className={`${inputClass} pr-8`} />
                   <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}>{showPwd.confirm ? <FaEyeSlash size={12} /> : <FaEye size={12} />}</button>
                 </div>
-                <button type="submit" disabled={loading || !role} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-40 flex items-center justify-center gap-1.5">
+                <button type="submit" disabled={loading} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-40 flex items-center justify-center gap-1.5">
                   {loading ? <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" /> : <>Create Account <FaArrowRight size={10} /></>}
                 </button>
               </form>

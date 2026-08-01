@@ -4,7 +4,7 @@ const topicSessionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
   subject: { type: String, default: '' },
-  level: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
+  level: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'Primary', 'O-Level', 'A-Level', 'TVET', 'University'], default: 'beginner' },
   status: { type: String, enum: ['generating', 'completed', 'failed'], default: 'generating' },
   lesson: {
     summary: String,

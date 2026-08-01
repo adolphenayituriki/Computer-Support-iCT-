@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
 import { AI_API_BASE } from '../api';
+import { sanitizeAI } from './AIMarkdown';
 import {
   FaBook, FaUpload, FaPlus, FaTrash, FaFilePdf, FaGlobe,
   FaRobot, FaQuestionCircle, FaBrain, FaFileAlt, FaComments,
@@ -388,12 +389,12 @@ export default function AIResources({ onBack }) {
                   {resourceQuiz.questions.map((q, qi) => (
                     <div className="ai-quiz-question-card" key={qi}>
                       <h3>Question {qi + 1}</h3>
-                      <p>{q.text}</p>
+                      <p>{sanitizeAI(q.text)}</p>
                       <div className="ai-quiz-options">
                         {q.options.map((opt, oi) => (
                           <button key={oi} className={`ai-quiz-option ${quizAnswers[qi] === oi ? 'selected' : ''}`} onClick={() => setQuizAnswers((prev) => ({ ...prev, [qi]: oi }))}>
                             <span className="ai-quiz-option-letter">{String.fromCharCode(65 + oi)}</span>
-                            <span>{opt}</span>
+                            <span>{sanitizeAI(opt)}</span>
                           </button>
                         ))}
                       </div>
@@ -414,9 +415,9 @@ export default function AIResources({ onBack }) {
                       <div className={`ai-quiz-result-item ${r.correct ? 'correct' : 'wrong'}`} key={i}>
                         {r.correct ? <FaCheckCircle className="ai-quiz-result-icon" /> : <FaExclamationTriangle className="ai-quiz-result-icon" />}
                         <div>
-                          <strong>Q{i + 1}: {r.text}</strong>
-                          <p>{r.correct ? 'Correct!' : `Your answer: ${r.options[r.userAnswer] || 'No answer'}`}</p>
-                          {!r.correct && <p>Correct: {r.options[r.correctIndex]}</p>}
+                          <strong>Q{i + 1}: {sanitizeAI(r.text)}</strong>
+                          <p>{r.correct ? 'Correct!' : `Your answer: ${sanitizeAI(r.options[r.userAnswer]) || 'No answer'}`}</p>
+                          {!r.correct && <p>Correct: {sanitizeAI(r.options[r.correctIndex])}</p>}
                         </div>
                       </div>
                     ))}
@@ -436,11 +437,11 @@ export default function AIResources({ onBack }) {
                     <div className="topic-flashcard" onClick={() => setFlashcardFlipped(!flashcardFlipped)}>
                       <div className="topic-flashcard-inner" style={{ transform: flashcardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
                         <div className="topic-flashcard-front">
-                          <p>{resourceFlashcards.flashcards[flashcardIndex].front}</p>
+                          <p>{sanitizeAI(resourceFlashcards.flashcards[flashcardIndex].front)}</p>
                           <span>Click to flip</span>
                         </div>
                         <div className="topic-flashcard-back">
-                          <p>{resourceFlashcards.flashcards[flashcardIndex].back}</p>
+                          <p>{sanitizeAI(resourceFlashcards.flashcards[flashcardIndex].back)}</p>
                           <span>Click to flip back</span>
                         </div>
                       </div>

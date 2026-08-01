@@ -330,6 +330,9 @@ export async function processTopic(req, res) {
     const { title, level, useResources } = req.body;
     if (!title || title.trim().length < 2) return res.status(400).json({ error: 'Please enter a topic (at least 2 characters).' });
 
+    const VALID_LEVELS = ['Primary', 'O-Level', 'A-Level', 'TVET', 'University', 'beginner', 'intermediate', 'advanced'];
+    const safeLevel = VALID_LEVELS.includes(level) ? level : 'O-Level';
+
     let resourceContext = '';
     if (useResources) {
       try {
@@ -347,7 +350,7 @@ export async function processTopic(req, res) {
       }
     }
 
-    const geminiContent = await gemini.generateTopicContent(title, level || 'secondary', resourceContext);
+    const geminiContent = await gemini.generateTopicContent(title, safeLevel, resourceContext);
     if (!geminiContent) {
       return res.status(503).json({ error: 'AI content generation is currently unavailable. Please try again later.' });
     }
@@ -372,7 +375,7 @@ export async function processTopic(req, res) {
       userId: req.user.id,
       title: title.trim(),
       subject: 'General',
-      level: level || 'secondary',
+      level: safeLevel,
       status: 'completed',
       lesson,
       image: { url: imageUrl, prompt: imagePrompt, alt: `AI illustration for ${title}` },
@@ -380,7 +383,7 @@ export async function processTopic(req, res) {
       audio: { url: '', transcript, duration: '10:00' },
       quiz: quizData,
       flashcards: flashcardData,
-      tags: [level || 'secondary'],
+      tags: [safeLevel],
     });
 
     await Notification.create({
