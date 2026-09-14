@@ -92,7 +92,7 @@ export default function CollaboratorsPage() {
           <p className="collab-subtitle">
             {lang === 'rw'
               ? "Abadufashije kubaka CS hub (iCT) — abana bose bafite uruhare mu iterambere ry'uru rwego."
-              : 'The people who make CS hub (iCT) possible — each playing a vital role in building this platform.'}
+              : 'The people who make CS hub (iCT) possible. Each playing a vital role in building this platform.'}
           </p>
         </div>
 

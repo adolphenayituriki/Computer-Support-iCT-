@@ -9,6 +9,10 @@ const courseProgressSchema = new mongoose.Schema({
     introVideoWatched: { type: Boolean, default: false },
     resourcesChecked: [{ type: mongoose.Schema.Types.ObjectId }],
   },
+  lessonProgress: {
+    completed: { type: Number, default: 0 },
+    total: { type: Number, default: 0 },
+  },
   progress: { type: Number, default: 0, min: 0, max: 100 },
   completed: { type: Boolean, default: false },
   completedAt: { type: Date, default: null },
@@ -23,23 +27,28 @@ courseProgressSchema.methods.calculateProgress = function (course) {
   let total = 0;
   let done = 0;
 
-  if (course.content) {
-    total += 40;
-    if (this.sections.contentRead) done += 40;
-  }
-  if (course.videoUrl) {
-    total += 30;
-    if (this.sections.videoWatched) done += 30;
-  }
-  if (course.introVideo) {
-    total += 15;
-    if (this.sections.introVideoWatched) done += 15;
-  }
-  if (course.resources && course.resources.length > 0) {
-    const resTotal = 15;
-    const resDone = this.sections.resourcesChecked.length;
-    total += resTotal;
-    done += Math.round((resDone / course.resources.length) * resTotal);
+  if (this.lessonProgress && this.lessonProgress.total > 0) {
+    total = this.lessonProgress.total;
+    done = this.lessonProgress.completed;
+  } else {
+    if (course.content) {
+      total += 40;
+      if (this.sections.contentRead) done += 40;
+    }
+    if (course.videoUrl) {
+      total += 30;
+      if (this.sections.videoWatched) done += 30;
+    }
+    if (course.introVideo) {
+      total += 15;
+      if (this.sections.introVideoWatched) done += 15;
+    }
+    if (course.resources && course.resources.length > 0) {
+      const resTotal = 15;
+      const resDone = this.sections.resourcesChecked.length;
+      total += resTotal;
+      done += Math.round((resDone / course.resources.length) * resTotal);
+    }
   }
 
   if (total === 0) {

@@ -108,24 +108,61 @@ export async function markSectionComplete(req, res) {
       progress.assessmentScore = assessmentScore;
     }
 
-    progress.calculateProgress(course);
-    await progress.save();
+    await finalizeProgress(progress, course, enrollment);
 
-    if (progress.completed && enrollment.status !== 'completed') {
-      enrollment.status = 'completed';
-      enrollment.completedAt = new Date();
-      enrollment.verificationCode = generateVerificationCode(req.user.id.toString(), courseId.toString());
-      await enrollment.save();
+    res.json({ progress: progress.progress, completed: progress.completed, sections: progress.sections, lessonProgress: progress.lessonProgress });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+}
+
+export async function syncLessonProgress(req, res) {
+  try {
+    const { courseId } = req.params;
+    const { completed, total } = req.body;
+
+    const completedCount = Number(completed);
+    const totalCount = Number(total);
+    if (!Number.isFinite(completedCount) || !Number.isFinite(totalCount) || totalCount <= 0 || completedCount < 0) {
+      return res.status(400).json({ error: 'Invalid progress data.' });
     }
 
-    res.json({ progress: progress.progress, completed: progress.completed, sections: progress.sections });
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found.' });
+
+    const enrollment = await Enrollment.findOne({ userId: req.user.id, courseId });
+    if (!enrollment) return res.status(400).json({ error: 'Not enrolled in this course.' });
+
+    let progress = await CourseProgress.findOne({ userId: req.user.id, courseId });
+    if (!progress) {
+      progress = await CourseProgress.create({ userId: req.user.id, courseId });
+    }
+
+    progress.lessonProgress = {
+      completed: Math.min(completedCount, totalCount),
+      total: totalCount,
+    };
+
+    await finalizeProgress(progress, course, enrollment);
+
+    res.json({ progress: progress.progress, completed: progress.completed, sections: progress.sections, lessonProgress: progress.lessonProgress });
   } catch (e) { res.status(500).json({ error: e.message }); }
+}
+
+async function finalizeProgress(progress, course, enrollment) {
+  progress.calculateProgress(course);
+  await progress.save();
+
+  if (progress.completed && enrollment.status !== 'completed') {
+    enrollment.status = 'completed';
+    enrollment.completedAt = new Date();
+    enrollment.verificationCode = generateVerificationCode(enrollment.userId.toString(), course._id.toString());
+    await enrollment.save();
+  }
 }
 
 export async function getMyCourseProgress(req, res) {
   try {
     const enrollments = await Enrollment.find({ userId: req.user.id }).select('courseId status completedAt');
-    const progressDocs = await CourseProgress.find({ userId: req.user.id }).select('courseId progress completed sections');
+    const progressDocs = await CourseProgress.find({ userId: req.user.id }).select('courseId progress completed sections lessonProgress assessmentScore');
 
     const progressMap = {};
     progressDocs.forEach((p) => { progressMap[p.courseId.toString()] = p; });

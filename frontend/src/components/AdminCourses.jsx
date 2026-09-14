@@ -7,6 +7,7 @@ import {
 import { cn } from '../lib/utils';
 import { useToast } from '../ToastContext';
 import API_BASE from '../api';
+import { groupByMonth, MonthHeader, MonthFilter, monthLabel } from './MonthGroup';
 
 const token = () => localStorage.getItem('cshub_token');
 
@@ -35,21 +36,21 @@ async function uploadFiles(formData) {
 const CATEGORIES = ['general', 'hardware', 'software', 'network', 'virus', 'training'];
 const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
 const RESOURCE_TYPES = [
-  { value: 'book', label: 'Book / PDF', icon: BookOpen, color: 'text-amber-500' },
-  { value: 'link', label: 'Link', icon: Link2, color: 'text-blue-500' },
-  { value: 'video', label: 'Video', icon: Video, color: 'text-red-500' },
-  { value: 'file', label: 'Document', icon: FileText, color: 'text-emerald-500' },
+  { value: 'book', label: 'Book / PDF', icon: BookOpen, color: 'text-cshub-blue' },
+  { value: 'link', label: 'Link', icon: Link2, color: 'text-cshub-blue' },
+  { value: 'video', label: 'Video', icon: Video, color: 'text-cshub-blue' },
+  { value: 'file', label: 'Document', icon: FileText, color: 'text-cshub-blue' },
 ];
 
 const CATEGORY_COLORS = {
-  general: 'bg-slate-100 text-slate-600', hardware: 'bg-blue-50 text-blue-600',
-  software: 'bg-violet-50 text-violet-600', network: 'bg-emerald-50 text-emerald-600',
-  virus: 'bg-red-50 text-red-600', training: 'bg-amber-50 text-amber-600',
+  general: 'bg-slate-100 text-slate-600', hardware: 'bg-slate-100 text-slate-600',
+  software: 'bg-slate-100 text-slate-600', network: 'bg-slate-100 text-slate-600',
+  virus: 'bg-slate-100 text-slate-600', training: 'bg-slate-100 text-slate-600',
 };
 const DIFFICULTY_COLORS = {
-  beginner: 'bg-emerald-50 text-emerald-600',
-  intermediate: 'bg-amber-50 text-amber-600',
-  advanced: 'bg-red-50 text-red-600',
+  beginner: 'bg-slate-100 text-slate-600',
+  intermediate: 'bg-slate-100 text-slate-600',
+  advanced: 'bg-slate-100 text-slate-600',
 };
 
 const emptyForm = () => ({
@@ -102,8 +103,8 @@ function MarkdownEditor({ value, onChange }) {
         <button type="button" onClick={() => insert('```\n', '\n```')} className="rounded px-2 py-1 text-xs text-slate-500 hover:bg-slate-200">&lt;/&gt;</button>
         <div className="flex-1" />
         <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden">
-          <button type="button" onClick={() => setMode('edit')} className={cn('px-2.5 py-0.5 text-[11px] font-medium transition-colors', mode === 'edit' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700')}>Write</button>
-          <button type="button" onClick={() => setMode('preview')} className={cn('px-2.5 py-0.5 text-[11px] font-medium transition-colors', mode === 'preview' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700')}>Preview</button>
+          <button type="button" onClick={() => setMode('edit')} className={cn('px-2.5 py-0.5 text-[11px] font-medium transition-colors', mode === 'edit' ? 'bg-cshub-blue text-white' : 'text-slate-500 hover:text-slate-700')}>Write</button>
+          <button type="button" onClick={() => setMode('preview')} className={cn('px-2.5 py-0.5 text-[11px] font-medium transition-colors', mode === 'preview' ? 'bg-cshub-blue text-white' : 'text-slate-500 hover:text-slate-700')}>Preview</button>
         </div>
       </div>
       {mode === 'edit' ? (
@@ -280,7 +281,7 @@ function CourseModal({ course, onClose, onSaved }) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cshub-blue text-white">
               <BookOpen className="h-4 w-4" />
             </div>
             <h3 className="text-sm font-bold text-slate-900">{isEdit ? 'Edit Course' : 'Create Course'}</h3>
@@ -349,7 +350,7 @@ function CourseModal({ course, onClose, onSaved }) {
                 accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                 label="Upload thumbnail from device"
                 icon={Image}
-                color="text-violet-500"
+                color="text-slate-500"
                 file={thumbFile}
                 preview={thumbPreview}
                 onFile={handleThumbFile}
@@ -371,7 +372,7 @@ function CourseModal({ course, onClose, onSaved }) {
                     accept="video/mp4,video/webm,video/ogg,video/quicktime"
                     label="Upload intro video from device"
                     icon={Video}
-                    color="text-red-500"
+                    color="text-slate-500"
                     file={introVideoFile}
                     preview={introVideoPreview}
                     onFile={handleIntroVideoFile}
@@ -393,7 +394,7 @@ function CourseModal({ course, onClose, onSaved }) {
                     accept="video/mp4,video/webm,video/ogg,video/quicktime"
                     label="Upload course video from device"
                     icon={Video}
-                    color="text-red-500"
+                    color="text-slate-500"
                     file={courseVideoFile}
                     preview={courseVideoPreview}
                     onFile={handleCourseVideoFile}
@@ -415,7 +416,7 @@ function CourseModal({ course, onClose, onSaved }) {
                   <button type="button" onClick={() => { setShowResourceForm(true); setNewResource((r) => ({ ...r, type: 'link' })); }} className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
                     <Link2 className="h-3 w-3" /> Add Link
                   </button>
-                  <label className="flex cursor-pointer items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800">
+                  <label className="flex cursor-pointer items-center gap-1 rounded-lg bg-cshub-blue px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-[#3f7ee8]">
                     <Upload className="h-3 w-3" /> Upload File
                     <input type="file" accept="image/*,video/*,application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar" className="hidden" multiple onChange={(e) => {
                       const files = Array.from(e.target.files || []);
@@ -446,10 +447,10 @@ function CourseModal({ course, onClose, onSaved }) {
                         <div className="min-w-0 flex-1">
                           <div className="text-xs font-semibold text-slate-800 truncate">
                             {res.title}
-                            {(isUploadedFile || hasLocalFile) && <span className="ml-1 inline-flex items-center rounded bg-emerald-100 px-1 py-0.5 text-[9px] font-bold text-emerald-600">FILE</span>}
+                            {(isUploadedFile || hasLocalFile) && <span className="ml-1 inline-flex items-center rounded bg-slate-200 px-1 py-0.5 text-[9px] font-semibold text-slate-600">FILE</span>}
                           </div>
                           {res.url && !isUploadedFile && !hasLocalFile && <div className="text-[10px] text-slate-400 truncate">{res.url}</div>}
-                          {(isUploadedFile || hasLocalFile) && <div className="text-[10px] text-emerald-500 truncate">{isUploadedFile ? res.url : resourceFiles[idx]?.name}</div>}
+                          {(isUploadedFile || hasLocalFile) && <div className="text-[10px] text-slate-500 truncate">{isUploadedFile ? res.url : resourceFiles[idx]?.name}</div>}
                         </div>
                         <button type="button" onClick={() => removeResource(idx)} className="shrink-0 rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500">
                           <X className="h-3.5 w-3.5" />
@@ -471,7 +472,7 @@ function CourseModal({ course, onClose, onSaved }) {
                     {RESOURCE_TYPES.map((rt) => {
                       const Icon = rt.icon;
                       return (
-                        <button key={rt.value} type="button" onClick={() => setNewResource((r) => ({ ...r, type: rt.value }))} className={cn('flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-all', newResource.type === rt.value ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300')}>
+                        <button key={rt.value} type="button" onClick={() => setNewResource((r) => ({ ...r, type: rt.value }))} className={cn('flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-all', newResource.type === rt.value ? 'border-cshub-blue bg-cshub-blue text-white' : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300')}>
                           <Icon className="h-3 w-3" /> {rt.label.split(' ')[0]}
                         </button>
                       );
@@ -480,7 +481,7 @@ function CourseModal({ course, onClose, onSaved }) {
                   <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none bg-white" placeholder="Resource title *" value={newResource.title} onChange={(e) => setNewResource((r) => ({ ...r, title: e.target.value }))} />
                   <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none bg-white" placeholder="URL" value={newResource.url} onChange={(e) => setNewResource((r) => ({ ...r, url: e.target.value }))} />
                   <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none bg-white" placeholder="Description (optional)" value={newResource.description} onChange={(e) => setNewResource((r) => ({ ...r, description: e.target.value }))} />
-                  <button type="button" onClick={addResource} className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800">Add Resource</button>
+                  <button type="button" onClick={addResource} className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8]">Add Resource</button>
                 </div>
               )}
             </div>
@@ -488,7 +489,7 @@ function CourseModal({ course, onClose, onSaved }) {
             {/* ── Publish Toggle ── */}
             <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
               <div className="flex items-center gap-2.5">
-                {form.published ? <Eye className="h-4 w-4 text-emerald-500" /> : <EyeOff className="h-4 w-4 text-slate-400" />}
+                {form.published ? <Eye className="h-4 w-4 text-slate-500" /> : <EyeOff className="h-4 w-4 text-slate-400" />}
                 <div>
                   <div className="text-xs font-semibold text-slate-800">{form.published ? 'Published' : 'Draft (Hidden)'}</div>
                   <div className="text-[10px] text-slate-400">{form.published ? 'Visible to students' : 'Hidden from student view'}</div>
@@ -503,7 +504,7 @@ function CourseModal({ course, onClose, onSaved }) {
           {/* Footer */}
           <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
             <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-            <button type="submit" disabled={submitting} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
+            <button type="submit" disabled={submitting} className="flex items-center gap-1.5 rounded-lg bg-cshub-blue px-4 py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50">
               {submitting ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <Save className="h-3.5 w-3.5" />}
               {submitting ? 'Saving...' : isEdit ? 'Update' : 'Create'}
             </button>
@@ -521,6 +522,7 @@ export default function AdminCourses() {
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
   const [modal, setModal] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [menuOpen, setMenuOpen] = useState(null);
@@ -557,6 +559,7 @@ export default function AdminCourses() {
     if (filterCat !== 'all' && c.category !== filterCat) return false;
     if (filterStatus === 'published' && !c.published) return false;
     if (filterStatus === 'draft' && c.published) return false;
+    if (monthFilter !== 'all' && monthLabel(c.createdAt) !== monthFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       return c.title?.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q) || c.tags?.some((t) => t.toLowerCase().includes(q));
@@ -578,8 +581,8 @@ export default function AdminCourses() {
           { label: 'Total', value: courses.length, icon: BookOpen, color: 'text-slate-600' },
           { label: 'Published', value: publishedCount, icon: Eye, color: 'text-emerald-500' },
           { label: 'Drafts', value: draftCount, icon: EyeOff, color: 'text-amber-500' },
-          { label: 'Videos', value: totalVideos, icon: Video, color: 'text-red-500' },
-          { label: 'Resources', value: totalResources, icon: ExternalLink, color: 'text-blue-500' },
+          { label: 'Videos', value: totalVideos, icon: Video, color: 'text-cshub-blue' },
+          { label: 'Resources', value: totalResources, icon: ExternalLink, color: 'text-cshub-blue' },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-slate-200 bg-white p-3">
             <s.icon className={cn('mb-1.5 h-4 w-4', s.color)} />
@@ -606,10 +609,12 @@ export default function AdminCourses() {
             <option value="draft">Draft</option>
           </select>
         </div>
-        <button onClick={() => setModal('create')} className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+        <button onClick={() => setModal('create')} className="flex items-center justify-center gap-1.5 rounded-lg bg-cshub-blue px-3 py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8]">
           <Plus className="h-3.5 w-3.5" /> New Course
         </button>
       </div>
+
+      {courses.length > 0 && <MonthFilter items={courses} value={monthFilter} onChange={setMonthFilter} />}
 
       {/* Course Grid */}
       {loading ? (
@@ -621,14 +626,22 @@ export default function AdminCourses() {
           <BookOpen className="mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-medium text-slate-500">{courses.length === 0 ? 'No courses yet' : 'No courses match your filters'}</p>
           {courses.length === 0 && (
-            <button onClick={() => setModal('create')} className="mt-3 flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+            <button onClick={() => setModal('create')} className="mt-3 flex items-center gap-1 rounded-lg bg-cshub-blue px-3 py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8]">
               <Plus className="h-3 w-3" /> Create First Course
             </button>
           )}
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-16">
+          <p className="text-sm font-medium text-slate-500">No courses in the selected month.</p>
+        </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((course) => {
+        <div className="space-y-6">
+          {groupByMonth(filtered).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {g.list.map((course) => {
             const id = nid(course);
             const resources = course.resources || [];
             const hasVideo = !!(course.introVideo || course.videoUrl);
@@ -643,7 +656,7 @@ export default function AdminCourses() {
                     <BookOpen className="h-8 w-8 text-slate-200" />
                   </div>
                   <div className="absolute left-2 top-2">
-                    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold', course.published ? 'bg-emerald-500/90 text-white' : 'bg-amber-500/90 text-white')}>
+                    <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold', course.published ? 'bg-emerald-500/90 text-white' : 'bg-amber-500/90 text-white')}>
                       {course.published ? 'Published' : 'Draft'}
                     </span>
                   </div>
@@ -692,7 +705,10 @@ export default function AdminCourses() {
                 </div>
               </div>
             );
-          })}
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

@@ -161,7 +161,7 @@ export default {
     "desc": "Empowering students and teachers with digital skills and computer support.",
     "quickLinks": "Quick Links",
     "contact": "Contact",
-    "copyright": "© 2026 CS hub (iCT). Made with  for our community."
+    "copyright": "© 2026 CS hub (iCT). Made with love for our community."
   },
   "serviceModal": {
     "whatsIncluded": "What's Included",

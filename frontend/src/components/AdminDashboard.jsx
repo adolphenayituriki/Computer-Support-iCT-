@@ -8,10 +8,11 @@ import LiveSessionsAdmin from './LiveSessionsAdmin';
 import HelpModal from './HelpModal';
 import { useAuth } from '../AuthContext';
 import { useToast } from '../ToastContext';
-import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaStar, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield, FaCalendarAlt, FaSpinner, FaExclamationTriangle, FaDownload, FaVideo } from 'react-icons/fa';
+import { FaTicketAlt, FaUsers, FaLightbulb, FaEnvelope, FaUserTie, FaTrash, FaCheckCircle, FaUndo, FaTimes, FaEye, FaEyeSlash, FaSave, FaEdit, FaPlus, FaSearch, FaCheck, FaBan, FaReply, FaComments, FaNewspaper, FaImage, FaYoutube, FaBookOpen, FaChartBar, FaChartLine, FaStar, FaLink, FaCode, FaBars, FaAngleLeft, FaAngleRight, FaCog, FaQuestionCircle, FaSignOutAlt, FaBell, FaUserShield, FaCalendarAlt, FaSpinner, FaExclamationTriangle, FaDownload, FaVideo } from 'react-icons/fa';
 import { Menu, Search, Bell, Settings, LogOut, ShieldCheck } from 'lucide-react';
 import API_BASE from '../api';
 import { cn } from '../lib/utils';
+import { groupByMonth, MonthHeader, MonthFilter, monthLabel } from './MonthGroup';
 
 function useIsMobile(breakpoint = 768) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint);
@@ -42,16 +43,29 @@ function api(url, opts = {}) {
   });
 }
 
+const STATUS_COLOR_MAP = {
+  open: 'bg-cshub-blue/10 text-cshub-blue border-cshub-blue/20',
+  'in-progress': 'bg-amber-100 text-amber-700 border-amber-200',
+  pending: 'bg-amber-100 text-amber-700 border-amber-200',
+  'pending_review': 'bg-amber-100 text-amber-700 border-amber-200',
+  new: 'bg-cshub-blue/10 text-cshub-blue border-cshub-blue/20',
+  reviewed: 'bg-cshub-blue/10 text-cshub-blue border-cshub-blue/20',
+  read: 'bg-cshub-blue/10 text-cshub-blue border-cshub-blue/20',
+  responded: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  implemented: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  resolved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  closed: 'bg-slate-100 text-slate-600 border-slate-200',
+  completed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  rejected: 'bg-red-100 text-red-600 border-red-200',
+};
+
 function StatusBadge({ status }) {
-  const colors = {
-    open: 'bg-blue-100 text-blue-700', 'in-progress': 'bg-amber-100 text-amber-700',
-    resolved: 'bg-emerald-100 text-emerald-700', closed: 'bg-slate-100 text-slate-600',
-    pending: 'bg-amber-100 text-amber-700', reviewed: 'bg-blue-100 text-blue-700',
-    implemented: 'bg-emerald-100 text-emerald-700', new: 'bg-red-100 text-red-700',
-    read: 'bg-blue-100 text-blue-700', responded: 'bg-emerald-100 text-emerald-700',
-    approved: 'bg-emerald-100 text-emerald-700', rejected: 'bg-red-100 text-red-700',
-  };
-  return <span className={cn('inline-flex items-center rounded-full px-2 py-px text-[10px] font-semibold whitespace-nowrap', colors[status] || 'bg-slate-100 text-slate-600')}>{status}</span>;
+  return (
+    <span className={cn('inline-flex items-center rounded-full border px-2 py-px text-[10px] font-medium whitespace-nowrap', STATUS_COLOR_MAP[status] || 'border-slate-200 bg-slate-50 text-slate-600')}>
+      {status}
+    </span>
+  );
 }
 
 function CreateTicketModal({ onClose, onCreated }) {
@@ -84,7 +98,7 @@ function CreateTicketModal({ onClose, onCreated }) {
             <option value="">Assign to yourself (Admin)</option>
             {users.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
           </select>
-          <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+          <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           <div className="grid grid-cols-2 gap-2">
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none bg-white">
               <option value="general">General</option><option value="hardware">Hardware</option><option value="software">Software</option>
@@ -94,8 +108,8 @@ function CreateTicketModal({ onClose, onCreated }) {
               {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <textarea rows="3" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none resize-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-          <button type="submit" className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={loading}>
+          <textarea rows="3" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none resize-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+          <button type="submit" className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={loading}>
             {loading ? 'Creating...' : 'Create Ticket'}
           </button>
         </form>
@@ -128,10 +142,10 @@ function CreateUserModal({ onClose, onCreated }) {
           <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400 hover:bg-slate-200"><FaTimes /></button>
         </div>
         <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3">
-          <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <input type="email" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" placeholder="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          <input type="email" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           <div className="relative">
-            <input type={showPwd ? 'text' : 'password'} className="w-full rounded-lg border border-slate-200 px-3 py-2 pr-10 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={6} />
+            <input type={showPwd ? 'text' : 'password'} className="w-full rounded-lg border border-slate-200 px-3 py-2 pr-10 text-sm text-slate-800 outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={6} />
             <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600" onClick={() => setShowPwd(!showPwd)}>
               {showPwd ? <FaEyeSlash className="h-4 w-4" /> : <FaEye className="h-4 w-4" />}
             </button>
@@ -140,7 +154,7 @@ function CreateUserModal({ onClose, onCreated }) {
             <input type="checkbox" className="rounded" checked={form.isAdmin} onChange={(e) => setForm({ ...form, isAdmin: e.target.checked })} />
             Admin privileges
           </label>
-          <button type="submit" className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={loading}>
+          <button type="submit" className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={loading}>
             {loading ? 'Creating...' : 'Create User'}
           </button>
         </form>
@@ -189,7 +203,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
       {(!messages || messages.length === 0) ? (
         <p className="text-center text-xs text-slate-400 py-2">No messages yet.</p>
       ) : messages.map((m, i) => (
-        <div key={i} className={cn('rounded-lg p-2.5 text-xs', m.sender === 'admin' ? 'bg-slate-900 text-white ml-6' : 'bg-white border border-slate-200 mr-6')}>
+        <div key={i} className={cn('rounded-lg p-2.5 text-xs', m.sender === 'admin' ? 'bg-cshub-blue text-white ml-6' : 'bg-white border border-slate-200 mr-6')}>
           <div className="flex items-center justify-between mb-1">
             <strong className={cn('text-[10px] font-semibold', m.sender === 'admin' ? 'text-slate-300' : 'text-slate-700')}>{m.senderName}</strong>
             <span className="text-[9px] text-slate-400">{new Date(m.createdAt).toLocaleString()}</span>
@@ -203,9 +217,9 @@ function DetailModal({ item, type, onClose, onUpdated }) {
 
   const renderReplyForm = (onSend) => (
     <div className="flex gap-2 mt-2">
-      <input type="text" className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" placeholder="Type reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)}
+      <input type="text" className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue" placeholder="Type reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }} />
-      <button className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={sendingReply || !replyText.trim()} onClick={onSend}>{sendingReply ? '...' : 'Send'}</button>
+      <button className="rounded-lg bg-cshub-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={sendingReply || !replyText.trim()} onClick={onSend}>{sendingReply ? '...' : 'Send'}</button>
     </div>
   );
 
@@ -225,7 +239,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none bg-white">
                 {statusOpts[type].map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-              <button className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={saving} onClick={handleUpdate}>{saving ? 'Saving...' : 'Save'}</button>
+              <button className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={saving} onClick={handleUpdate}>{saving ? 'Saving...' : 'Save'}</button>
               <h5 className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700"><FaReply className="scale-x-[-1]" /> Conversation</h5>
               {renderMessages(currentItem.messages)}
               {renderReplyForm(handleSendReply)}
@@ -240,7 +254,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none bg-white">
                 {statusOpts[type].map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-              <button className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={saving} onClick={handleUpdate}>{saving ? 'Saving...' : 'Save'}</button>
+              <button className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={saving} onClick={handleUpdate}>{saving ? 'Saving...' : 'Save'}</button>
             </>
           )}
           {type === 'team' && (
@@ -260,7 +274,7 @@ function DetailModal({ item, type, onClose, onUpdated }) {
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none bg-white">
                 {statusOpts[type].map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-              <button className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={saving} onClick={handleUpdate}>{saving ? 'Saving...' : 'Save'}</button>
+              <button className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={saving} onClick={handleUpdate}>{saving ? 'Saving...' : 'Save'}</button>
             </>
           )}
         </div>
@@ -273,6 +287,7 @@ function AdminTickets() {
   const { showToast } = useToast();
   const [tickets, setTickets] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [viewTicket, setViewTicket] = useState(null);
@@ -329,7 +344,7 @@ function AdminTickets() {
     setUpdatingId(null); showToast(`Status changed to ${status}.`);
   };
 
-  const filtered = tickets.filter((t) => filter === 'all' || t.status === filter);
+  const filtered = tickets.filter((t) => (filter === 'all' || t.status === filter) && (monthFilter === 'all' || monthLabel(t.createdAt) === monthFilter));
   const messagesEndRef = useRef(null);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [viewTicket?.messages]);
 
@@ -362,7 +377,7 @@ function AdminTickets() {
             {msgs.length === 0 ? (
               <p className="text-center text-xs text-slate-400 py-3">No messages yet. Reply to start a conversation.</p>
             ) : msgs.map((m, i) => (
-              <div key={i} className={cn('rounded-lg p-2.5 text-xs', m.sender === 'admin' ? 'bg-slate-900 text-white ml-6' : 'bg-white border border-slate-200 mr-6')}>
+              <div key={i} className={cn('rounded-lg p-2.5 text-xs', m.sender === 'admin' ? 'bg-cshub-blue text-white ml-6' : 'bg-white border border-slate-200 mr-6')}>
                 <div className="flex items-center justify-between mb-1">
                   <strong className={cn('text-[10px] font-semibold', m.sender === 'admin' ? 'text-slate-300' : 'text-slate-700')}>{m.senderName}</strong>
                   <span className="text-[9px] text-slate-400">{new Date(m.createdAt).toLocaleString()}</span>
@@ -373,9 +388,9 @@ function AdminTickets() {
             <div ref={messagesEndRef} />
           </div>
           <div className="flex gap-2 mt-2">
-            <input type="text" className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" placeholder="Type reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)}
+            <input type="text" className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue" placeholder="Type reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
-            <button className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? '...' : 'Send'}</button>
+            <button className="rounded-lg bg-cshub-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={sendingReply || !replyText.trim()} onClick={handleSendReply}>{sendingReply ? '...' : 'Send'}</button>
           </div>
         </div>
       </div>
@@ -386,28 +401,34 @@ function AdminTickets() {
     <div className="space-y-3">
       {showCreate && <CreateTicketModal onClose={() => setShowCreate(false)} onCreated={fetchData} />}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="text-sm font-bold text-slate-900">All Tickets ({tickets.length})</h3>
+        <h3 className="text-sm font-semibold text-slate-900">All Tickets ({tickets.length})</h3>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex gap-1 flex-wrap">
             {['all', ...TICKET_STATUSES].map((f) => (
-              <button key={f} className={cn('rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors', filter === f ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50')} onClick={() => setFilter(f)}>
+              <button key={f} className={cn('rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors', filter === f ? 'bg-cshub-blue text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50')} onClick={() => setFilter(f)}>
                 {f === 'in-progress' ? 'In Progress' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
-          <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800"><FaPlus /> New</button>
+          <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 rounded-lg bg-cshub-blue px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#3f7ee8]"><FaPlus /> New</button>
         </div>
       </div>
+
+      {tickets.length > 0 && <MonthFilter items={tickets} value={monthFilter} onChange={setMonthFilter} />}
 
       {loading ? <Loading /> : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaTicketAlt className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No tickets found.</p></div>
       ) : (
-        <div className="space-y-2">
-          {filtered.map((t) => (
-            <div key={tid(t)} className={cn('rounded-xl border border-slate-200 bg-white p-3 transition-all hover:shadow-sm', editingId === tid(t) && 'ring-1 ring-slate-900')}>
+        <div className="space-y-6">
+          {groupByMonth(filtered).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((t) => (
+                  <div key={tid(t)} className={cn('rounded-xl border border-slate-200 bg-white p-3 transition-all hover:shadow-sm', editingId === tid(t) && 'ring-1 ring-cshub-blue')}>
               {editingId === tid(t) ? (
                 <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-                  <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
+                  <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
                   <div className="grid grid-cols-2 gap-2">
                     <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none bg-white">
                       <option value="general">General</option><option value="hardware">Hardware</option><option value="software">Software</option>
@@ -417,9 +438,9 @@ function AdminTickets() {
                       {TICKET_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
-                  <textarea rows="2" className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none resize-none focus:border-slate-900" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+                  <textarea rows="2" className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none resize-none focus:border-cshub-blue" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
                   <div className="flex gap-2">
-                    <button className="rounded-lg bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? '...' : 'Save'}</button>
+                    <button className="rounded-lg bg-cshub-blue px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={savingId === tid(t)} onClick={() => handleUpdate(tid(t))}>{savingId === tid(t) ? '...' : 'Save'}</button>
                     <button className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50" onClick={() => setEditingId(null)}>Cancel</button>
                   </div>
                 </div>
@@ -446,6 +467,9 @@ function AdminTickets() {
                   </div>
                 </div>
               )}
+            </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -494,43 +518,53 @@ function AdminUsers() {
     <div className="space-y-3">
       {showCreate && <CreateUserModal onClose={() => setShowCreate(false)} onCreated={fetchData} />}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-900">Users ({users.length})</h3>
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800"><FaPlus /> New User</button>
+        <h3 className="text-sm font-semibold text-slate-900">Users ({users.length})</h3>
+        <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 rounded-lg bg-cshub-blue px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#3f7ee8]"><FaPlus /> New User</button>
       </div>
       {loading ? <Loading /> : users.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaUsers className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No users.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {users.map((u) => (
-            <div key={uid(u)} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+        <div className="space-y-6">
+          {groupByMonth(users).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                {g.list.map((u) => (
+                  <div key={uid(u)} className="rounded-xl border border-slate-200 bg-white p-3">
               {editingId === uid(u) ? (
                 <div className="space-y-2">
-                  <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} placeholder="Name" />
-                  <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} placeholder="Email" />
+                  <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue focus:ring-2 focus:ring-cshub-blue/20" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} placeholder="Name" />
+                  <input className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue focus:ring-2 focus:ring-cshub-blue/20" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} placeholder="Email" />
                   <label className="flex items-center gap-2 text-xs text-slate-600">
-                    <input type="checkbox" className="rounded" checked={editForm.isAdmin} onChange={(e) => setEditForm({ ...editForm, isAdmin: e.target.checked })} /> Admin
+                    <input type="checkbox" className="rounded accent-cshub-blue" checked={editForm.isAdmin} onChange={(e) => setEditForm({ ...editForm, isAdmin: e.target.checked })} /> Admin
                   </label>
                   <div className="flex gap-2">
-                    <button className="rounded-lg bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={savingId === uid(u)} onClick={() => handleUpdate(uid(u))}>{savingId === uid(u) ? '...' : 'Save'}</button>
+                    <button className="rounded-lg bg-cshub-blue px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={savingId === uid(u)} onClick={() => handleUpdate(uid(u))}>{savingId === uid(u) ? '...' : 'Save'}</button>
                     <button className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50" onClick={() => setEditingId(null)}>Cancel</button>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <strong className="text-xs font-semibold text-slate-800 truncate">{u.name}</strong>
-                      {u.isAdmin && <span className="rounded-full bg-violet-100 px-2 py-px text-[10px] font-semibold text-violet-600">Admin</span>}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cshub-blue/10 text-[11px] font-bold text-cshub-blue">
+                    {(u.name || 'U').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <strong className="truncate text-xs font-semibold text-slate-800">{u.name}</strong>
+                      {u.isAdmin && <span className="shrink-0 rounded-full bg-cshub-blue/10 px-1.5 py-px text-[9px] font-medium text-cshub-blue">Admin</span>}
                     </div>
-                    <span className="text-[11px] text-slate-500 block">{u.email}</span>
+                    <span className="block truncate text-[11px] text-slate-500">{u.email}</span>
                     <span className="text-[10px] text-slate-400">Created: {new Date(u.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" title="Edit" onClick={() => { setEditingId(uid(u)); setEditForm({ name: u.name, email: u.email, isAdmin: u.isAdmin }); }}><FaEdit className="text-[10px]" /></button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-cshub-blue/10 hover:text-cshub-blue" title="Edit" onClick={() => { setEditingId(uid(u)); setEditForm({ name: u.name, email: u.email, isAdmin: u.isAdmin }); }}><FaEdit className="text-[10px]" /></button>
                     {!u.isAdmin && <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Delete" disabled={deletingId === uid(u)} onClick={() => handleDelete(uid(u))}>{deletingId === uid(u) ? '...' : <FaTrash className="text-[10px]" />}</button>}
                   </div>
                 </div>
               )}
+            </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -566,13 +600,17 @@ function AdminSuggestions() {
   return (
     <div className="space-y-3">
       {detail && <DetailModal item={detail} type="suggestion" onClose={() => setDetail(null)} onUpdated={fetchData} />}
-      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaLightbulb className="h-3.5 w-3.5 text-amber-500" /> Suggestions ({items.length})</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaLightbulb className="h-3.5 w-3.5 text-slate-400" /> Suggestions ({items.length})</h3>
       {loading ? <Loading /> : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaLightbulb className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No suggestions.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={sid(item)} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+        <div className="space-y-6">
+          {groupByMonth(items).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((item) => (
+                  <div key={sid(item)} className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -586,6 +624,9 @@ function AdminSuggestions() {
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" title="View" onClick={() => setDetail(item)}><FaEye className="text-[10px]" /></button>
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Delete" disabled={deletingId === sid(item)} onClick={() => handleDelete(sid(item))}>{deletingId === sid(item) ? '...' : <FaTrash className="text-[10px]" />}</button>
                 </div>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}
@@ -622,13 +663,17 @@ function AdminContacts() {
   return (
     <div className="space-y-3">
       {detail && <DetailModal item={detail} type="contact" onClose={() => setDetail(null)} onUpdated={fetchData} />}
-      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaEnvelope className="h-3.5 w-3.5 text-cyan-500" /> Contact Messages ({items.length})</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaEnvelope className="h-3.5 w-3.5 text-slate-400" /> Contact Messages ({items.length})</h3>
       {loading ? <Loading /> : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaEnvelope className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No messages.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={cid(item)} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+        <div className="space-y-6">
+          {groupByMonth(items).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((item) => (
+                  <div key={cid(item)} className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -642,6 +687,9 @@ function AdminContacts() {
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" title="View" onClick={() => setDetail(item)}><FaEye className="text-[10px]" /></button>
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Delete" disabled={deletingId === cid(item)} onClick={() => handleDelete(cid(item))}>{deletingId === cid(item) ? '...' : <FaTrash className="text-[10px]" />}</button>
                 </div>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}
@@ -730,7 +778,7 @@ function AdminTeams() {
                         <strong className="block text-xs font-semibold text-slate-800 truncate">{b.name}</strong>
                         <div className="text-[10px] text-slate-500 truncate">{b.issue?.slice(0, 60)}</div>
                       </div>
-                      <button className="rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-800 shrink-0" onClick={() => handleAssign(b._id, showAssign)}>Assign</button>
+                      <button className="rounded-lg bg-cshub-blue px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-[#3f7ee8] shrink-0" onClick={() => handleAssign(b._id, showAssign)}>Assign</button>
                     </div>
                   ))}
                 </div>
@@ -740,13 +788,17 @@ function AdminTeams() {
         </div>
       )}
       {detail && <DetailModal item={detail} type="team" onClose={() => setDetail(null)} onUpdated={fetchData} />}
-      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaUserTie className="h-3.5 w-3.5 text-pink-500" /> Team Applications ({items.length})</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaUserTie className="h-3.5 w-3.5 text-slate-400" /> Team Applications ({items.length})</h3>
       {loading ? <Loading /> : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaUserTie className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No applications.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={tid(item)} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+        <div className="space-y-6">
+          {groupByMonth(items).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((item) => (
+                  <div key={tid(item)} className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -764,16 +816,19 @@ function AdminTeams() {
                   {item.status === 'pending' && (
                     <>
                       <button className="h-6 w-6 flex items-center justify-center rounded-md text-emerald-500 hover:bg-emerald-50" title="Approve" disabled={submitting} onClick={() => handleStatus(tid(item), 'approved')}><FaCheckCircle className="text-[10px]" /></button>
-                      <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50" title="Reject" disabled={submitting} onClick={() => handleStatus(tid(item), 'rejected')}><FaBan className="text-[10px]" /></button>
+                      <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Reject" disabled={submitting} onClick={() => handleStatus(tid(item), 'rejected')}><FaBan className="text-[10px]" /></button>
                     </>
                   )}
-                  {item.status === 'approved' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-500 hover:bg-red-50" title="Reject" disabled={submitting} onClick={() => handleStatus(tid(item), 'rejected')}><FaBan className="text-[10px]" /></button>}
+                  {item.status === 'approved' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Reject" disabled={submitting} onClick={() => handleStatus(tid(item), 'rejected')}><FaBan className="text-[10px]" /></button>}
                   {item.status === 'rejected' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-emerald-500 hover:bg-emerald-50" title="Approve" disabled={submitting} onClick={() => handleStatus(tid(item), 'approved')}><FaUndo className="text-[10px]" /></button>}
-                  {item.status === 'approved' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-blue-500 hover:bg-blue-50" title="Chat" disabled={chattingId === tid(item)} onClick={() => handleChat(tid(item))}>{chattingId === tid(item) ? '...' : <FaComments className="text-[10px]" />}</button>}
-                  {item.status === 'approved' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-violet-500 hover:bg-violet-50" title="Assign" onClick={() => setShowAssign(tid(item))}><FaUserTie className="text-[10px]" /></button>}
+                  {item.status === 'approved' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-cshub-blue hover:bg-blue-50" title="Chat" disabled={chattingId === tid(item)} onClick={() => handleChat(tid(item))}>{chattingId === tid(item) ? '...' : <FaComments className="text-[10px]" />}</button>}
+                  {item.status === 'approved' && <button className="h-6 w-6 flex items-center justify-center rounded-md text-cshub-blue hover:bg-blue-50" title="Assign" onClick={() => setShowAssign(tid(item))}><FaUserTie className="text-[10px]" /></button>}
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600" title="View" onClick={() => setDetail(item)}><FaEye className="text-[10px]" /></button>
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Delete" disabled={deletingId === tid(item)} onClick={() => handleDelete(tid(item))}>{deletingId === tid(item) ? '...' : <FaTrash className="text-[10px]" />}</button>
                 </div>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}
@@ -831,7 +886,7 @@ function AdminNews() {
 
   const nid = (i) => i._id || i.id;
 
-  const inputCls = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10";
+  const inputCls = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10";
   const selectCls = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none bg-white";
 
   return (
@@ -853,21 +908,25 @@ function AdminNews() {
               <label className="flex items-center gap-2 text-xs text-slate-600">
                 <input type="checkbox" className="rounded" checked={createForm.published} onChange={(e) => setCreateForm({ ...createForm, published: e.target.checked })} /> Published
               </label>
-              <button type="submit" className="w-full rounded-lg bg-slate-900 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={submitting}>{submitting ? 'Creating...' : 'Create News'}</button>
+              <button type="submit" className="w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={submitting}>{submitting ? 'Creating...' : 'Create News'}</button>
             </form>
           </div>
         </div>
       )}
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaNewspaper className="h-3.5 w-3.5 text-rose-500" /> News ({items.length})</h3>
-        <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-800"><FaPlus /> New Post</button>
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaNewspaper className="h-3.5 w-3.5 text-slate-400" /> News ({items.length})</h3>
+        <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 rounded-lg bg-cshub-blue px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#3f7ee8]"><FaPlus /> New Post</button>
       </div>
       {loading ? <Loading /> : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaNewspaper className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No news posted yet.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={nid(item)} className={cn("rounded-xl border border-slate-200 bg-white px-4 py-3", editingId === nid(item) && "ring-1 ring-slate-900")}>
+        <div className="space-y-6">
+          {groupByMonth(items).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((item) => (
+                  <div key={nid(item)} className={cn("rounded-xl border border-slate-200 bg-white px-3.5 py-2.5", editingId === nid(item) && "ring-1 ring-cshub-blue")}>
               {editingId === nid(item) ? (
                 <div className="space-y-2">
                   <input className={inputCls} value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} placeholder="Title" />
@@ -880,7 +939,7 @@ function AdminNews() {
                     <input type="checkbox" className="rounded" checked={editForm.published} onChange={(e) => setEditForm({ ...editForm, published: e.target.checked })} /> Published
                   </label>
                   <div className="flex gap-2">
-                    <button className="rounded-lg bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={submitting} onClick={() => handleUpdate(nid(item))}>{submitting ? '...' : 'Save'}</button>
+                    <button className="rounded-lg bg-cshub-blue px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={submitting} onClick={() => handleUpdate(nid(item))}>{submitting ? '...' : 'Save'}</button>
                     <button className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50" onClick={() => setEditingId(null)}>Cancel</button>
                   </div>
                 </div>
@@ -889,9 +948,9 @@ function AdminNews() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <strong className="text-xs font-semibold text-slate-800 truncate">{item.title}</strong>
-                      {item.mediaType === 'image' && <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-100 px-1.5 py-px text-[9px] font-medium text-blue-600"><FaImage /> Photo</span>}
-                      {item.mediaType === 'video' && <span className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-px text-[9px] font-medium text-red-600"><FaYoutube /> Video</span>}
-                      {!item.published && <span className="rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-medium text-amber-600">Draft</span>}
+                      {item.mediaType === 'image' && <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-medium text-slate-600"><FaImage /> Photo</span>}
+                      {item.mediaType === 'video' && <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-medium text-slate-600"><FaYoutube /> Video</span>}
+                      {!item.published && <span className="rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-medium text-slate-600">Draft</span>}
                     </div>
                     <span className="text-[11px] text-slate-500 block">{item.content?.slice(0, 100) || 'No content'}</span>
                     <span className="text-[10px] text-slate-400">{new Date(item.createdAt).toLocaleDateString()} by {item.author}</span>
@@ -902,6 +961,9 @@ function AdminNews() {
                   </div>
                 </div>
               )}
+            </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -944,26 +1006,30 @@ function AdminTestimonials() {
 
   return (
     <div className="space-y-3">
-      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaStar className="h-3.5 w-3.5 text-yellow-500" /> Testimonials ({items.length})</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaStar className="h-3.5 w-3.5 text-slate-400" /> Testimonials ({items.length})</h3>
       {loading ? <Loading /> : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaStar className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No testimonials yet.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={nid(item)} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+        <div className="space-y-6">
+          {groupByMonth(items).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((item) => (
+                  <div key={nid(item)} className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <strong className="text-xs font-semibold text-slate-800 truncate">{item.name}</strong>
                     {item.role && <span className="text-[11px] text-slate-500">— {item.role}</span>}
                     {item.approved ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-px text-[9px] font-semibold text-emerald-600"><FaCheck /> Approved</span>
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-px text-[9px] font-medium text-emerald-700"><FaCheck /> Approved</span>
                     ) : (
-                      <span className="rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-semibold text-amber-600">Pending</span>
+                      <span className="rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-medium text-amber-700">Pending</span>
                     )}
                   </div>
                   <div className="flex gap-0.5 mt-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => <FaStar key={s} size={10} className={s <= item.rating ? 'text-yellow-400' : 'text-slate-200'} />)}
+                    {[1, 2, 3, 4, 5].map((s) => <FaStar key={s} size={10} className={s <= item.rating ? 'text-slate-700' : 'text-slate-200'} />)}
                   </div>
                   <span className="text-[11px] text-slate-500 block">&ldquo;{item.content?.slice(0, 200)}&rdquo;</span>
                   <span className="text-[10px] text-slate-400">{new Date(item.createdAt).toLocaleDateString()}</span>
@@ -972,6 +1038,9 @@ function AdminTestimonials() {
                   {!item.approved && <button className="h-6 w-6 flex items-center justify-center rounded-md text-emerald-500 hover:bg-emerald-50" title="Approve" disabled={submittingId === nid(item)} onClick={() => handleApprove(nid(item))}>{submittingId === nid(item) ? '...' : <FaCheckCircle className="text-[10px]" />}</button>}
                   <button className="h-6 w-6 flex items-center justify-center rounded-md text-red-400 hover:bg-red-50" title="Delete" disabled={submittingId === nid(item)} onClick={() => handleDelete(nid(item))}>{submittingId === nid(item) ? '...' : <FaTrash className="text-[10px]" />}</button>
                 </div>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}
@@ -1018,20 +1087,24 @@ function AdminBeneficiaries() {
 
   const nid = (i) => i._id || i.id;
   const BSTATUSES = ['open', 'in-progress', 'resolved', 'closed'];
-  const bStatusColors = { open: 'bg-red-100 text-red-600', 'in-progress': 'bg-amber-100 text-amber-600', resolved: 'bg-emerald-100 text-emerald-600', closed: 'bg-slate-100 text-slate-500' };
+  const bStatusColors = { open: 'bg-cshub-blue/10 text-cshub-blue', 'in-progress': 'bg-amber-100 text-amber-700', resolved: 'bg-emerald-100 text-emerald-700', closed: 'bg-slate-100 text-slate-500' };
 
-  const inputCls = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10";
+  const inputCls = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10";
   const selectCls = "w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none bg-white";
 
   return (
     <div className="space-y-3">
-      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><FaUserTie className="h-3.5 w-3.5 text-pink-500" /> Beneficiaries ({items.length})</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaUserTie className="h-3.5 w-3.5 text-slate-400" /> Beneficiaries ({items.length})</h3>
       {loading ? <Loading /> : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><FaUserTie className="mb-2 h-8 w-8 text-slate-200" /><p className="text-xs text-slate-400">No beneficiaries yet.</p></div>
       ) : (
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={nid(item)} className={cn("rounded-xl border border-slate-200 bg-white px-4 py-3", editingId === nid(item) && "ring-1 ring-slate-900")}>
+        <div className="space-y-6">
+          {groupByMonth(items).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((item) => (
+                  <div key={nid(item)} className={cn("rounded-xl border border-slate-200 bg-white px-3.5 py-2.5", editingId === nid(item) && "ring-1 ring-cshub-blue")}>
               {editingId === nid(item) ? (
                 <div className="space-y-2">
                   <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className={selectCls}>
@@ -1043,7 +1116,7 @@ function AdminBeneficiaries() {
                   </select>
                   <textarea rows="2" className={cn(inputCls, "resize-none")} placeholder="Admin notes" value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
                   <div className="flex gap-2">
-                    <button className="rounded-lg bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white hover:bg-slate-800 disabled:opacity-50" disabled={savingId === nid(item)} onClick={() => handleUpdate(nid(item))}>{savingId === nid(item) ? '...' : 'Save'}</button>
+                    <button className="rounded-lg bg-cshub-blue px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={savingId === nid(item)} onClick={() => handleUpdate(nid(item))}>{savingId === nid(item) ? '...' : 'Save'}</button>
                     <button className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50" onClick={() => setEditingId(null)}>Cancel</button>
                   </div>
                 </div>
@@ -1069,6 +1142,9 @@ function AdminBeneficiaries() {
                 </div>
               )}
             </div>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -1076,242 +1152,357 @@ function AdminBeneficiaries() {
   );
 }
 
-function AnalyticsView({ stats, ticketChart, appChart, onNavigate, user }) {
+function DonutChart({ data }) {
+  const total = data.reduce((s, d) => s + d.value, 0);
+  const size = 84;
+  const stroke = 10;
+  const r = (size - stroke) / 2;
+  const circum = 2 * Math.PI * r;
+  let acc = 0;
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#F1F5F9" strokeWidth={stroke} />
+          {total > 0 &&
+            data.map((d, i) => {
+              const len = (d.value / total) * circum;
+              const slice = (
+                <circle
+                  key={i}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={r}
+                  fill="none"
+                  stroke={d.color}
+                  strokeWidth={stroke}
+                  strokeLinecap="round"
+                  strokeDasharray={`${Math.max(len - 2, 0)} ${circum}`}
+                  strokeDashoffset={-acc}
+                />
+              );
+              acc += len;
+              return slice;
+            })}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg font-bold text-slate-900">{total}</span>
+          <span className="text-[8px] font-semibold uppercase tracking-widest text-slate-400">Total</span>
+        </div>
+      </div>
+      <div className="grid w-full grid-cols-3 gap-1">
+        {data.map((d) => (
+          <div key={d.label} className="text-center">
+            <div className="flex items-center justify-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: d.color }} />
+              <span className="text-[10px] font-semibold text-slate-700">{d.value}</span>
+            </div>
+            <div className="truncate text-[9px] text-slate-400">{d.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsView({ stats, ticketChart, appChart, datasets = {}, onNavigate, user }) {
   const totalItems = Object.values(stats).reduce((a, b) => a + b, 0);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   const statCards = [
-    { key: 'tickets', label: 'Tickets', count: stats.tickets, icon: FaTicketAlt, color: 'from-amber-500 to-orange-500', light: 'bg-amber-50 text-amber-600' },
-    { key: 'users', label: 'Users', count: stats.users, icon: FaUsers, color: 'from-violet-500 to-purple-600', light: 'bg-violet-50 text-violet-600' },
-    { key: 'suggestions', label: 'Suggestions', count: stats.suggestions, icon: FaLightbulb, color: 'from-orange-500 to-red-500', light: 'bg-orange-50 text-orange-600' },
-    { key: 'contacts', label: 'Messages', count: stats.contacts, icon: FaEnvelope, color: 'from-cyan-500 to-blue-500', light: 'bg-cyan-50 text-cyan-600' },
-    { key: 'teams', label: 'Applications', count: stats.teams, icon: FaUserTie, color: 'from-pink-500 to-rose-500', light: 'bg-pink-50 text-pink-600' },
-    { key: 'beneficiaries', label: 'Beneficiaries', count: stats.beneficiaries, icon: FaUserTie, color: 'from-teal-500 to-emerald-500', light: 'bg-teal-50 text-teal-600' },
-    { key: 'news', label: 'News', count: stats.news, icon: FaNewspaper, color: 'from-rose-500 to-pink-500', light: 'bg-rose-50 text-rose-600' },
-    { key: 'courses', label: 'Courses', count: stats.courses, icon: FaBookOpen, color: 'from-sky-500 to-blue-600', light: 'bg-sky-50 text-sky-600' },
-    { key: 'testimonials', label: 'Testimonials', count: stats.testimonials, icon: FaStar, color: 'from-yellow-500 to-amber-500', light: 'bg-yellow-50 text-yellow-600' },
-    { key: 'payments', label: 'Payments', count: stats.payments, icon: FaDownload, color: 'from-emerald-500 to-teal-500', light: 'bg-emerald-50 text-emerald-600' },
+    { key: 'tickets', label: 'Tickets', count: stats.tickets, icon: FaTicketAlt },
+    { key: 'users', label: 'Users', count: stats.users, icon: FaUsers },
+    { key: 'suggestions', label: 'Suggestions', count: stats.suggestions, icon: FaLightbulb },
+    { key: 'contacts', label: 'Messages', count: stats.contacts, icon: FaEnvelope },
+    { key: 'teams', label: 'Applications', count: stats.teams, icon: FaUserTie },
+    { key: 'beneficiaries', label: 'Beneficiaries', count: stats.beneficiaries, icon: FaUserTie },
+    { key: 'news', label: 'News', count: stats.news, icon: FaNewspaper },
+    { key: 'courses', label: 'Courses', count: stats.courses, icon: FaBookOpen },
+    { key: 'testimonials', label: 'Testimonials', count: stats.testimonials, icon: FaStar },
+    { key: 'payments', label: 'Payments', count: stats.payments, icon: FaDownload },
   ];
-
   const barMax = Math.max(...statCards.map((c) => c.count), 1);
+
+  const hasActivity = totalItems > 0;
+  const alerts = [];
+  if (ticketChart.open > 0) alerts.push({ icon: FaTicketAlt, title: `${ticketChart.open} open ticket${ticketChart.open !== 1 ? 's' : ''} need attention`, sub: 'Support queue', nav: 'tickets', tone: 'bg-cshub-blue/10 text-cshub-blue' });
+  if (appChart.pending > 0) alerts.push({ icon: FaUserTie, title: `${appChart.pending} application${appChart.pending !== 1 ? 's' : ''} pending review`, sub: 'Team applications', nav: 'teams', tone: 'bg-amber-100 text-amber-700' });
+  if (stats.contacts > 0) alerts.push({ icon: FaEnvelope, title: 'Messages waiting for reply', sub: 'Contact form', nav: 'contacts', tone: 'bg-cshub-blue/10 text-cshub-blue' });
+  if (stats.suggestions > 0) alerts.push({ icon: FaLightbulb, title: 'Suggestions to review', sub: 'Community feedback', nav: 'suggestions', tone: 'bg-cshub-blue/10 text-cshub-blue' });
+  const needAttentionCount = ticketChart.open + appChart.pending + stats.contacts + stats.suggestions;
+
+  const chartMetrics = [
+    { key: 'users', label: 'Users', dataKey: 'users' },
+    { key: 'tickets', label: 'Support', dataKey: 'tickets' },
+    { key: 'messages', label: 'Messages', dataKey: 'contacts' },
+    { key: 'apps', label: 'Applications', dataKey: 'teams' },
+    { key: 'payments', label: 'Payments', dataKey: 'payments' },
+  ];
+  const periods = [
+    { label: '7D', days: 7 },
+    { label: '28D', days: 28 },
+    { label: '90D', days: 90 },
+  ];
+  const [metricKey, setMetricKey] = useState('users');
+  const [periodDays, setPeriodDays] = useState(28);
+  const activeMetric = chartMetrics.find((m) => m.key === metricKey) || chartMetrics[0];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dayBuckets = [];
+  for (let i = periodDays - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    dayBuckets.push(d);
+  }
+  const counts = dayBuckets.map((d) => {
+    const list = datasets[activeMetric.dataKey] || [];
+    return list.filter((r) => {
+      const dt = new Date(r.createdAt);
+      return !isNaN(dt) && dt.getFullYear() === d.getFullYear() && dt.getMonth() === d.getMonth() && dt.getDate() === d.getDate();
+    }).length;
+  });
+  const maxCount = Math.max(1, ...counts);
+  const rangeTotal = counts.reduce((a, b) => a + b, 0);
+  const rangeStart = new Date(dayBuckets[0]);
+  const prevTheshold = new Date(rangeStart);
+  prevTheshold.setDate(rangeStart.getDate() - periodDays);
+  const prevTotal = (datasets[activeMetric.dataKey] || []).filter((r) => {
+    const dt = new Date(r.createdAt);
+    return !isNaN(dt) && dt >= prevTheshold && dt < rangeStart;
+  }).length;
+  const delta = prevTotal > 0 ? Math.round(((rangeTotal - prevTotal) / prevTotal) * 100) : null;
+  const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const labelStep = Math.ceil(periodDays / 6);
 
   return (
     <div className="space-y-4 animate-in fade-in">
       {/* Greeting */}
-      <div className="relative overflow-hidden rounded-xl bg-slate-900 p-4 text-white lg:p-5">
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cshub-yellow/10 blur-3xl" />
-        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 lg:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-lg font-extrabold tracking-tight lg:text-xl">{greeting}, {user?.name?.split(' ')[0] || 'Admin'}</h1>
-            <p className="mt-0.5 text-xs text-slate-400">Here's what's happening across your platform today.</p>
+            <h1 className="text-lg font-bold tracking-tight text-slate-900 lg:text-xl">{greeting}, {user?.name?.split(' ')[0] || 'Admin'}</h1>
+            <p className="mt-0.5 text-xs text-slate-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="text-center">
-              <div className="text-xl font-extrabold text-cshub-yellow">{totalItems}</div>
-              <div className="text-[9px] font-semibold uppercase tracking-widest text-slate-500">Total</div>
+              <div className="text-xl font-bold text-slate-900">{totalItems}</div>
+              <div className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Total Items</div>
             </div>
-            <div className="h-6 w-px bg-white/10" />
+            <div className="h-6 w-px bg-slate-200" />
             <div className="text-center">
-              <div className="text-xl font-extrabold text-amber-400">{ticketChart.open}</div>
-              <div className="text-[9px] font-semibold uppercase tracking-widest text-slate-500">Open</div>
-            </div>
-            <div className="h-6 w-px bg-white/10" />
-            <div className="text-center">
-              <div className="text-xl font-extrabold text-rose-400">{appChart.pending}</div>
-              <div className="text-[9px] font-semibold uppercase tracking-widest text-slate-500">Pending</div>
+              <div className="text-xl font-bold text-cshub-blue">{needAttentionCount}</div>
+              <div className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Need Review</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-10">
         {statCards.map((c) => {
           const Icon = c.icon;
           return (
             <button
               key={c.key}
               onClick={() => onNavigate(c.key)}
-              className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md"
+              className="rounded-xl border border-slate-200 bg-white p-3 text-left transition-all hover:border-slate-300 hover:shadow-sm"
             >
-              <Icon className={`mb-2 h-4 w-4 ${c.light.split(' ')[1]}`} />
-              <div className="text-lg font-extrabold text-slate-900">{c.count}</div>
+              <div className="mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-cshub-blue/10 text-cshub-blue">
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              <div className="text-lg font-bold text-slate-900">{c.count}</div>
               <div className="text-[10px] font-medium text-slate-400">{c.label}</div>
             </button>
           );
         })}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid gap-4 lg:grid-cols-5">
-        {/* Bar Chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-3">
-          <div className="mb-3 flex items-center gap-2">
-            <FaChartBar className="h-4 w-4 text-indigo-500" />
-            <h3 className="text-sm font-bold text-slate-900">Platform Overview</h3>
+      {/* Activity Trend */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <FaChartLine className="h-4 w-4 text-cshub-blue" />
+              <h3 className="text-sm font-semibold text-slate-900">Activity Overview</h3>
+            </div>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-slate-900">{rangeTotal}</span>
+              <span className="text-[11px] text-slate-400">{activeMetric.label} in the last {periodDays} days</span>
+              {delta !== null && (
+                <span className={cn('text-[11px] font-semibold', delta >= 0 ? 'text-emerald-600' : 'text-red-500')}>
+                  {delta >= 0 ? '\u25B2' : '\u25BC'} {Math.abs(delta)}%
+                </span>
+              )}
+            </div>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+              {chartMetrics.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => setMetricKey(m.key)}
+                  className={cn('rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors', metricKey === m.key ? 'bg-white text-cshub-blue shadow-sm' : 'text-slate-500 hover:text-slate-700')}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+              {periods.map((p) => (
+                <button
+                  key={p.days}
+                  onClick={() => setPeriodDays(p.days)}
+                  className={cn('rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors', periodDays === p.days ? 'bg-white text-cshub-blue shadow-sm' : 'text-slate-500 hover:text-slate-700')}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex h-40 items-end gap-px">
+          {counts.map((c, i) => {
+            const d = dayBuckets[i];
+            const isToday = i === counts.length - 1;
+            return (
+              <div key={i} className="group relative flex h-full flex-1 flex-col justify-end">
+                <div className="pointer-events-none absolute left-1/2 top-0 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-[10px] font-medium text-white group-hover:block">
+                  {fmt(d)} · {c}
+                </div>
+                <div
+                  className={cn('w-full rounded-t-[3px] transition-colors', isToday ? 'bg-[#3f7ee8]' : 'bg-cshub-blue/70 group-hover:bg-cshub-blue')}
+                  style={{ height: `${Math.max((c / maxCount) * 100, c > 0 ? 4 : 0)}%` }}
+                />
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-1 flex gap-px">
+          {counts.map((_, i) => (
+            <div key={i} className="flex-1">
+              {(i % labelStep === 0 || i === counts.length - 1) ? (
+                <span className="text-[9px] text-slate-400">{fmt(dayBuckets[i])}</span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* System Analysis */}
+      <div className="grid gap-4 lg:grid-cols-5">
+        {/* Distribution bars */}
+        <div className="rounded-xl border border-slate-200 bg-white p-4 lg:col-span-3">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FaChartBar className="h-4 w-4 text-cshub-blue" />
+              <h3 className="text-sm font-semibold text-slate-900">System Analysis</h3>
+            </div>
+            <span className="text-[10px] font-medium text-slate-400">Total {totalItems} items</span>
+          </div>
+          <div className="space-y-1.5">
             {statCards.map((item) => {
               const pct = (item.count / barMax) * 100;
+              const Icon = item.icon;
               return (
                 <button
                   key={item.key}
                   onClick={() => onNavigate(item.key)}
-                  className="flex w-full items-center gap-2 group"
+                  className="group flex w-full items-center gap-2 rounded-lg px-1.5 py-1 transition-colors hover:bg-slate-50"
                 >
-                  <span className="w-20 shrink-0 text-left text-[11px] font-medium text-slate-500 group-hover:text-slate-700">{item.label}</span>
-                  <div className="flex-1 h-6 overflow-hidden rounded-md bg-slate-100">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-cshub-blue/10 text-cshub-blue">
+                    <Icon className="h-2.5 w-2.5" />
+                  </span>
+                  <span className="w-24 shrink-0 truncate text-left text-[11px] font-medium text-slate-500 group-hover:text-slate-700">{item.label}</span>
+                  <div className="h-3.5 flex-1 overflow-hidden rounded-md bg-slate-100">
                     <div
-                      className={`h-full rounded-md bg-gradient-to-r ${item.color} transition-all duration-500 ease-out flex items-center justify-end px-1.5`}
-                      style={{ width: `${Math.max(pct, 3)}%` }}
+                      className="flex h-full items-center justify-end rounded-md bg-cshub-blue pr-1 transition-all duration-500 ease-out group-hover:bg-[#3f7ee8]"
+                      style={{ width: `${Math.max(pct, item.count > 0 ? 6 : 0)}%` }}
                     >
-                      {pct > 15 && <span className="text-[9px] font-bold text-white drop-shadow-sm">{item.count}</span>}
+                      {pct > 12 && <span className="text-[9px] font-bold text-white">{item.count}</span>}
                     </div>
                   </div>
-                  {pct <= 15 && <span className="text-[11px] font-bold text-slate-600 w-5 text-right">{item.count}</span>}
+                  {pct <= 12 && <span className="w-6 shrink-0 text-right text-[11px] font-semibold text-slate-600">{item.count}</span>}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Activity + Status */}
+        {/* Donut breakdowns */}
         <div className="space-y-3 lg:col-span-2">
-          {/* Recent Activity */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <FaBell className="h-4 w-4 text-emerald-500" />
-              <h3 className="text-sm font-bold text-slate-900">Recent Activity</h3>
-            </div>
-            <div className="space-y-1">
-              {stats.tickets > 0 && (
-                <button onClick={() => onNavigate('tickets')} className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-slate-50">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-medium text-slate-700">{ticketChart.open} open ticket{ticketChart.open !== 1 ? 's' : ''} need attention</div>
-                    <div className="text-[10px] text-slate-400">Support queue</div>
-                  </div>
-                </button>
-              )}
-              {stats.contacts > 0 && (
-                <button onClick={() => onNavigate('contacts')} className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-slate-50">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-500" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-medium text-slate-700">New messages waiting for reply</div>
-                    <div className="text-[10px] text-slate-400">Contact form</div>
-                  </div>
-                </button>
-              )}
-              {stats.suggestions > 0 && (
-                <button onClick={() => onNavigate('suggestions')} className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-slate-50">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-medium text-slate-700">Suggestions to review</div>
-                    <div className="text-[10px] text-slate-400">Community feedback</div>
-                  </div>
-                </button>
-              )}
-              {stats.teams > 0 && (
-                <button onClick={() => onNavigate('teams')} className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-slate-50">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-pink-500" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-medium text-slate-700">{appChart.pending} application{appChart.pending !== 1 ? 's' : ''} pending review</div>
-                    <div className="text-[10px] text-slate-400">Team applications</div>
-                  </div>
-                </button>
-              )}
-              {totalItems === 0 && (
-                <div className="py-4 text-center">
-                  <FaChartBar className="mx-auto mb-1 h-6 w-6 text-slate-200" />
-                  <p className="text-xs font-medium text-slate-400">No activity yet</p>
-                </div>
-              )}
-            </div>
+            <h4 className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
+              <FaTicketAlt className="text-slate-400" /> Ticket Status
+            </h4>
+            {stats.tickets > 0 ? (
+              <DonutChart
+                data={[
+                  { label: 'Open', value: ticketChart.open, color: '#5694F7' },
+                  { label: 'Resolved', value: ticketChart.resolved, color: '#94A3B8' },
+                  { label: 'Closed', value: ticketChart.closed, color: '#CBD5E1' },
+                ]}
+              />
+            ) : (
+              <div className="py-4 text-center text-xs text-slate-400">No tickets yet.</div>
+            )}
           </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h4 className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
+              <FaUserTie className="text-slate-400" /> Applications
+            </h4>
+            {stats.teams > 0 ? (
+              <DonutChart
+                data={[
+                  { label: 'Pending', value: appChart.pending, color: '#F59E0B' },
+                  { label: 'Approved', value: appChart.approved, color: '#10B981' },
+                  { label: 'Rejected', value: appChart.rejected, color: '#EF4444' },
+                ]}
+              />
+            ) : (
+              <div className="py-4 text-center text-xs text-slate-400">No applications yet.</div>
+            )}
+          </div>
+        </div>
+      </div>
 
-          {/* Status Breakdown Cards */}
-          <div className="grid grid-cols-2 gap-3">
-            {stats.tickets > 0 && (
-              <div className="rounded-xl border border-slate-200 bg-white p-3">
-                <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
-                  <FaTicketAlt className="text-amber-500" /> Ticket Status
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-amber-400" />
-                      <span className="text-[11px] text-slate-500">Open / Active</span>
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">{ticketChart.open}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      <span className="text-[11px] text-slate-500">Resolved</span>
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">{ticketChart.resolved}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-slate-300" />
-                      <span className="text-[11px] text-slate-500">Closed</span>
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">{ticketChart.closed}</span>
-                  </div>
-                </div>
-                {/* Mini progress bar */}
-                <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-slate-100">
-                  {ticketChart.open + ticketChart.resolved + ticketChart.closed > 0 && (
-                    <>
-                      <div className="bg-amber-400" style={{ width: `${(ticketChart.open / (ticketChart.open + ticketChart.resolved + ticketChart.closed)) * 100}%` }} />
-                      <div className="bg-emerald-400" style={{ width: `${(ticketChart.resolved / (ticketChart.open + ticketChart.resolved + ticketChart.closed)) * 100}%` }} />
-                      <div className="bg-slate-300" style={{ width: `${(ticketChart.closed / (ticketChart.open + ticketChart.resolved + ticketChart.closed)) * 100}%` }} />
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-            {stats.teams > 0 && (
-              <div className="rounded-xl border border-slate-200 bg-white p-3">
-                <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
-                  <FaUserTie className="text-pink-500" /> Applications
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-amber-400" />
-                      <span className="text-[11px] text-slate-500">Pending</span>
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">{appChart.pending}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                      <span className="text-[11px] text-slate-500">Approved</span>
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">{appChart.approved}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-red-400" />
-                      <span className="text-[11px] text-slate-500">Rejected</span>
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">{appChart.rejected}</span>
-                  </div>
-                </div>
-                <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-slate-100">
-                  {appChart.pending + appChart.approved + appChart.rejected > 0 && (
-                    <>
-                      <div className="bg-amber-400" style={{ width: `${(appChart.pending / (appChart.pending + appChart.approved + appChart.rejected)) * 100}%` }} />
-                      <div className="bg-emerald-400" style={{ width: `${(appChart.approved / (appChart.pending + appChart.approved + appChart.rejected)) * 100}%` }} />
-                      <div className="bg-red-400" style={{ width: `${(appChart.rejected / (appChart.pending + appChart.approved + appChart.rejected)) * 100}%` }} />
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
+      {/* Recent Activity */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FaBell className="h-4 w-4 text-slate-400" />
+            <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
           </div>
+          {alerts.length > 0 && (
+            <span className="rounded-full bg-cshub-blue/10 px-2 py-0.5 text-[10px] font-semibold text-cshub-blue">{alerts.length} to review</span>
+          )}
+        </div>
+        <div className="space-y-1">
+          {alerts.map((a, i) => (
+            <button key={i} onClick={() => onNavigate(a.nav)} className="flex w-full max-w-3xl items-center gap-2.5 rounded-lg p-2 text-left transition-colors hover:bg-slate-50">
+              <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-md', a.tone)}><a.icon className="h-3 w-3" /></span>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium text-slate-700">{a.title}</div>
+                <div className="text-[10px] text-slate-400">{a.sub}</div>
+              </div>
+            </button>
+          ))}
+          {alerts.length === 0 && hasActivity && (
+            <div className="flex max-w-3xl items-center gap-2.5 rounded-lg bg-emerald-50 px-3 py-3">
+              <FaCheckCircle className="h-4 w-4 shrink-0 text-emerald-500" />
+              <div>
+                <div className="text-xs font-medium text-emerald-700">You're all caught up</div>
+                <div className="text-[10px] text-emerald-500">Nothing needs your attention right now.</div>
+              </div>
+            </div>
+          )}
+          {alerts.length === 0 && !hasActivity && (
+            <div className="py-4 text-center">
+              <FaChartBar className="mx-auto mb-1 h-6 w-6 text-slate-200" />
+              <p className="text-xs font-medium text-slate-400">No activity yet</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1323,6 +1514,7 @@ function AdminInvites() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState(null);
   const [emailModal, setEmailModal] = useState(false);
   const [emailSubject, setEmailSubject] = useState('');
@@ -1418,24 +1610,26 @@ function AdminInvites() {
     link.download = `session-invites-${new Date().toISOString().slice(0, 10)}.csv`; link.click(); URL.revokeObjectURL(url);
   };
 
-  const filtered = statusFilter === 'all' ? invites : invites.filter((inv) => inv.status === statusFilter);
+  const filtered = invites.filter((inv) => (statusFilter === 'all' || inv.status === statusFilter) && (monthFilter === 'all' || monthLabel(inv.createdAt) === monthFilter));
   const counts = { all: invites.length, new: invites.filter((i) => i.status === 'new').length, contacted: invites.filter((i) => i.status === 'contacted').length, confirmed: invites.filter((i) => i.status === 'confirmed').length };
   const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const invStatusColors = { new: 'bg-amber-100 text-amber-600 border-amber-200', contacted: 'bg-blue-100 text-blue-600 border-blue-200', confirmed: 'bg-emerald-100 text-emerald-600 border-emerald-200' };
+  const invStatusColors = { new: 'bg-cshub-blue/10 text-cshub-blue border-cshub-blue/20', contacted: 'bg-amber-100 text-amber-700 border-amber-200', confirmed: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         <button disabled={invites.length === 0} onClick={() => setEmailModal(true)} className="flex items-center gap-1.5 rounded-lg bg-cshub-yellow px-3 py-1.5 text-[11px] font-semibold text-slate-900 hover:brightness-110 disabled:opacity-50"><FaEnvelope /> Send All Emails</button>
-        <button disabled={invites.length === 0} onClick={exportToExcel} className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"><FaDownload /> Export</button>
+        <button disabled={invites.length === 0} onClick={exportToExcel} className="flex items-center gap-1.5 rounded-lg bg-cshub-blue px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50"><FaDownload /> Export</button>
         <div className="flex gap-1 flex-wrap">
           {['all', 'new', 'contacted', 'confirmed'].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={cn('rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors', statusFilter === s ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50')}>
+            <button key={s} onClick={() => setStatusFilter(s)} className={cn('rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors', statusFilter === s ? 'bg-cshub-blue text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50')}>
               {s.charAt(0).toUpperCase() + s.slice(1)} ({counts[s] || 0})
             </button>
           ))}
         </div>
       </div>
+
+      {invites.length > 0 && <MonthFilter items={invites} value={monthFilter} onChange={setMonthFilter} />}
 
       {loading ? (
         <div className="flex items-center justify-center py-10"><FaSpinner className="h-5 w-5 animate-spin text-slate-300" /></div>
@@ -1444,38 +1638,45 @@ function AdminInvites() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center"><p className="text-xs text-slate-400">No registrations found.</p></div>
       ) : (
-        <div className="space-y-2">
-          {filtered.map((inv) => (
-            <div key={inv._id} className="rounded-xl border border-slate-200 bg-white p-3">
+        <div className="space-y-6">
+          {groupByMonth(filtered).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2">
+                {g.list.map((inv) => (
+                  <div key={inv._id} className="rounded-xl border border-slate-200 bg-white p-2.5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <strong className="text-xs font-semibold text-slate-800 truncate">{inv.name}</strong>
-                    <span className={cn("rounded-full border px-1.5 py-px text-[9px] font-semibold", invStatusColors[inv.status] || invStatusColors.new)}>{inv.status}</span>
-                    {inv.emailSent && <span className="text-[9px] text-emerald-500">sent</span>}
+                  <div className="flex items-center gap-1.5">
+                    <strong className="truncate text-xs font-semibold text-slate-800">{inv.name}</strong>
+                    <span className={cn("rounded-full border px-1.5 py-px text-[9px] font-semibold shrink-0", invStatusColors[inv.status] || invStatusColors.new)}>{inv.status}</span>
+                    {inv.emailSent && <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-medium text-slate-500">sent</span>}
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
-                    <span>{inv.email}</span>
-                    {inv.phone && <span>{inv.phone}</span>}
-                    <span>{formatDate(inv.createdAt)}</span>
+                  <div className="mt-0.5 truncate text-[11px] text-slate-500">
+                    {inv.email}
+                    {inv.phone && <span className="text-slate-400"> · {inv.phone}</span>}
+                    <span className="text-slate-400"> · {formatDate(inv.createdAt)}</span>
                   </div>
-                  <div className="mt-0.5 text-[10px] text-slate-400">
-                    Level: <strong className="text-slate-600">{inv.level || '—'}</strong>
-                    {inv.heardFrom && <> · Heard via: <strong className="text-slate-600">{inv.heardFrom}</strong></>}
+                  <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                    <span className="rounded-md bg-slate-100 px-1.5 py-px font-medium text-slate-600">{inv.level || '—'}</span>
+                    {inv.heardFrom && <span>Heard via: <span className="text-slate-500">{inv.heardFrom}</span></span>}
                   </div>
                   {inv.interests?.length > 0 && (
-                    <div className="flex gap-1 flex-wrap mt-1">
+                    <div className="mt-1 flex max-w-full flex-wrap gap-1">
                       {inv.interests.map((i) => <span key={i} className="rounded-full bg-slate-100 px-2 py-px text-[9px] text-slate-500">{i}</span>)}
                     </div>
                   )}
-                  {inv.suggestion && <div className="mt-1 text-[11px] text-slate-500 italic">&ldquo;{inv.suggestion}&rdquo;</div>}
+                  {inv.suggestion && <div className="mt-1 truncate text-[11px] text-slate-500">&ldquo;{inv.suggestion}&rdquo;</div>}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  {inv.status === 'new' && <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'contacted')} title="Mark as Contacted" className="h-7 w-7 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 disabled:opacity-50"><FaCheck className="text-[10px]" /></button>}
-                  {inv.status === 'contacted' && <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'confirmed')} title="Confirm" className="h-7 w-7 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-500 hover:bg-emerald-100 disabled:opacity-50"><FaCheck className="text-[10px]" /></button>}
-                  <button disabled={updatingId === inv._id} onClick={() => resendEmail(inv._id)} title="Resend Email" className="h-7 w-7 flex items-center justify-center rounded-lg bg-amber-50 text-amber-500 hover:bg-amber-100 disabled:opacity-50"><FaEnvelope className="text-[10px]" /></button>
-                  <button onClick={() => deleteInvite(inv._id)} title="Delete" className="h-7 w-7 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100"><FaTrash className="text-[10px]" /></button>
+                  {inv.status === 'new' && <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'contacted')} title="Mark as Contacted" className="h-7 w-7 flex items-center justify-center rounded-lg bg-cshub-blue/10 text-cshub-blue hover:bg-cshub-blue/20 disabled:opacity-50"><FaCheck className="text-[10px]" /></button>}
+                  {inv.status === 'contacted' && <button disabled={updatingId === inv._id} onClick={() => updateStatus(inv._id, 'confirmed')} title="Confirm" className="h-7 w-7 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 disabled:opacity-50"><FaCheck className="text-[10px]" /></button>}
+                  <button disabled={updatingId === inv._id} onClick={() => resendEmail(inv._id)} title="Resend Email" className="h-7 w-7 flex items-center justify-center rounded-lg bg-cshub-blue/10 text-cshub-blue hover:bg-cshub-blue/20 disabled:opacity-50"><FaEnvelope className="text-[10px]" /></button>
+                  <button onClick={() => deleteInvite(inv._id)} title="Delete" className="h-7 w-7 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500"><FaTrash className="text-[10px]" /></button>
                 </div>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}
@@ -1493,15 +1694,15 @@ function AdminInvites() {
               <p className="text-xs text-slate-500">This will send your email to all <strong className="text-slate-700">{invites.length}</strong> registered participants.</p>
               <div>
                 <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">Subject</label>
-                <input type="text" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="e.g. Session Schedule Update" disabled={sendingEmails} />
+                <input type="text" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} placeholder="e.g. Session Schedule Update" disabled={sendingEmails} />
               </div>
               <div>
                 <label className="mb-1 block text-[10px] font-semibold text-slate-500 uppercase">Message</label>
-                <textarea className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none resize-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" value={emailMessage} onChange={(e) => setEmailMessage(e.target.value)} placeholder="Write your message here..." rows={5} disabled={sendingEmails} />
+                <textarea className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none resize-none focus:border-cshub-blue focus:ring-2 focus:ring-slate-900/10" value={emailMessage} onChange={(e) => setEmailMessage(e.target.value)} placeholder="Write your message here..." rows={5} disabled={sendingEmails} />
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button disabled={sendingEmails} onClick={() => setEmailModal(false)} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50">Cancel</button>
-                <button disabled={sendingEmails || !emailSubject.trim() || !emailMessage.trim()} onClick={sendCustomEmails} className="flex items-center gap-1.5 rounded-lg bg-cshub-yellow px-3 py-1.5 text-xs font-semibold text-slate-900 hover:brightness-110 disabled:opacity-50">
+                <button disabled={sendingEmails || !emailSubject.trim() || !emailMessage.trim()} onClick={sendCustomEmails} className="flex items-center gap-1.5 rounded-lg bg-cshub-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50">
                   {sendingEmails ? <><FaSpinner className="animate-spin" /> Sending...</> : <><FaEnvelope /> Send to All ({invites.length})</>}
                 </button>
               </div>
@@ -1622,6 +1823,7 @@ export default function AdminDashboard() {
 
   const [ticketChart, setTicketChart] = useState({ open: 0, inProgress: 0, resolved: 0, closed: 0 });
   const [appChart, setAppChart] = useState({ pending: 0, approved: 0, rejected: 0 });
+  const [datasets, setDatasets] = useState({});
 
   useEffect(() => {
     const endpoints = [
@@ -1644,6 +1846,11 @@ export default function AdminDashboard() {
           if (r.status === 'fulfilled' && Array.isArray(r.value)) s[endpoints[i][0]] = r.value.length;
         });
         setStats(s);
+        const ds = {};
+        endpoints.forEach(([k], i) => {
+          if (results[i].status === 'fulfilled' && Array.isArray(results[i].value)) ds[k] = results[i].value;
+        });
+        setDatasets(ds);
         const ticketsArr = results[1].status === 'fulfilled' && Array.isArray(results[1].value) ? results[1].value : [];
         setTicketChart({
           open: ticketsArr.filter((t) => t.status === 'open' || t.status === 'in-progress').length,
@@ -1753,7 +1960,7 @@ export default function AdminDashboard() {
       return statsLoading ? (
         <Loading />
       ) : (
-        <AnalyticsView stats={stats} ticketChart={ticketChart} appChart={appChart} onNavigate={(t) => setTab(t)} user={user} />
+        <AnalyticsView stats={stats} ticketChart={ticketChart} appChart={appChart} datasets={datasets} onNavigate={(t) => setTab(t)} user={user} />
       );
     }
     if (tab === 'tickets') return <AdminTickets />;
@@ -1805,7 +2012,7 @@ export default function AdminDashboard() {
 
           <div className="ml-auto flex items-center gap-1.5">
             {/* Search */}
-            <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 h-8 w-52 transition-all focus-within:border-cshub-yellow focus-within:bg-white focus-within:ring-2 focus-within:ring-cshub-yellow/20">
+            <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 h-8 w-52 transition-all focus-within:border-slate-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200">
               <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <input
                 type="text"
@@ -1819,7 +2026,7 @@ export default function AdminDashboard() {
             {/* Settings */}
             <button
               onClick={() => { setProfileEditOpen(true); setProfileTab('password'); }}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-cshub-yellow hover:text-cshub-yellow"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50"
             >
               <Settings className="h-4 w-4" />
             </button>
@@ -1828,7 +2035,7 @@ export default function AdminDashboard() {
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
-                className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-cshub-yellow hover:text-cshub-yellow"
+                className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50"
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
@@ -1903,7 +2110,7 @@ export default function AdminDashboard() {
                 onClick={() => setProfileOpen(!profileOpen)}
                 className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white py-1 pl-1 pr-2.5 transition-colors hover:bg-slate-50"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-cshub-yellow to-amber-500 text-[10px] font-bold text-slate-900">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-cshub-yellow text-[10px] font-bold text-slate-900">
                   {initials}
                 </div>
                 <span className="hidden sm:block text-xs font-semibold text-slate-700">{user?.name || 'Admin'}</span>
@@ -1912,13 +2119,13 @@ export default function AdminDashboard() {
                 <div className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-black/10 animate-in fade-in z-50">
                   <div className="border-b border-slate-100 px-3 py-2.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cshub-yellow to-amber-500 text-xs font-bold text-slate-900">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cshub-yellow text-xs font-bold text-slate-900">
                         {initials}
                       </div>
                       <div className="min-w-0">
                         <div className="text-xs font-semibold text-slate-900 truncate">{user?.name || 'Admin'}</div>
                         <div className="text-[10px] text-slate-400 truncate">{user?.email || ''}</div>
-                        <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-cshub-yellow/10 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">
+                        <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-600">
                           <ShieldCheck className="h-2 w-2" /> Admin
                         </span>
                       </div>
@@ -1964,16 +2171,16 @@ export default function AdminDashboard() {
               </div>
               {profileTab === 'profile' ? (
                 <div className="flex flex-col gap-3">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cshub-yellow to-amber-500 text-sm font-bold text-slate-900">{initials}</div>
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cshub-yellow text-sm font-bold text-slate-900">{initials}</div>
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold text-slate-600">Full Name</label>
-                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="text" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} />
                   </div>
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold text-slate-600">Email</label>
-                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="email" value={profileForm.email} onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })} />
                   </div>
-                  <button className="mt-0.5 w-full rounded-lg bg-cshub-yellow py-2 text-xs font-bold text-slate-900 transition-colors hover:bg-amber-400 disabled:opacity-50" onClick={handleProfileSave} disabled={profileLoading}>
+                  <button className="mt-0.5 w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3f7ee8] disabled:opacity-50" onClick={handleProfileSave} disabled={profileLoading}>
                     {profileLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
@@ -1981,17 +2188,17 @@ export default function AdminDashboard() {
                 <div className="flex flex-col gap-3">
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold text-slate-600">Current Password</label>
-                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} />
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} />
                   </div>
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold text-slate-600">New Password</label>
-                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="password" value={pwdForm.newPwd} onChange={(e) => setPwdForm({ ...pwdForm, newPwd: e.target.value })} />
                   </div>
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold text-slate-600">Confirm New Password</label>
-                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-cshub-yellow focus:ring-2 focus:ring-cshub-yellow/20" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
+                    <input className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none transition-all focus:border-slate-400 focus:ring-2 focus:ring-slate-200" type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} />
                   </div>
-                  <button className="mt-0.5 w-full rounded-lg bg-cshub-yellow py-2 text-xs font-bold text-slate-900 transition-colors hover:bg-amber-400 disabled:opacity-50" onClick={handlePasswordChange} disabled={profileLoading}>
+                  <button className="mt-0.5 w-full rounded-lg bg-cshub-blue py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3f7ee8] disabled:opacity-50" onClick={handlePasswordChange} disabled={profileLoading}>
                     {profileLoading ? 'Updating...' : 'Update Password'}
                   </button>
                 </div>

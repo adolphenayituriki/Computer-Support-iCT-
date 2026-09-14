@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../ToastContext';
-import { FaComments, FaPlus, FaPaperPlane, FaTicketAlt, FaLightbulb } from 'react-icons/fa';
+import { FaComments, FaPlus, FaPaperPlane, FaTicketAlt, FaLightbulb, FaTimes } from 'react-icons/fa';
+import { cn } from '../lib/utils';
 import API_BASE from '../api';
 
 const token = () => localStorage.getItem('cshub_token');
@@ -14,6 +15,12 @@ function api(url, opts = {}) {
     if (!r.ok) return { error: data.error || `Request failed (${r.status})` };
     return data;
   });
+}
+
+function typeMeta(type) {
+  if (type === 'direct') return { label: 'Chat', Icon: FaComments };
+  if (type === 'suggestion') return { label: 'Suggestion', Icon: FaLightbulb };
+  return { label: 'Ticket', Icon: FaTicketAlt };
 }
 
 export default function AdminChatView() {
@@ -193,119 +200,136 @@ export default function AdminChatView() {
     setActiveConv(item);
   };
 
-  const typeIcon = (type) => {
-    if (type === 'direct') return <FaComments style={{ color: '#6B7280' }} />;
-    if (type === 'suggestion') return <FaLightbulb style={{ color: '#6B7280' }} />;
-    return <FaTicketAlt style={{ color: '#6B7280' }} />;
-  };
-
-  const typeLabel = (type) => {
-    if (type === 'direct') return 'Chat';
-    if (type === 'suggestion') return 'Suggestion';
-    return 'Ticket';
-  };
-
-  const statusColor = (s) => {
-    const m = {
-      pending: '#b45309', reviewed: '#1d4ed8', implemented: '#047857',
-      open: '#1d4ed8', 'in-progress': '#b45309', resolved: '#047857', closed: '#4b5563',
-    };
-    return m[s] || '#6b7280';
-  };
+  const activeMeta = activeConv ? typeMeta(activeConv.type) : null;
 
   return (
-    <div className="admin-chat-wrap">
+    <div className="space-y-3 animate-in fade-in">
       {showNew && (
-        <div className="modal-overlay" onClick={() => setShowNew(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <h3>Start Direct Conversation</h3>
-            <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} disabled={loadingUsers} style={{ width: '100%', margin: '1rem 0', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}>
-              <option value="">{loadingUsers ? 'Loading users...' : 'Select a user...'}</option>
-              {users.map((u) => <option key={u.id || u._id} value={u.id || u._id}>{u.name} ({u.email})</option>)}
-            </select>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button className="btn btn-sm" style={{ background: '#e5e7eb', color: '#374151' }} onClick={() => setShowNew(false)}>Cancel</button>
-              <button className="btn btn-sm" disabled={!selectedUserId || creating} onClick={handleCreate}>{creating ? <span className="btn-spinner"></span> : 'Start'}</button>
+        <div className="fixed inset-0 z-[600] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setShowNew(false)}>
+          <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-2xl animate-in fade-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+              <h3 className="text-sm font-semibold text-slate-900">Start Direct Conversation</h3>
+              <button onClick={() => setShowNew(false)} className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400 hover:bg-slate-200"><FaTimes /></button>
+            </div>
+            <div className="px-5 py-4 space-y-3">
+              <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} disabled={loadingUsers} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none bg-white">
+                <option value="">{loadingUsers ? 'Loading users...' : 'Select a user...'}</option>
+                {users.map((u) => <option key={u.id || u._id} value={u.id || u._id}>{u.name} ({u.email})</option>)}
+              </select>
+              <div className="flex items-center justify-end gap-2">
+                <button className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50" onClick={() => setShowNew(false)}>Cancel</button>
+                <button className="rounded-lg bg-cshub-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#3f7ee8] disabled:opacity-50" disabled={!selectedUserId || creating} onClick={handleCreate}>
+                  {creating ? 'Creating...' : 'Start'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="admin-chat-layout">
-        <div className="admin-chat-sidebar">
-          <div className="admin-chat-sidebar-header">
-            <h3><FaComments /> All Conversations</h3>
+      <div className="flex h-[calc(100vh-180px)] min-h-[420px] overflow-hidden rounded-xl border border-slate-200 bg-white">
+        {/* Conversation list */}
+        <div className="flex w-full max-w-[320px] shrink-0 flex-col border-r border-slate-200 bg-slate-50/60">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><FaComments className="h-3.5 w-3.5 text-slate-400" /> Conversations</h3>
+            <button onClick={openNew} className="flex items-center gap-1 rounded-lg bg-cshub-blue px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-[#3f7ee8]"><FaPlus className="text-[9px]" /> New</button>
           </div>
-          <button className="admin-chat-new-btn" onClick={openNew}><FaPlus /> New Direct Chat</button>
-          <div className="admin-chat-list">
+          <div className="flex-1 overflow-y-auto p-2">
             {loading ? (
-              <p style={{ padding: '1rem', textAlign: 'center', color: '#9ca3af' }}>Loading...</p>
+              <div className="flex items-center justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" /></div>
             ) : items.length === 0 ? (
-              <p style={{ padding: '1rem', color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center' }}>
+              <p className="px-4 py-8 text-center text-xs text-slate-400">
                 No conversations yet. Messages from suggestions and tickets will appear here automatically.
               </p>
             ) : (
-              items.map((item) => (
-                <div
-                  key={`${item.type}-${item._id}`}
-                  className={`admin-chat-item${activeId === item._id && activeType === item.type ? ' active' : ''}`}
-                  onClick={() => handleSelect(item)}
-                >
-                  <div className="admin-chat-item-avatar">{typeIcon(item.type)}</div>
-                  <div className="admin-chat-item-info">
-                    <strong>{item.userName}</strong>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
-                      <span className="admin-chat-type-badge" style={{ background: item.type === 'direct' ? '#dbeafe' : item.type === 'suggestion' ? '#fef3c7' : '#d1fae5', color: item.type === 'direct' ? '#1d4ed8' : item.type === 'suggestion' ? '#b45309' : '#047857' }}>{typeLabel(item.type)}</span>
-                      {item.status && <span style={{ fontSize: '0.65rem', color: statusColor(item.status), fontWeight: 600 }}>{item.status}</span>}
-                    </span>
-                    <small>{item.lastMsg ? item.lastMsg.text.slice(0, 45) : item.title.slice(0, 45)}</small>
-                  </div>
-                </div>
-              ))
+              <div className="space-y-1">
+                {items.map((item) => {
+                  const { label, Icon } = typeMeta(item.type);
+                  const isActive = activeId === item._id && activeType === item.type;
+                  return (
+                    <button
+                      key={`${item.type}-${item._id}`}
+                      onClick={() => handleSelect(item)}
+                      className={cn(
+                        'flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors',
+                        isActive ? 'bg-white shadow-sm border border-slate-200' : 'hover:bg-white',
+                      )}
+                    >
+                      <div className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg', isActive ? 'bg-cshub-blue text-white' : 'bg-slate-200 text-slate-500')}>
+                        <Icon className="h-3 w-3" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <strong className={cn('truncate text-xs font-semibold', isActive ? 'text-slate-900' : 'text-slate-700')}>{item.userName}</strong>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-medium uppercase tracking-wide text-slate-400">{label}</span>
+                          {item.status && <span className="text-[9px] text-slate-400">·</span>}
+                          {item.status && <span className="text-[9px] font-medium text-slate-500">{item.status}</span>}
+                        </div>
+                        <p className="mt-0.5 truncate text-[11px] text-slate-400">{item.lastMsg ? item.lastMsg.text : item.title}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>
 
-        <div className="admin-chat-main">
+        {/* Chat pane */}
+        <div className="flex min-w-0 flex-1 flex-col">
           {!activeConv ? (
-            <div className="admin-chat-empty">
-              <FaComments size={48} style={{ color: '#d1d5db' }} />
-              <p>{loading ? 'Loading...' : 'Select a conversation to start chatting'}</p>
+            <div className="flex flex-1 flex-col items-center justify-center gap-2">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-300"><FaComments className="h-5 w-5" /></div>
+              <p className="text-xs text-slate-400">{loading ? 'Loading...' : 'Select a conversation to start chatting'}</p>
             </div>
           ) : (
             <>
-              <div className="admin-chat-header">
-                {typeIcon(activeConv.type)}
-                {activeConv.userName}
-                <span style={{ fontSize: '0.78rem', color: '#9ca3af', fontWeight: 400, marginLeft: '0.3rem' }}>
-                  {activeConv.title}
-                  {activeConv.status && <> &middot; {activeConv.status}</>}
-                </span>
+              <div className="flex items-center gap-2.5 border-b border-slate-200 bg-white px-4 py-3">
+                {activeMeta && <activeMeta.Icon className="h-4 w-4 text-slate-400" />}
+                <div className="min-w-0 flex-1">
+                  <h4 className="truncate text-sm font-semibold text-slate-900">{activeConv.userName}</h4>
+                  <p className="truncate text-[10px] text-slate-400">
+                    {activeConv.title}
+                    {activeConv.status && <> · {activeConv.status}</>}
+                  </p>
+                </div>
               </div>
-              <div className="admin-chat-messages">
+
+              <div className="flex-1 space-y-2 overflow-y-auto bg-slate-50/40 p-4">
                 {activeConv.messages.length === 0 ? (
-                  <p style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem', fontSize: '0.85rem' }}>No messages yet. Send the first message.</p>
+                  <p className="py-8 text-center text-xs text-slate-400">No messages yet. Send the first message.</p>
                 ) : (
                   activeConv.messages.map((m, i) => (
-                    <div key={i} className={`chat-msg ${m.sender === 'admin' ? 'chat-msg-admin' : 'chat-msg-user'}`}>
-                      <div className="chat-msg-sender">{m.senderName}</div>
-                      <div className="chat-msg-text">{m.text}</div>
-                      <div className="chat-msg-time">{new Date(m.createdAt).toLocaleString()}</div>
+                    <div key={i} className={cn('flex flex-col', m.sender === 'admin' ? 'items-end' : 'items-start')}>
+                      <div className={cn(
+                        'max-w-[75%] rounded-xl px-3 py-2 text-xs',
+                        m.sender === 'admin' ? 'bg-cshub-blue text-slate-100 rounded-br-sm' : 'bg-white border border-slate-200 rounded-bl-sm',
+                      )}>
+                        <div className={cn('mb-0.5 flex items-center justify-between gap-3', m.sender === 'admin' ? 'text-slate-300' : 'text-slate-400')}>
+                          <strong className="text-[10px] font-semibold">{m.senderName}</strong>
+                          <span className="text-[9px]">{new Date(m.createdAt).toLocaleString()}</span>
+                        </div>
+                        <p className={cn('leading-relaxed', m.sender === 'admin' ? 'text-slate-200' : 'text-slate-600')}>{m.text}</p>
+                      </div>
                     </div>
                   ))
                 )}
                 <div ref={msgEndRef} />
               </div>
-              <div className="admin-chat-input">
+
+              <div className="flex items-center gap-2 border-t border-slate-200 bg-white px-4 py-3">
                 <input
                   type="text"
                   placeholder="Type your message..."
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                  className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none focus:border-slate-400 focus:bg-white"
                 />
-                <button className="btn btn-sm" disabled={sending || !text.trim()} onClick={handleSend}>
-                  {sending ? <span className="btn-spinner"></span> : <FaPaperPlane />}
+                <button disabled={sending || !text.trim()} onClick={handleSend} className="flex h-9 w-9 items-center justify-center rounded-lg bg-cshub-blue text-white transition-colors hover:bg-[#3f7ee8] disabled:opacity-40">
+                  {sending ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <FaPaperPlane className="h-3.5 w-3.5" />}
                 </button>
               </div>
             </>

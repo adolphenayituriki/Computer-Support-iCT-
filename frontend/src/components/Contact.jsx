@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaClock, FaWhatsapp } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaClock, FaWhatsapp, FaShieldAlt } from 'react-icons/fa';
 import { useToast } from '../ToastContext';
 import { useLang } from '../LanguageContext';
 import API_BASE from '../api';
@@ -88,7 +88,7 @@ export default function Contact() {
             <span className="contact-icon"><FaPhoneAlt /></span>
             <div>
               <strong>{t('contact.phone')}</strong>
-              <p>+250 78050 5948</p>
+              <p>+250 780 505 948</p>
             </div>
           </div>
 
@@ -101,13 +101,33 @@ export default function Contact() {
           </div>
 
           <div className="contact-item">
-            <span className="contact-icon" style={{ color: '#25D366' }}><FaWhatsapp /></span>
+            <span className="contact-icon" style={{ color: 'var(--brand-green)' }}><FaWhatsapp /></span>
             <div>
               <strong>{t('contact.whatsappGroup')}</strong>
-              <p><a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" style={{ color: '#25D366', fontWeight: 600 }}>{t('contact.joinGroup')}</a></p>
+              <p><a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand-green)', fontWeight: 600 }}>{t('contact.joinGroup')}</a></p>
             </div>
           </div>
         </div>
+      </div>
+
+      <div
+        className="contact-security-note"
+        style={{
+          marginTop: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '0.9rem 1.1rem',
+          borderRadius: '12px',
+          border: '1px solid #5694F7',
+          background: 'rgba(86,148,247,0.08)',
+          fontSize: '0.92rem',
+        }}
+      >
+        <span style={{ fontSize: '1.2rem', color: '#5694F7', flexShrink: 0 }}><FaShieldAlt /></span>
+        <p style={{ margin: 0 }}>
+          <strong>Security note:</strong> Never share your password. Our team will never ask for it.
+        </p>
       </div>
     </section>
   );

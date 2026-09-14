@@ -10,7 +10,7 @@ function StarRating({ value, onChange }) {
         <FaStar
           key={star}
           size={onChange ? 22 : 14}
-          style={{ cursor: onChange ? 'pointer' : 'default', color: star <= value ? '#FFCE08' : '#d1d5db' }}
+          style={{ cursor: onChange ? 'pointer' : 'default', color: star <= value ? 'var(--brand-yellow)' : '#d1d5db' }}
           onClick={() => onChange?.(star)}
         />
       ))}
@@ -50,8 +50,8 @@ function SubmitTestimonialModal({ open, onClose }) {
         </div>
         {done ? (
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-            <FaQuoteLeft size={36} style={{ color: '#FFCE08', marginBottom: '1rem' }} />
-            <p style={{ color: '#334155', fontSize: '1.05rem', marginBottom: '0.5rem' }}>{t('testimonials.submitted')}</p>
+            <FaQuoteLeft size={36} style={{ color: 'var(--brand-yellow)', marginBottom: '1rem' }} />
+            <p style={{ color: 'var(--text-heading)', fontSize: '1.05rem', marginBottom: '0.5rem' }}>{t('testimonials.submitted')}</p>
             <p className="auth-sub">{t('testimonials.submittedSub')}</p>
             <button type="button" className="btn" onClick={onClose} style={{ marginTop: '1rem' }}>{t('testimonials.close')}</button>
           </div>
@@ -63,7 +63,7 @@ function SubmitTestimonialModal({ open, onClose }) {
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <input placeholder={t('testimonials.avatar')} value={form.avatar} onChange={(e) => setForm({ ...form, avatar: e.target.value })} style={{ flex: 1 }} />
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}><FaCamera /> {t('testimonials.optional')}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}><FaCamera /> {t('testimonials.optional')}</span>
             </div>
             <label style={{ fontSize: '0.85rem', color: '#4b5563', display: 'block', textAlign: 'left' }}>{t('testimonials.rating')}</label>
             <StarRating value={form.rating} onChange={(r) => setForm({ ...form, rating: r })} />

@@ -54,13 +54,45 @@ export default function TeamApplyModal({ onClose }) {
     skills: [], message: '',
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const toggleSkill = (skill) => {
     setForm((prev) => ({ ...prev, skills: prev.skills.includes(skill) ? prev.skills.filter((s) => s !== skill) : [...prev.skills, skill] }));
   };
 
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validateStep1 = () => {
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'Full name is required.';
+    if (!form.email.trim()) errs.email = 'Email address is required.';
+    else if (!validateEmail(form.email)) errs.email = 'Enter a valid email address.';
+    if (!form.location.trim()) errs.location = 'Location is required.';
+    if (!form.education) errs.education = 'Please select your highest education.';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const nextToStep2 = () => {
+    if (validateStep1()) setStep(2);
+  };
+
+  const nextToStep3 = () => {
+    if (form.skills.length === 0) {
+      setErrors({ skills: 'Select at least one skill.' });
+      return;
+    }
+    setErrors({});
+    setStep(3);
+  };
+
+  const clearError = (key) => setErrors((prev) => ({ ...prev, [key]: undefined }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateStep1()) { setStep(1); return; }
+    if (form.skills.length === 0) { setErrors({ skills: 'Select at least one skill.' }); setStep(2); return; }
+    if (!form.message.trim()) { setErrors({ message: 'Please tell us why you want to join.' }); setStep(3); return; }
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/team/apply`, {
@@ -84,40 +116,42 @@ export default function TeamApplyModal({ onClose }) {
 
   return (
     <div className="modal-auth team-form" style={{ padding: 0, maxHeight: '90vh', overflowY: 'auto' }}>
-      <div style={{ position: 'sticky', top: 0, background: '#0f172a', padding: '1.5rem 1.5rem 1rem', zIndex: 2, borderRadius: '12px 12px 0 0' }}>
+      <div style={{ position: 'sticky', top: 0, background: '#0f172a', padding: '1.1rem 1.25rem 0.8rem', zIndex: 2, borderRadius: '12px 12px 0 0' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div className="auth-logo" style={{ marginBottom: '0.5rem' }}>
+            <div className="auth-logo" style={{ marginBottom: '0.35rem' }}>
               <span className="logo-cs">CS H</span><span className="logo-ub">ub</span>{' '}
               <span className="logo-paren">(</span><span className="logo-ub">i</span><span className="logo-ct">CT</span><span className="logo-paren">)</span>
               <small>COMPUTER SUPPORT</small>
             </div>
-            <h2 style={{ margin: '0.25rem 0 0.25rem', color: '#f8fafc', fontSize: '1.3rem' }}>Join Our Team</h2>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>Tell us about yourself and how you'd like to contribute.</p>
+            <h2 style={{ margin: '0.15rem 0 0.15rem', color: '#f8fafc', fontSize: '1.1rem' }}>Join Our Team</h2>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.8rem' }}>Tell us about yourself and how you'd like to contribute.</p>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.25rem' }}><FaTimes size={20} /></button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.25rem' }}><FaTimes size={18} /></button>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.7rem' }}>
           {[1, 2, 3].map((s) => (
             <div key={s} style={{ flex: 1, height: '4px', borderRadius: '2px', background: step >= s ? '#FFCE08' : '#1e293b', transition: 'background 0.3s' }} />
           ))}
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ padding: '1.5rem' }}>
+      <form onSubmit={handleSubmit} style={{ padding: '1.15rem 1.25rem' }}>
         {step === 1 && (
           <>
-            <h3 style={{ margin: '0 0 1rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.7rem', color: '#fff', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaUser style={{ color: '#FFCE08' }} /> Personal Information
             </h3>
             <div className="form-row">
               <div style={{ position: 'relative', flex: 1 }}>
                 <FaUser style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '0.85rem' }} />
-                <input type="text" placeholder="Full Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required style={{ paddingLeft: '2.2rem' }} />
+                <input type="text" placeholder="Full Name *" value={form.name} onChange={(e) => { setForm({ ...form, name: e.target.value }); clearError('name'); }} style={{ paddingLeft: '2.2rem', ...(errors.name ? { borderColor: '#f87171' } : {}) }} />
+                {errors.name && <span className="field-error">{errors.name}</span>}
               </div>
               <div style={{ position: 'relative', flex: 1 }}>
                 <FaEnvelope style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '0.85rem' }} />
-                <input type="email" placeholder="Email Address *" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required style={{ paddingLeft: '2.2rem' }} />
+                <input type="email" placeholder="Email Address *" value={form.email} onChange={(e) => { setForm({ ...form, email: e.target.value }); clearError('email'); }} style={{ paddingLeft: '2.2rem', ...(errors.email ? { borderColor: '#f87171' } : {}) }} />
+                {errors.email && <span className="field-error">{errors.email}</span>}
               </div>
             </div>
             <div className="form-row">
@@ -127,59 +161,52 @@ export default function TeamApplyModal({ onClose }) {
               </div>
               <div style={{ position: 'relative', flex: 1 }}>
                 <FaMapMarkerAlt style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '0.85rem' }} />
-                <input type="text" placeholder="Your Location (e.g., Kigali, Musanze) *" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} required style={{ paddingLeft: '2.2rem' }} />
+                <input type="text" placeholder="Your Location (e.g., Kigali, Musanze) *" value={form.location} onChange={(e) => { setForm({ ...form, location: e.target.value }); clearError('location'); }} style={{ paddingLeft: '2.2rem', ...(errors.location ? { borderColor: '#f87171' } : {}) }} />
+                {errors.location && <span className="field-error">{errors.location}</span>}
               </div>
             </div>
 
-            <h3 style={{ margin: '1.5rem 0 0.75rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '1rem 0 0.55rem', color: '#fff', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaGraduationCap style={{ color: '#FFCE08' }} /> Background
             </h3>
-            <div className="form-row">
-              <select value={form.education} onChange={(e) => setForm({ ...form, education: e.target.value })} style={{ flex: 1 }}>
-                <option value="">— Highest Education —</option>
-                {educationLevels.map((level) => (<option key={level} value={level}>{level}</option>))}
-              </select>
-              <select value={form.applicantType} onChange={(e) => setForm({ ...form, applicantType: e.target.value })} style={{ flex: 1 }}>
-                <option value="student">I am a Student</option>
-                <option value="teacher">Teacher / Lecturer</option>
-                <option value="entrepreneur">Entrepreneur</option>
-                <option value="employee">Employee</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+            <select value={form.education} onChange={(e) => { setForm({ ...form, education: e.target.value }); clearError('education'); }} style={{ width: '100%', ...(errors.education ? { borderColor: '#f87171' } : {}) }}>
+              <option value="">— Highest Education —</option>
+              {educationLevels.map((level) => (<option key={level} value={level}>{level}</option>))}
+            </select>
+            {errors.education && <span className="field-error">{errors.education}</span>}
 
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               {applicantTypes.map((t) => {
                 const Icon = t.icon;
                 const selected = form.applicantType === t.value;
                 return (
                   <button key={t.value} type="button" onClick={() => setForm({ ...form, applicantType: t.value })}
                     style={{
-                      flex: 1, minWidth: '100px', padding: '0.6rem 0.5rem', borderRadius: '10px', border: selected ? '1.5px solid #FFCE08' : '1px solid rgba(255,255,255,0.12)',
+                      flex: 1, minWidth: 0, padding: '0.5rem 0.3rem', borderRadius: '10px', border: selected ? '1.5px solid #FFCE08' : '1px solid rgba(255,255,255,0.12)',
                       background: selected ? 'rgba(255,206,8,0.12)' : 'rgba(255,255,255,0.04)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
-                      fontSize: '0.78rem', fontWeight: selected ? 600 : 400, color: selected ? '#FFCE08' : '#94a3b8',
+                      fontSize: '0.7rem', fontWeight: selected ? 600 : 400, color: selected ? '#FFCE08' : '#94a3b8',
                     }}
                   >
-                    <Icon size={20} style={{ display: 'block', margin: '0 auto 0.25rem', color: selected ? '#FFCE08' : '#64748b' }} />
+                    <Icon size={14} style={{ display: 'block', margin: '0 auto 0.15rem', color: selected ? '#FFCE08' : '#64748b' }} />
                     {t.label}
                   </button>
                 );
               })}
             </div>
 
-            <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
-              <button type="button" className="btn" onClick={() => setStep(2)}>Next: Skills & Interests →</button>
+            <div style={{ marginTop: '0.9rem', textAlign: 'right' }}>
+              <button type="button" className="btn" onClick={nextToStep2}>Next: Skills & Interests →</button>
             </div>
           </>
         )}
 
         {step === 2 && (
           <>
-            <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.4rem', color: '#fff', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaLaptopCode style={{ color: '#FFCE08' }} /> Your ICT Skills
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.75rem' }}>Select all that apply — don't worry if you're just starting out!</p>
-            <div className="skills-grid" style={{ marginBottom: '1.5rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.6rem' }}>Select all that apply — don't worry if you're just starting out!</p>
+            <div className="skills-grid" style={{ marginBottom: '1rem' }}>
               {skillOptions.map((skill) => (
                 <label key={skill} className={`skill-chip${form.skills.includes(skill) ? ' selected' : ''}`}>
                   <input type="checkbox" checked={form.skills.includes(skill)} onChange={() => toggleSkill(skill)} />
@@ -187,24 +214,25 @@ export default function TeamApplyModal({ onClose }) {
                 </label>
               ))}
             </div>
+            {errors.skills && <p className="field-error" style={{ marginBottom: '1rem' }}>{errors.skills}</p>}
 
-            <h3 style={{ margin: '0 0 0.75rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '1rem 0 0.55rem', color: '#fff', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaHandshake style={{ color: '#FFCE08' }} /> How You Want to Contribute
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1rem' }}>
               {involvementTypes.map((t) => {
                 const Icon = t.icon;
                 const selected = form.involvement === t.value;
                 return (
                   <label key={t.value} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
+                    display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.85rem',
                     borderRadius: '10px', border: selected ? '1.5px solid #FFCE08' : '1px solid rgba(255,255,255,0.12)',
                     background: selected ? 'rgba(255,206,8,0.12)' : 'rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'all 0.2s',
                   }}>
                     <input type="radio" name="involvement" value={t.value} checked={selected} onChange={(e) => setForm({ ...form, involvement: e.target.value })} style={{ accentColor: '#FFCE08' }} />
-                    <Icon size={18} style={{ color: selected ? '#FFCE08' : '#64748b' }} />
+                    <Icon size={16} style={{ color: selected ? '#FFCE08' : '#64748b' }} />
                     <div>
-                      <div style={{ fontWeight: selected ? 600 : 400, fontSize: '0.9rem', color: selected ? '#FFCE08' : '#e2e8f0' }}>{t.label}</div>
+                      <div style={{ fontWeight: selected ? 600 : 400, fontSize: '0.85rem', color: selected ? '#FFCE08' : '#e2e8f0' }}>{t.label}</div>
                     </div>
                   </label>
                 );
@@ -213,22 +241,23 @@ export default function TeamApplyModal({ onClose }) {
 
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between' }}>
               <button type="button" className="btn btn-outline" onClick={() => setStep(1)}>← Back</button>
-              <button type="button" className="btn" onClick={() => setStep(3)}>Next: Message →</button>
+              <button type="button" className="btn" onClick={nextToStep3}>Next: Message →</button>
             </div>
           </>
         )}
 
         {step === 3 && (
           <>
-            <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: '0 0 0.4rem', color: '#fff', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaStar style={{ color: '#FFCE08' }} /> Why Join Us?
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.6rem' }}>
               Tell us about yourself, your motivation, and what you hope to bring to the team.
             </p>
-            <textarea rows="5" placeholder="Why do you want to join or partner with us? Share your story... *" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required style={{ marginBottom: '1rem' }} />
+            <textarea rows="4" placeholder="Why do you want to join or partner with us? Share your story... *" value={form.message} onChange={(e) => { setForm({ ...form, message: e.target.value }); clearError('message'); }} style={{ marginBottom: '0.75rem', ...(errors.message ? { borderColor: '#f87171' } : {}) }} />
+            {errors.message && <span className="field-error">{errors.message}</span>}
 
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '1rem', marginBottom: '1rem', fontSize: '0.82rem', color: '#94a3b8', lineHeight: '1.7' }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.75rem', marginBottom: '0.75rem', fontSize: '0.8rem', color: '#94a3b8', lineHeight: '1.7' }}>
               <strong style={{ color: '#e2e8f0' }}>Summary</strong>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem 1rem', marginTop: '0.5rem' }}>
                 <span>Name: {form.name || '—'}</span>

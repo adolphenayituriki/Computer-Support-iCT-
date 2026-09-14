@@ -14,36 +14,36 @@ const NAV_SECTIONS = [
   {
     label: 'AI Learning',
     items: [
-      { key: 'ai-learning', href: '/ai-dashboard', icon: Bot, label: 'AI Learning', color: 'text-fuchsia-400' },
+      { key: 'ai-learning', href: '/ai-dashboard', icon: Bot, label: 'AI Learning' },
     ],
   },
   {
     label: 'Overview',
     items: [
-      { key: 'analytics', icon: LayoutDashboard, label: 'Dashboard', color: 'text-indigo-400' },
-      { key: 'tickets', icon: Ticket, label: 'Tickets', color: 'text-amber-400' },
-      { key: 'users', icon: Users, label: 'Users', color: 'text-violet-400' },
-      { key: 'chat', icon: MessageSquare, label: 'Chat', color: 'text-emerald-400' },
+      { key: 'analytics', icon: LayoutDashboard, label: 'Dashboard' },
+      { key: 'tickets', icon: Ticket, label: 'Tickets' },
+      { key: 'users', icon: Users, label: 'Users' },
+      { key: 'chat', icon: MessageSquare, label: 'Chat' },
     ],
   },
   {
     label: 'Management',
     items: [
-      { key: 'contacts', icon: Mail, label: 'Contacts', color: 'text-cyan-400' },
-      { key: 'teams', icon: UserCheck, label: 'Applications', color: 'text-pink-400' },
-      { key: 'suggestions', icon: Lightbulb, label: 'Suggestions', color: 'text-orange-400' },
-      { key: 'beneficiaries', icon: ShieldCheck, label: 'Beneficiaries', color: 'text-teal-400' },
-      { key: 'testimonials', icon: Star, label: 'Testimonials', color: 'text-yellow-400' },
-      { key: 'invites', icon: Calendar, label: 'Session Invites', color: 'text-purple-400' },
+      { key: 'contacts', icon: Mail, label: 'Contacts' },
+      { key: 'teams', icon: UserCheck, label: 'Applications' },
+      { key: 'suggestions', icon: Lightbulb, label: 'Suggestions' },
+      { key: 'beneficiaries', icon: ShieldCheck, label: 'Beneficiaries' },
+      { key: 'testimonials', icon: Star, label: 'Testimonials' },
+      { key: 'invites', icon: Calendar, label: 'Session Invites' },
     ],
   },
   {
     label: 'Content',
     items: [
-      { key: 'news', icon: Newspaper, label: 'News', color: 'text-rose-400' },
-      { key: 'courses', icon: BookOpen, label: 'Courses', color: 'text-sky-400' },
-      { key: 'live-sessions', icon: Video, label: 'Live Sessions', color: 'text-red-400' },
-      { key: 'payments', icon: CreditCard, label: 'Payments', color: 'text-emerald-400' },
+      { key: 'news', icon: Newspaper, label: 'News' },
+      { key: 'courses', icon: BookOpen, label: 'Courses' },
+      { key: 'live-sessions', icon: Video, label: 'Live Sessions' },
+      { key: 'payments', icon: CreditCard, label: 'Payments' },
     ],
   },
 ];
@@ -64,7 +64,7 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen, onClose }
         className={cn(
           'fixed top-0 left-0 bottom-0 z-50 flex flex-col bg-slate-950 text-white transition-all duration-300 ease-in-out',
           'border-r border-white/5',
-          collapsed ? 'w-[68px]' : 'w-[280px]',
+          collapsed ? 'w-[60px]' : 'w-[224px]',
           'max-lg:-translate-x-full max-lg:shadow-2xl',
           isOpen && 'max-lg:translate-x-0',
         )}
@@ -108,7 +108,7 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen, onClose }
             {NAV_SECTIONS.map((section) => (
               <div key={section.label} className="mb-1">
                 {!collapsed && (
-                  <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-600">
+                  <div className="px-3 pt-2.5 pb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-slate-600">
                     {section.label}
                   </div>
                 )}
@@ -118,18 +118,18 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen, onClose }
                   const inner = (
                     <>
                       {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-cshub-yellow shadow-sm shadow-cshub-yellow/30" />
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-cshub-blue" />
                       )}
-                      <Icon className={cn('h-[18px] w-[18px] shrink-0 transition-colors', isActive ? item.color : 'text-slate-500 group-hover:text-slate-300')} />
+                      <Icon className={cn('h-[18px] w-[18px] shrink-0 transition-colors', isActive ? 'text-cshub-blue' : 'text-slate-500 group-hover:text-slate-300')} />
                       {!collapsed && <span className="truncate">{item.label}</span>}
                     </>
                   );
                   const cls = cn(
-                    'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
-                    collapsed && 'justify-center px-0 py-2.5',
+                    'group relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium transition-all duration-150',
+                    collapsed && 'justify-center px-0 py-2',
                     isActive
-                      ? 'bg-white/[0.08] text-white'
-                      : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                      ? 'bg-cshub-blue/10 text-white'
+                      : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200',
                   );
                   const btn = item.href ? (
                     <a key={item.key} href={item.href} className={cls}>
@@ -169,10 +169,10 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen, onClose }
               <button
                 onClick={() => { onTabChange('settings'); onClose(); }}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
+                  'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium transition-all duration-150',
                   activeTab === 'settings'
-                    ? 'bg-white/[0.08] text-white'
-                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                    ? 'bg-cshub-blue/10 text-white'
+                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-200',
                 )}
               >
                 <Settings className="h-[18px] w-[18px] shrink-0 text-slate-500" />

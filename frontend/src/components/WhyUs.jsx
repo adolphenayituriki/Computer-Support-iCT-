@@ -1,31 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useLang } from '../LanguageContext';
 import { FiCpu, FiImage, FiBookOpen, FiGlobe } from 'react-icons/fi';
+import { FaUsers } from 'react-icons/fa';
 import BehindTheScenePopup from './BehindTheScenePopup';
 
 export default function WhyUs() {
-  const { t } = useLang();
-  const sectionRef = useRef(null);
+  const { t, lang } = useLang();
   const [showPopup, setShowPopup] = useState(false);
-  const hasTriggered = useRef(false);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasTriggered.current) {
-          hasTriggered.current = true;
-          setTimeout(() => setShowPopup(true), 800);
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   const reasons = [
     { icon: <FiCpu />, title: t('whyUs.personalized'), desc: t('whyUs.personalizedDesc') },
@@ -36,7 +17,7 @@ export default function WhyUs() {
 
   return (
     <>
-      <section id="why-us" className="why-us section-alt section-reveal" ref={sectionRef}>
+      <section id="why-us" className="why-us section-alt section-reveal">
         <div className="container">
           <h2 className="section-title">{t('whyUs.title')}</h2>
           <p className="section-sub">{t('whyUs.subtitle')}</p>
@@ -48,6 +29,11 @@ export default function WhyUs() {
                 <p>{r.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="why-team-btn">
+            <button type="button" onClick={() => setShowPopup(true)}>
+              <FaUsers /> {lang === 'rw' ? 'Menya abadukorera inyuma' : 'Meet the team behind CS hub'}
+            </button>
           </div>
         </div>
       </section>

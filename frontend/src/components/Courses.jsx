@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FaBookOpen, FaClock, FaSignal, FaArrowLeft, FaTag, FaUser, FaHeart, FaRegHeart, FaComment, FaShare, FaPaperPlane, FaPlay, FaCheckCircle, FaSpinner, FaGraduationCap, FaLock, FaTimes, FaClipboardCheck, FaCircle } from 'react-icons/fa';
+import { FaBookOpen, FaClock, FaSignal, FaArrowLeft, FaTag, FaUser, FaHeart, FaRegHeart, FaComment, FaShare, FaPaperPlane, FaPlay, FaCheckCircle, FaSpinner, FaGraduationCap, FaLock, FaTimes, FaClipboardCheck, FaCircle, FaSearch } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +21,32 @@ const CATEGORY_COLORS = {
 const DIFFICULTY_COLORS = {
   beginner: 'bg-emerald-100 text-emerald-700', intermediate: 'bg-orange-100 text-orange-700', advanced: 'bg-red-100 text-red-700',
 };
+
+const CATEGORY_COVERS = {
+  hardware: 'from-blue-500/25 via-blue-100/70 to-slate-50',
+  software: 'from-purple-500/25 via-purple-100/70 to-slate-50',
+  network: 'from-cyan-500/25 via-cyan-100/70 to-slate-50',
+  virus: 'from-red-500/25 via-red-100/70 to-slate-50',
+  training: 'from-amber-500/30 via-amber-100/70 to-slate-50',
+  general: 'from-indigo-500/20 via-indigo-100/60 to-slate-50',
+};
+
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+
+function localProgress(courseId) {
+  try {
+    const lessonsData = localStorage.getItem(`cshub-lessons-${courseId}`);
+    const assessmentPassed = localStorage.getItem(`cshub-assessment-${courseId}`) === 'true';
+    if (lessonsData) {
+      const ids = JSON.parse(lessonsData);
+      if (Array.isArray(ids) && ids.length > 0) {
+        const pct = Math.min(95, ids.length * 8);
+        return assessmentPassed ? 100 : pct;
+      }
+    }
+  } catch { /* ignore */ }
+  return 0;
+}
 
 function ProgressRing({ progress, size = 40, stroke = 3 }) {
   const r = (size - stroke) / 2;
@@ -106,14 +132,17 @@ export default function Courses({ onLoginClick }) {
   const filtered = courses.filter((c) => {
     const matchSearch = !search || c.title.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase());
     const matchCat = !filterCat || c.category === filterCat;
+    const courseProgress = Math.max(enrollments[c._id]?.progress?.progress || 0, localProgress(c._id));
     let matchStatus = true;
-    if (filterStatus === 'enrolled') matchStatus = !!enrollments[c._id] && !enrollments[c._id]?.progress?.completed;
-    else if (filterStatus === 'completed') matchStatus = !!enrollments[c._id]?.progress?.completed;
+    if (filterStatus === 'enrolled') matchStatus = !!enrollments[c._id] && !enrollments[c._id]?.progress?.completed && courseProgress < 100;
+    else if (filterStatus === 'completed') matchStatus = !!(enrollments[c._id]?.progress?.completed || courseProgress >= 100);
     else if (filterStatus === 'not-enrolled') matchStatus = !enrollments[c._id];
     return matchSearch && matchCat && matchStatus;
   });
 
   const categories = [...new Set(courses.map((c) => c.category))];
+
+  const clearFilters = () => { setSearch(''); setFilterCat(''); setFilterStatus(''); };
 
   const handleEnroll = async (courseId, e) => {
     e.stopPropagation();
@@ -233,8 +262,8 @@ export default function Courses({ onLoginClick }) {
               {filtered.map((course) => {
                 const enroll = enrollments[course._id];
                 const isEnrolled = !!enroll;
-                const progress = enroll?.progress?.progress || 0;
-                const isCompleted = enroll?.progress?.completed;
+                const progress = Math.max(enroll?.progress?.progress || 0, localProgress(course._id));
+                const isCompleted = enroll?.progress?.completed || progress >= 100;
                 const visibleTags = (course.tags || []).slice(0, 3);
                 const extraTags = (course.tags || []).length - 3;
 
@@ -387,113 +416,150 @@ export default function Courses({ onLoginClick }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 pt-32 pb-12">
-        <div className="mb-8">
-          <h1 className="flex items-center gap-3 text-2xl font-bold text-slate-900 mb-2">
-            <FaBookOpen className="text-[#FFCE08]" /> Knowledge Base
-          </h1>
-          <p className="text-sm text-slate-500">Short guides and tutorials covering the most common questions and issues.</p>
-        </div>
+      <div className="mx-auto max-w-6xl px-4 pt-28 pb-12">
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
-          <div className="relative flex-1">
-            <FaBookOpen className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300" />
-            <input type="text" placeholder="Search courses..."
-              value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-6 py-10 sm:px-10 text-center shadow-xl shadow-slate-900/10">
+          <div className="pointer-events-none absolute -top-20 right-8 h-48 w-48 rounded-full bg-[#FFCE08]/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-2 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)', backgroundSize: '22px 22px' }} />
+          <div className="relative">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FFCE08]">
+              <FaBookOpen size={12} /> Free Learning Library
+            </span>
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Knowledge Base</h1>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-300">
+              Short guides and tutorials covering the most common questions and issues.
+            </p>
+
+            <div className="mx-auto mt-7 flex max-w-3xl flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
+                <FaSearch className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <input type="text" placeholder="Search courses..."
+                  value={search} onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-xl border border-white/15 bg-white/10 py-3 pl-10 pr-4 text-sm text-white placeholder:text-slate-400 outline-none backdrop-blur transition-colors focus:border-[#FFCE08] focus:bg-white/15" />
+              </div>
+              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
+                className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm text-white outline-none backdrop-blur transition-colors focus:border-[#FFCE08]">
+                <option value="" className="bg-slate-800 text-white">All Categories</option>
+                {categories.map((cat) => <option key={cat} value={cat} className="bg-slate-800 text-white">{cap(cat)}</option>)}
+              </select>
+              {user && (
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+                  className="cursor-pointer rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-sm text-white outline-none backdrop-blur transition-colors focus:border-[#FFCE08]">
+                  <option value="" className="bg-slate-800 text-white">All Status</option>
+                  <option value="enrolled" className="bg-slate-800 text-white">In Progress</option>
+                  <option value="completed" className="bg-slate-800 text-white">Completed</option>
+                  <option value="not-enrolled" className="bg-slate-800 text-white">Not Enrolled</option>
+                </select>
+              )}
+            </div>
           </div>
-          <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900">
-            <option value="">All Categories</option>
-            {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-          {user && (
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900">
-              <option value="">All Status</option>
-              <option value="enrolled">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="not-enrolled">Not Enrolled</option>
-            </select>
-          )}
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
-            <FaSpinner size={32} className="text-slate-300 mb-3 animate-spin" />
-            <p className="text-sm text-slate-400">Loading courses...</p>
+          <div className="mt-8 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20 text-center">
+            <FaSpinner size={30} className="mb-3 animate-spin text-slate-300" />
+            <p className="text-sm font-medium text-slate-400">Loading courses...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
-            <FaBookOpen size={40} className="text-slate-200 mb-3" />
-            <p className="text-sm text-slate-400">No courses found. Check back later for new guides.</p>
+          <div className="mt-8 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20 text-center">
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+              <FaBookOpen size={22} className="text-slate-300" />
+            </div>
+            <p className="text-sm font-semibold text-slate-600">No courses found.</p>
+            <p className="mt-1 text-xs text-slate-400">Check back later for new guides, or clear your filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {filtered.map((course) => {
-              const enroll = enrollments[course._id];
-              const isEnrolled = !!enroll;
-              const progress = enroll?.progress?.progress || 0;
-              const isCompleted = enroll?.progress?.completed;
+          <>
+            <div className="mb-5 mt-8 flex items-center justify-between">
+              <p className="text-xs font-medium text-slate-500">
+                <span className="font-bold text-slate-900">{filtered.length}</span> {filtered.length === 1 ? 'guide' : 'guides'} available
+              </p>
+              {(search || filterCat || filterStatus) && (
+                <button onClick={clearFilters} className="text-xs font-semibold text-slate-400 transition-colors hover:text-slate-700">
+                  ✕ Clear filters
+                </button>
+              )}
+            </div>
 
-              return (
-                <article key={course._id}
-                  className="group rounded-xl border border-slate-200 bg-white overflow-hidden transition-all hover:shadow-md hover:border-slate-300 cursor-pointer flex flex-col"
-                  onClick={() => setSelected(course)}
-                  onKeyDown={(e) => e.key === 'Enter' && setSelected(course)}
-                  role="button" tabIndex={0}>
-                  {course.thumbnail && (
-                    <div className="aspect-[16/10] w-full overflow-hidden bg-slate-100">
-                      <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                    </div>
-                  )}
-                  <div className="p-3 flex flex-col flex-1">
-                    <div className="flex items-center gap-1 mb-1.5 flex-wrap">
-                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${CATEGORY_COLORS[course.category] || CATEGORY_COLORS.general}`}>
-                        {course.category}
-                      </span>
-                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${DIFFICULTY_COLORS[course.difficulty] || DIFFICULTY_COLORS.beginner}`}>
-                        {course.difficulty}
-                      </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
+              {filtered.map((course) => {
+                const enroll = enrollments[course._id];
+                const isEnrolled = !!enroll;
+                const progress = enroll?.progress?.progress || 0;
+                const isCompleted = enroll?.progress?.completed;
+
+                return (
+                  <article key={course._id}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-900/10 cursor-pointer"
+                    onClick={() => setSelected(course)}
+                    onKeyDown={(e) => e.key === 'Enter' && setSelected(course)}
+                    role="button" tabIndex={0}>
+                    <div className={`relative h-16 w-full overflow-hidden bg-gradient-to-br ${CATEGORY_COVERS[course.category] || CATEGORY_COVERS.general}`}>
+                      <div className="absolute inset-0 flex items-center justify-center text-2xl opacity-90 transition-transform duration-300 group-hover:scale-110 drop-shadow-sm">
+                        {CATEGORY_ICONS[course.category] || '📘'}
+                      </div>
                       {isCompleted && (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">
-                          <FaCheckCircle size={7} /> Done
+                        <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm">
+                          <FaCheckCircle size={8} /> Done
                         </span>
                       )}
                     </div>
-
-                    <h3 className="text-xs font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-slate-700 leading-tight">{course.title}</h3>
-                    <p className="text-[10px] text-slate-500 mb-2 line-clamp-2 flex-1 leading-relaxed">{course.description}</p>
-
-                    {isEnrolled && !isCompleted && (
-                      <div className="mb-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[9px] font-semibold text-slate-500">{progress}%</span>
-                        </div>
-                        <ProgressBar progress={progress} />
+                    <div className="flex flex-1 flex-col p-3.5">
+                      <div className="mb-2 flex items-center gap-1.5 flex-wrap">
+                        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${CATEGORY_COLORS[course.category] || CATEGORY_COLORS.general}`}>
+                          {course.category}
+                        </span>
+                        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold capitalize tracking-wide ${DIFFICULTY_COLORS[course.difficulty] || DIFFICULTY_COLORS.beginner}`}>
+                          {course.difficulty}
+                        </span>
                       </div>
-                    )}
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
-                      {!isEnrolled ? (
-                        <button onClick={(e) => handleEnroll(course._id, e)} disabled={enrolling === course._id}
-                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-semibold text-white transition-all disabled:opacity-50"
-                          style={{ background: 'linear-gradient(135deg, #FFCE08, #f59e0b)' }}>
-                          {enrolling === course._id ? <FaSpinner className="animate-spin" size={9} /> : <FaGraduationCap size={9} />}
-                          Enroll
-                        </button>
-                      ) : (
-                        <button onClick={(e) => handleStartCourse(course._id, e)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-slate-800 transition-colors">
-                          {isCompleted ? <><FaCheckCircle size={9} /> Review</> : progress > 0 ? <><FaPlay size={9} /> Continue</> : <><FaPlay size={9} /> Start</>}
-                        </button>
+                      <h3 className="mb-1 text-[13px] font-bold leading-snug text-slate-900 line-clamp-2 group-hover:text-slate-700">{course.title}</h3>
+                      <p className="mb-2.5 flex-1 text-[11px] leading-relaxed text-slate-500 line-clamp-2">{course.description}</p>
+
+                      <div className="mb-3 flex items-center gap-2 text-[10px] font-medium text-slate-400 flex-wrap">
+                        {course.estimatedTime && (
+                          <span className="inline-flex items-center gap-1"><FaClock size={9} /> {course.estimatedTime}</span>
+                        )}
+                        {course.tags?.slice(0, 2).map((tag, i) => (
+                          <span key={i} className="text-slate-400">{tag}</span>
+                        ))}
+                        {course.tags?.length > 2 && (
+                          <span className="font-semibold text-slate-500">+{course.tags.length - 2}</span>
+                        )}
+                      </div>
+
+                      {isEnrolled && !isCompleted && (
+                        <div className="mb-2.5">
+                          <div className="mb-1 flex items-center justify-between">
+                            <span className="text-[9px] font-semibold text-slate-500">{progress}% complete</span>
+                          </div>
+                          <ProgressBar progress={progress} />
+                        </div>
                       )}
+
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Free</span>
+                        {!isEnrolled ? (
+                          <button onClick={(e) => handleEnroll(course._id, e)} disabled={enrolling === course._id}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#FFCE08] to-[#f59e0b] px-3 py-1.5 text-[11px] font-bold text-slate-900 shadow-sm shadow-amber-400/40 transition-all hover:shadow-md hover:shadow-amber-400/50 hover:brightness-[1.05] disabled:opacity-50">
+                            {enrolling === course._id ? <FaSpinner className="animate-spin" size={9} /> : <FaGraduationCap size={9} />}
+                            Enroll
+                          </button>
+                        ) : (
+                          <button onClick={(e) => handleStartCourse(course._id, e)}
+                            className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow-md">
+                            {isCompleted ? <><FaCheckCircle size={9} /> Review</> : progress > 0 ? <><FaPlay size={9} /> Continue</> : <><FaPlay size={9} /> Start</>}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>

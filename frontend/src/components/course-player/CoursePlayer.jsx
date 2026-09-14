@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { FaSpinner, FaCheckCircle } from 'react-icons/fa';
+import { FaSpinner, FaCheckCircle, FaClipboardCheck, FaAward } from 'react-icons/fa';
 import { useAuth } from '../../AuthContext';
 import { useToast } from '../../ToastContext';
 import API_BASE from '../../api';
@@ -18,19 +18,41 @@ function token() { return localStorage.getItem('cshub_token'); }
 function CompletionBanner({ onShowAssessment }) {
   return (
     <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 mb-3 animate-fade-in">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
           <FaCheckCircle size={16} className="text-emerald-500" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-xs font-bold text-emerald-900">Course Completed!</h3>
-          <p className="text-[11px] text-emerald-600">Congratulations! You have completed all lessons.</p>
+          <h3 className="text-xs font-bold text-emerald-900">All lessons completed!</h3>
+          <p className="text-[11px] text-emerald-600">You've finished the course content — take the assessment to earn your certificate.</p>
         </div>
         <button
           onClick={onShowAssessment}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 rounded-lg text-[10px] font-bold hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm cursor-pointer"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 rounded-lg text-[10px] font-bold hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm cursor-pointer"
         >
-          Take Assessment
+          <FaClipboardCheck size={10} /> Take Assessment
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CertificateBanner({ onShowCertificate }) {
+  return (
+    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-3 mb-3 animate-fade-in">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+          <FaAward size={16} className="text-amber-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-bold text-amber-900">Assessment passed!</h3>
+          <p className="text-[11px] text-amber-600">Your certificate of completion is ready to view and download.</p>
+        </div>
+        <button
+          onClick={onShowCertificate}
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 rounded-lg text-[10px] font-bold hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm cursor-pointer"
+        >
+          <FaAward size={10} /> View Certificate
         </button>
       </div>
     </div>
@@ -114,15 +136,23 @@ export default function CoursePlayer() {
     if (section) syncToBackend(section, resourceId);
   }, [id, syncToBackend]);
 
+  const refreshAssessmentState = useCallback(() => {
+    try {
+      setAssessmentPassed(localStorage.getItem(`cshub-assessment-${id}`) === 'true');
+      setAssessmentFinalized(localStorage.getItem(`cshub-assessment-finalized-${id}`) === 'true');
+      setAssessmentScore(parseInt(localStorage.getItem(`cshub-assessment-score-${id}`) || '0', 10));
+    } catch { /* ignore */ }
+  }, [id]);
+
   const markAssessmentPassed = useCallback(() => {
     localStorage.setItem(`cshub-assessment-${id}`, 'true');
-    setAssessmentPassed(true);
-  }, [id]);
+    refreshAssessmentState();
+  }, [id, refreshAssessmentState]);
 
   const markAssessmentFinalized = useCallback(() => {
     localStorage.setItem(`cshub-assessment-finalized-${id}`, 'true');
-    setAssessmentFinalized(true);
-  }, [id]);
+    refreshAssessmentState();
+  }, [id, refreshAssessmentState]);
 
   const curriculum = useCourseCurriculum(course, progress, completedLessons, assessmentPassed, assessmentFinalized);
 
@@ -232,6 +262,23 @@ export default function CoursePlayer() {
   }, [id, user, showToast]);
 
   useAutoComplete({ lesson: activeLesson, isComplete: activeLesson?.completed, onMark: markSection });
+
+  useEffect(() => {
+    if (!user || !curriculum.totalLessons || curriculum.totalLessons <= 0) return;
+    const timer = setTimeout(() => {
+      fetch(`${API_BASE}/api/enrollments/${id}/lesson-progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ completed: curriculum.completedLessons, total: curriculum.totalLessons }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.progress !== undefined) setProgress(prev => ({ ...prev, ...data }));
+        })
+        .catch(() => {});
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [id, user, curriculum.completedLessons, curriculum.totalLessons]);
 
   if (loading) {
     return (

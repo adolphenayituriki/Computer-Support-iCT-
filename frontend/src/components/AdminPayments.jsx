@@ -3,6 +3,7 @@ import { FaCheckCircle, FaTimesCircle, FaEye, FaSpinner, FaSearch, FaFilter, FaI
 import { cn } from '../lib/utils';
 import { useToast } from '../ToastContext';
 import API_BASE from '../api';
+import { groupByMonth, MonthHeader, MonthFilter, monthLabel } from './MonthGroup';
 
 const token = () => localStorage.getItem('cshub_token');
 
@@ -18,9 +19,9 @@ function apiFetch(url, opts = {}) {
 }
 
 const STATUS_COLORS = {
-  pending_review: 'bg-amber-100 text-amber-700',
+  pending_review: 'bg-cshub-blue/10 text-cshub-blue',
   approved: 'bg-emerald-100 text-emerald-700',
-  rejected: 'bg-red-100 text-red-700',
+  rejected: 'bg-red-100 text-red-600',
 };
 
 function ReceiptModal({ payment, onClose, onApprove, onReject }) {
@@ -110,7 +111,7 @@ function ReceiptModal({ payment, onClose, onApprove, onReject }) {
                 />
               </div>
               <div className="flex gap-2">
-                <button onClick={handleApprove} disabled={loading}
+<button onClick={handleApprove} disabled={loading}
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2.5 text-xs font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
                   {loading ? <FaSpinner className="animate-spin" /> : <FaCheckCircle />} Approve
                 </button>
@@ -140,6 +141,7 @@ export default function AdminPayments() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [monthFilter, setMonthFilter] = useState('all');
   const [detailPayment, setDetailPayment] = useState(null);
 
   const fetchPayments = () => {
@@ -173,6 +175,7 @@ export default function AdminPayments() {
 
   const filtered = payments.filter((p) => {
     if (filter !== 'all' && p.status !== filter) return false;
+    if (monthFilter !== 'all' && monthLabel(p.createdAt) !== monthFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       return (
@@ -206,7 +209,7 @@ export default function AdminPayments() {
           { label: 'Pending Review', value: pendingCount, color: 'text-amber-500' },
           { label: 'Approved', value: approvedCount, color: 'text-emerald-500' },
           { label: 'Rejected', value: rejectedCount, color: 'text-red-500' },
-          { label: 'Revenue', value: `${totalRevenue.toLocaleString()} RWF`, color: 'text-sky-500' },
+          { label: 'Revenue', value: `${totalRevenue.toLocaleString()} RWF`, color: 'text-cshub-blue' },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-slate-200 bg-white p-3">
             <div className={cn('text-lg font-extrabold', s.color)}>{s.value}</div>
@@ -224,13 +227,15 @@ export default function AdminPayments() {
           <div className="flex gap-1">
             {['all', 'pending_review', 'approved', 'rejected'].map((f) => (
               <button key={f} onClick={() => setFilter(f)}
-                className={cn('rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors', filter === f ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50')}>
+                className={cn('rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors', filter === f ? 'bg-cshub-blue text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50')}>
                 {f === 'pending_review' ? 'Pending' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {payments.length > 0 && <MonthFilter items={payments} value={monthFilter} onChange={setMonthFilter} />}
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -242,9 +247,13 @@ export default function AdminPayments() {
           <p className="text-sm font-medium text-slate-500">No payments found</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {filtered.map((p) => (
-            <div key={p._id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 hover:shadow-sm transition-all">
+        <div className="space-y-6">
+          {groupByMonth(filtered).map((g) => (
+            <div key={g.label} className="space-y-2">
+              <MonthHeader label={g.label} count={g.list.length} />
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {g.list.map((p) => (
+                  <div key={p._id} className="rounded-xl border border-slate-200 bg-white p-3 hover:shadow-sm transition-all">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -267,6 +276,9 @@ export default function AdminPayments() {
                 >
                   <FaEye /> Review
                 </button>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}

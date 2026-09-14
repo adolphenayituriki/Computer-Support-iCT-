@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 
 const images = [
   '/images.jpg',
-  '/images.jpg',
-  '/images.jpg',
+  '/CS%20HUB%20SESSION.png',
 ];
 
 export default function ImageCarousel() {

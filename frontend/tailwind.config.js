@@ -51,6 +51,7 @@ export default {
         cshub: {
           yellow: "#FFCE08",
           navy: "#111827",
+          blue: "#5694F7",
         },
       },
       borderRadius: {

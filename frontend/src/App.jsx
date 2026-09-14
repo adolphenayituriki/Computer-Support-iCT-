@@ -139,7 +139,7 @@ export default function App() {
         {!isDashboard && !isAdmin && !isGamePlay && !isCoursePlayer && !isVerify && <a href="https://chat.whatsapp.com/GeDRB76f01gDAcnj0BTOiN" target="_blank" rel="noopener noreferrer" className={`whatsapp-float${waVisible ? ' visible' : ''}`} title="Join our WhatsApp group"><FaWhatsapp /></a>}
         <Modal open={showLogin} onClose={closeAll}><LoginModal onClose={closeAll} onSwitchToRegister={openRegister} onForgotPassword={openForgot} message={loginMessage} /></Modal>
         <Modal open={showRegister} onClose={closeAll}><RegisterModal onClose={closeAll} onSwitchToLogin={openLogin} /></Modal>
-        <Modal open={showTeam} onClose={closeAll} wide><TeamApplyModal onClose={closeAll} /></Modal>
+        <Modal open={showTeam} onClose={closeAll} wide hideClose><TeamApplyModal onClose={closeAll} /></Modal>
         <Modal open={showForgot} onClose={closeAll}><ForgotPasswordModal onClose={closeAll} onBackToLogin={openLogin} /></Modal>
       </>
     );
